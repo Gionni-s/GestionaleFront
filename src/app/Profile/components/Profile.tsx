@@ -75,7 +75,7 @@ const Profile: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold mb-4 text-center">Profile</h1>
         {successMessage && (
-          <Alert variant="success" className="mb-4">
+          <Alert variant="default" className="mb-4">
             {successMessage}
           </Alert>
         )}
