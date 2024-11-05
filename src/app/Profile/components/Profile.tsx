@@ -59,7 +59,7 @@ const Profile: React.FC = () => {
         setUserProfile(form) // Update local state with new data
         setIsEditing(false) // Stop editing mode
         setSuccessMessage("Profile updated successfully!")
-        setTimeout(() => setSuccessMessage(null), 3000) // Clear message after 3 seconds
+        setTimeout(() => setSuccessMessage(undefined), 3000) // Clear message after 3 seconds
       } catch (error) {
         console.error("Failed to update profile:", error)
       }
