@@ -1,8 +1,8 @@
 FROM node:18-alpine
 WORKDIR /app
-COPY . /app
-# COPY public/ /app/public
-# COPY src/ /app/src
-# COPY package.json /app/
+COPY public/ /app/public
+COPY src/ /app/src
+COPY package.json /app/
 RUN npm install
+RUN npm run build
 CMD ["npm","start"]
