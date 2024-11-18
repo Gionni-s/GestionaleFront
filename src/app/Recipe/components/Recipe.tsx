@@ -263,56 +263,60 @@ const Recipes: React.FC = () => {
                   // required
                 >
                   <option value="">Select Cookbook</option>
-                  {recipes.length > 0 && cookbookOptions.map((book) => (
-                    <option key={book._id} value={book._id}>
-                      {book.name}
-                    </option>
-                  ))}
+                  {Array.isArray(recipes) &&
+                    recipes.length > 0 &&
+                    cookbookOptions.map((book) => (
+                      <option key={book._id} value={book._id}>
+                        {book.name}
+                      </option>
+                    ))}
                 </select>
               </div>
 
               {/* Ingredienti */}
               <div className="space-y-4">
                 <Label>Ingredients</Label>
-                {recipes.length > 0 && form.ingridients.map((ingredient, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <select
-                      value={ingredient.foodId}
-                      onChange={(e) =>
-                        handleFieldChange("foodId", e.target.value, index)
-                      }
-                      className="border p-2 rounded"
-                      required
-                    >
-                      <option value="">Select Ingredient</option>
-                      {ingredientOptions.map((option) => (
-                        <option key={option._id} value={option._id}>
-                          {option.name}
-                        </option>
-                      ))}
-                    </select>
-                    <Input
-                      type="number"
-                      value={ingredient.quantity}
-                      onChange={(e) =>
-                        handleFieldChange(
-                          "quantity",
-                          Number(e.target.value),
-                          index
-                        )
-                      }
-                      min="1"
-                      className="w-20"
-                      required
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => removeIngredientField(index)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
+                {Array.isArray(recipes) &&
+                  recipes.length > 0 &&
+                  form.ingridients.map((ingredient, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <select
+                        value={ingredient.foodId}
+                        onChange={(e) =>
+                          handleFieldChange("foodId", e.target.value, index)
+                        }
+                        className="border p-2 rounded"
+                        required
+                      >
+                        <option value="">Select Ingredient</option>
+                        {ingredientOptions.map((option) => (
+                          <option key={option._id} value={option._id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
+                      <Input
+                        type="number"
+                        value={ingredient.quantity}
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "quantity",
+                            Number(e.target.value),
+                            index
+                          )
+                        }
+                        min="1"
+                        className="w-20"
+                        required
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={() => removeIngredientField(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
                 <Button type="button" onClick={addIngredientField}>
                   Add Ingredient
                 </Button>

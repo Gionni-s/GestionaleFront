@@ -303,7 +303,8 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select food" />
                   </SelectTrigger>
                   <SelectContent>
-                    {werehouseEntities.length > 0 &&
+                    {Array.isArray(werehouseEntities) &&
+                      werehouseEntities.length > 0 &&
                       foods.map((food) => (
                         <SelectItem key={food._id} value={food._id}>
                           {food.name}
@@ -325,7 +326,8 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {werehouseEntities.length > 0 &&
+                    {Array.isArray(werehouseEntities) &&
+                      werehouseEntities.length > 0 &&
                       locations.map((location) => (
                         <SelectItem key={location._id} value={location._id}>
                           {location.name}
@@ -347,7 +349,8 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select warehouse" />
                   </SelectTrigger>
                   <SelectContent>
-                    {werehouseEntities.length > 0 &&
+                    {Array.isArray(werehouseEntities) &&
+                      werehouseEntities.length > 0 &&
                       warehouses.map((warehouse) => (
                         <SelectItem key={warehouse._id} value={warehouse._id}>
                           {warehouse.name}
