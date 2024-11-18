@@ -21,7 +21,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { PlusCircle, Pencil, Trash } from "lucide-react"
 
-// Interfacce per il tipo di dati
+// Interfaces for data types
 interface Recipe {
   _id: string
   name: string
@@ -30,7 +30,7 @@ interface Recipe {
   bookId: string
 }
 
-interface AlthernativeRecipe {
+interface AlternativeRecipe {
   message: string
 }
 
@@ -56,7 +56,9 @@ interface FormData {
 }
 
 const Recipes: React.FC = () => {
-  const [recipes, setRecipes] = useState<Recipe[] | AlthernativeRecipe>([])
+  const [recipes, setRecipes] = useState<Recipe[] | AlternativeRecipe>({
+    message: "",
+  })
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({
     name: "",
@@ -70,7 +72,7 @@ const Recipes: React.FC = () => {
   const [ingredientOptions, setIngredientOptions] = useState<Ingredient[]>([])
   const [cookbookOptions, setCookbookOptions] = useState<CookBook[]>([])
 
-  // Effetto per il caricamento delle ricette, ingredienti e libri di cucina
+  // Effect for loading recipes, ingredients, and cookbooks
   useEffect(() => {
     fetchRecipes()
     fetchIngredients()
@@ -81,8 +83,10 @@ const Recipes: React.FC = () => {
     try {
       const response = await api.get<Recipe[]>("/recipes")
       setRecipes(response.data)
+      console.log(response.data)
     } catch (error) {
       console.error("Failed to fetch recipes:", error)
+      setRecipes({ message: "Failed to load recipes" })
     }
   }
 
@@ -91,7 +95,7 @@ const Recipes: React.FC = () => {
       const response = await api.get<Ingredient[]>("/foods")
       setIngredientOptions(response.data)
     } catch (error) {
-      console.error("Failed to fetch ingridients:", error)
+      console.error("Failed to fetch ingredients:", error)
     }
   }
 
@@ -122,7 +126,6 @@ const Recipes: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      console.log(id)
       await api.delete(`/recipes/${id}`)
       fetchRecipes()
     } catch (error) {
@@ -147,7 +150,7 @@ const Recipes: React.FC = () => {
     value: string | number,
     index?: number
   ) => {
-    if (field === "name" || field === "fkBook") {
+    if (field === "name" || field === "bookId") {
       setForm({ ...form, [field]: value })
     } else if (index !== undefined) {
       const updatedIngredients = form.ingridients.map((ingredient, i) =>
@@ -169,61 +172,63 @@ const Recipes: React.FC = () => {
     setEditingId(null)
   }
 
-  const generate = () => {
+  const renderTableRows = () => {
     if (!Array.isArray(recipes)) {
-      // This means 'foods' is of type 'AlternativeFood'
       return (
         <TableRow>
-          <TableCell colSpan={2}>{recipes.message}</TableCell>
-        </TableRow>
-      )
-    } else if (recipes.length === 0) {
-      // Handle case when the array is empty
-      return (
-        <TableRow>
-          <TableCell colSpan={2}>Loading...</TableCell>
-        </TableRow>
-      )
-    } else {
-      recipes.map((recipe) => (
-        <TableRow key={recipe._id}>
-          <TableCell>{recipe.name}</TableCell>
-          <TableCell>
-            {cookbookOptions.find((book) => book._id === recipe.bookId)?.name ||
-              "N/A"}
-          </TableCell>
-          <TableCell>
-            <div className="flex space-x-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => {
-                  setForm({
-                    name: recipe.name,
-                    bookId: recipe.bookId,
-                    ingridients: recipe.ingridients.map((ingredient) => ({
-                      foodId: ingredient.foodId,
-                      quantity: ingredient.quantity,
-                    })),
-                  })
-                  setEditingId(recipe._id)
-                  setModalVisible(true)
-                }}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleDelete(recipe._id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
+          <TableCell colSpan={3} className="text-center">
+            Loading...
           </TableCell>
         </TableRow>
-      ))
+      )
     }
+
+    if (recipes.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={3}>No element found</TableCell>
+        </TableRow>
+      )
+    }
+
+    return recipes.map((recipe) => (
+      <TableRow key={recipe._id}>
+        <TableCell>{recipe.name}</TableCell>
+        <TableCell>
+          {cookbookOptions.find((book) => book._id === recipe.bookId)?.name ||
+            "N/A"}
+        </TableCell>
+        <TableCell>
+          <div className="flex space-x-2">
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => {
+                setForm({
+                  name: recipe.name,
+                  bookId: recipe.bookId,
+                  ingridients: recipe.ingridients.map((ingredient) => ({
+                    foodId: ingredient.foodId,
+                    quantity: ingredient.quantity,
+                  })),
+                })
+                setEditingId(recipe._id)
+                setModalVisible(true)
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleDelete(recipe._id)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    ))
   }
 
   return (
@@ -260,63 +265,62 @@ const Recipes: React.FC = () => {
                   value={form.bookId}
                   onChange={(e) => handleFieldChange("bookId", e.target.value)}
                   className="border p-2 rounded w-full"
-                  // required
+                  required
                 >
                   <option value="">Select Cookbook</option>
-                  {Array.isArray(recipes) &&
-                    recipes.length > 0 &&
-                    cookbookOptions.map((book) => (
-                      <option key={book._id} value={book._id}>
-                        {book.name}
-                      </option>
-                    ))}
+                  {cookbookOptions.map((book) => (
+                    <option key={book._id} value={book._id}>
+                      {book.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              {/* Ingredienti */}
+              {/* Ingredients */}
               <div className="space-y-4">
                 <Label>Ingredients</Label>
-                {Array.isArray(recipes) &&
-                  recipes.length > 0 &&
-                  form.ingridients.map((ingredient, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <select
-                        value={ingredient.foodId}
-                        onChange={(e) =>
-                          handleFieldChange("foodId", e.target.value, index)
-                        }
-                        className="border p-2 rounded"
-                        required
-                      >
-                        <option value="">Select Ingredient</option>
-                        {ingredientOptions.map((option) => (
-                          <option key={option._id} value={option._id}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
-                      <Input
-                        type="number"
-                        value={ingredient.quantity}
-                        onChange={(e) =>
-                          handleFieldChange(
-                            "quantity",
-                            Number(e.target.value),
-                            index
-                          )
-                        }
-                        min="1"
-                        className="w-20"
-                        required
-                      />
+                {form.ingridients.map((ingredient, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <select
+                      value={ingredient.foodId}
+                      onChange={(e) =>
+                        handleFieldChange("foodId", e.target.value, index)
+                      }
+                      className="border p-2 rounded"
+                      required
+                    >
+                      <option value="">Select Ingredient</option>
+                      {ingredientOptions.map((option) => (
+                        <option key={option._id} value={option._id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                    <Input
+                      type="number"
+                      value={ingredient.quantity}
+                      onChange={(e) =>
+                        handleFieldChange(
+                          "quantity",
+                          Number(e.target.value),
+                          index
+                        )
+                      }
+                      min="1"
+                      className="w-20"
+                      required
+                    />
+                    {form.ingridients.length > 1 && (
                       <Button
+                        type="button"
                         variant="outline"
                         onClick={() => removeIngredientField(index)}
                       >
                         Remove
                       </Button>
-                    </div>
-                  ))}
+                    )}
+                  </div>
+                ))}
                 <Button type="button" onClick={addIngredientField}>
                   Add Ingredient
                 </Button>
@@ -337,50 +341,7 @@ const Recipes: React.FC = () => {
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {generate()}
-            {/* {recipes.length > 0 &&
-              recipes.map((recipe) => (
-                <TableRow key={recipe._id}>
-                  <TableCell>{recipe.name}</TableCell>
-                  <TableCell>
-                    {cookbookOptions.find((book) => book._id === recipe.bookId)
-                      ?.name || "N/A"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => {
-                          setForm({
-                            name: recipe.name,
-                            bookId: recipe.bookId,
-                            ingridients: recipe.ingridients.map(
-                              (ingredient) => ({
-                                foodId: ingredient.foodId,
-                                quantity: ingredient.quantity,
-                              })
-                            ),
-                          })
-                          setEditingId(recipe._id)
-                          setModalVisible(true)
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleDelete(recipe._id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))} */}
-          </TableBody>
+          <TableBody>{renderTableRows()}</TableBody>
         </Table>
       </div>
     </div>

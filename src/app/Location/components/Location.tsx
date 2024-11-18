@@ -27,32 +27,30 @@ interface Location {
   fkProprietario: string
 }
 
-interface AlthernativeLocation {
-  message: string
-}
-
 interface FormData {
   name: string
 }
 
 const Locations: React.FC = () => {
-  const [locations, setlocations] = useState<Location[] | AlthernativeLocation>(
-    []
-  )
+  const [locations, setLocations] = useState<Location[]>([])
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    fetch("/locations")
+    fetchLocations()
   }, [])
 
-  const fetch = async (url: string): Promise<void> => {
+  const fetchLocations = async (): Promise<void> => {
     try {
-      const response = await api.get<Location[]>(url)
-      setlocations(response.data)
+      setIsLoading(true)
+      const response = await api.get<Location[]>("/locations")
+      setLocations(response.data)
+      setIsLoading(false)
     } catch (error) {
       console.error("Failed to fetch locations:", error)
+      setIsLoading(false)
     }
   }
 
@@ -69,7 +67,7 @@ const Locations: React.FC = () => {
       setModalVisible(false)
       setForm({ name: "" })
       setEditingId(null)
-      fetch("/locations")
+      fetchLocations()
     } catch (error) {
       console.error("Failed to save location:", error)
     }
@@ -78,56 +76,58 @@ const Locations: React.FC = () => {
   const handleDelete = async (id: string): Promise<void> => {
     try {
       await api.delete(`/locations/${id}`)
-      fetch("/locations")
+      fetchLocations()
     } catch (error) {
       console.error("Failed to delete location:", error)
     }
   }
 
-  const generate = () => {
-    if (!Array.isArray(locations)) {
-      // This means 'foods' is of type 'AlternativeFood'
+  const renderTableContent = () => {
+    if (isLoading) {
       return (
         <TableRow>
-          <TableCell colSpan={2}>No locations available</TableCell>
-        </TableRow>
-      )
-    } else if (locations.length === 0) {
-      // Handle case when the array is empty
-      return (
-        <TableRow>
-          <TableCell colSpan={2}>Loaging...</TableCell>
-        </TableRow>
-      )
-    } else {
-      locations.map((location) => (
-        <TableRow key={location._id}>
-          <TableCell>{location.name}</TableCell>
-          <TableCell>
-            <div className="flex space-x-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => {
-                  setForm({ name: location.name })
-                  setEditingId(location._id)
-                  setModalVisible(true)
-                }}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleDelete(location._id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
+          <TableCell colSpan={2} className="text-center">
+            Loading...
           </TableCell>
         </TableRow>
-      ))
+      )
     }
+    if (locations.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={2} className="text-center">
+            No locations available
+          </TableCell>
+        </TableRow>
+      )
+    }
+    return locations.map((location) => (
+      <TableRow key={location._id}>
+        <TableCell>{location.name}</TableCell>
+        <TableCell>
+          <div className="flex space-x-2">
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => {
+                setForm({ name: location.name })
+                setEditingId(location._id)
+                setModalVisible(true)
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleDelete(location._id)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    ))
   }
 
   return (
@@ -176,7 +176,7 @@ const Locations: React.FC = () => {
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>{generate()}</TableBody>
+          <TableBody>{renderTableContent()}</TableBody>
         </Table>
       </div>
     </div>

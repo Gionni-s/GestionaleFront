@@ -27,7 +27,7 @@ interface CookBook {
   fkProprietario: string
 }
 
-interface AlthernativeCookBook {
+interface AlternativeCookBook {
   message: string
 }
 
@@ -36,23 +36,24 @@ interface FormData {
 }
 
 const CookBooks: React.FC = () => {
-  const [cookBooks, setCookBooks] = useState<CookBook[] | AlthernativeCookBook>(
-    []
-  )
+  const [cookBooks, setCookBooks] = useState<CookBook[] | AlternativeCookBook>({
+    message: "",
+  })
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch("/cookBooks")
+    fetchCookBooks()
   }, [])
 
-  const fetch = async (url: string): Promise<void> => {
+  const fetchCookBooks = async (): Promise<void> => {
     try {
-      const response = await api.get<CookBook[]>(url)
+      const response = await api.get<CookBook[]>("/cookBooks")
       setCookBooks(response.data)
     } catch (error) {
       console.error("Failed to fetch cookBooks:", error)
+      setCookBooks({ message: "Failed to load cookbooks" })
     }
   }
 
@@ -69,7 +70,7 @@ const CookBooks: React.FC = () => {
       setModalVisible(false)
       setForm({ name: "" })
       setEditingId(null)
-      fetch("/cookBooks")
+      fetchCookBooks()
     } catch (error) {
       console.error("Failed to save cookBook:", error)
     }
@@ -78,54 +79,58 @@ const CookBooks: React.FC = () => {
   const handleDelete = async (id: string): Promise<void> => {
     try {
       await api.delete(`/cookBooks/${id}`)
-      fetch("/cookBooks")
+      fetchCookBooks()
     } catch (error) {
       console.error("Failed to delete cookBook:", error)
     }
   }
-  const generate = () => {
+
+  const renderTableRows = () => {
     if (!Array.isArray(cookBooks)) {
       return (
         <TableRow>
-          <TableCell colSpan={2}>{cookBooks.message}</TableCell>
-        </TableRow>
-      )
-    } else if (cookBooks.length === 0) {
-      // Handle case when the array is empty
-      return (
-        <TableRow>
-          <TableCell colSpan={2}>Loading...</TableCell>
-        </TableRow>
-      )
-    } else {
-      cookBooks.map((cookBook) => (
-        <TableRow key={cookBook._id}>
-          <TableCell>{cookBook.name}</TableCell>
-          <TableCell>
-            <div className="flex space-x-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => {
-                  setForm({ name: cookBook.name })
-                  setEditingId(cookBook._id)
-                  setModalVisible(true)
-                }}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleDelete(cookBook._id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
+          <TableCell colSpan={2} className="text-center">
+            Loading...
           </TableCell>
         </TableRow>
-      ))
+      )
     }
+
+    if (cookBooks.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>No cookbooks found</TableCell>
+        </TableRow>
+      )
+    }
+
+    return cookBooks.map((cookBook) => (
+      <TableRow key={cookBook._id}>
+        <TableCell>{cookBook.name}</TableCell>
+        <TableCell>
+          <div className="flex space-x-2">
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => {
+                setForm({ name: cookBook.name })
+                setEditingId(cookBook._id)
+                setModalVisible(true)
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleDelete(cookBook._id)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    ))
   }
 
   return (
@@ -174,7 +179,7 @@ const CookBooks: React.FC = () => {
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>{generate()}</TableBody>
+          <TableBody>{renderTableRows()}</TableBody>
         </Table>
       </div>
     </div>

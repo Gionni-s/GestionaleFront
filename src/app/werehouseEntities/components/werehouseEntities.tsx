@@ -72,7 +72,7 @@ const WerehouseEntities: React.FC = () => {
     foodId: "",
     locationId: "",
     warehouseId: "",
-    userId: "",
+    userId: "", // TODO: Implement actual user authentication
     quantita: 1,
     scadenza: "",
   })
@@ -91,25 +91,31 @@ const WerehouseEntities: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await fetchWerehouseEntities()
-      await fetchFoods()
-      await fetchLocations()
-      await fetchWarehouses()
+      try {
+        await Promise.all([
+          fetchWerehouseEntities(),
+          fetchFoods(),
+          fetchLocations(),
+          fetchWarehouses(),
+        ])
+      } catch (err) {
+        setError("Failed to fetch initial data")
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchData()
   }, [])
 
   const fetchWerehouseEntities = async (): Promise<void> => {
-    setLoading(true)
-    setError(null)
     try {
       const response = await api.get<WerehouseEntitie[]>("/werehouseEntities")
       setWerehouseEntities(response.data || [])
     } catch (err) {
       setError("Failed to fetch warehouse entities.")
-    } finally {
-      setLoading(false)
+      console.error(err)
     }
   }
 
@@ -144,27 +150,34 @@ const WerehouseEntities: React.FC = () => {
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault()
+
+    // TODO: Replace with actual user authentication
+    const mockUserId = "current-user-id"
+    const submissionForm = { ...form, userId: mockUserId }
+
     try {
       if (editingId) {
-        await api.put(`/werehouseEntities/${editingId}`, form)
+        await api.put(`/werehouseEntities/${editingId}`, submissionForm)
       } else {
-        await api.post("/werehouseEntities", form)
+        await api.post("/werehouseEntities", submissionForm)
       }
       setModalVisible(false)
       resetForm()
       setEditingId(null)
-      await fetchWerehouseEntities() // Refetch the updated list
+      await fetchWerehouseEntities()
     } catch (error) {
       console.error("Failed to save warehouse entity:", error)
+      setError("Failed to save warehouse entity")
     }
   }
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
       await api.delete(`/werehouseEntities/${id}`)
-      fetchWerehouseEntities() // Refetch after delete
+      await fetchWerehouseEntities()
     } catch (error) {
       console.error("Failed to delete warehouse entity:", error)
+      setError("Failed to delete warehouse entity")
     }
   }
 
@@ -192,19 +205,67 @@ const WerehouseEntities: React.FC = () => {
     setModalVisible(true)
   }
 
-  const handleCloseModal = () => {
-    setModalVisible(false)
-    resetForm()
-    setEditingId(null)
-  }
-
   const getExpirationColor = (expirationDate: string) => {
     const daysUntilExpiration =
       (new Date(expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    if (daysUntilExpiration <= 0) return "text-red-600" // Expired
-    if (daysUntilExpiration <= 7) return "text-red-500" // Less than a week
-    if (daysUntilExpiration <= 30) return "text-orange-400" // Less than a month
-    return "text-gray-700" // More than a month
+    if (daysUntilExpiration <= 0) return "text-red-600"
+    if (daysUntilExpiration <= 7) return "text-red-500"
+    if (daysUntilExpiration <= 30) return "text-orange-400"
+    return "text-gray-700"
+  }
+
+  const renderTableRows = () => {
+    if (!Array.isArray(werehouseEntities)) {
+      return (
+        <TableRow>
+          <TableCell colSpan={6} className="text-center">
+            {(werehouseEntities as AlthernativeWarehouse).message}
+          </TableCell>
+        </TableRow>
+      )
+    }
+
+    if (werehouseEntities.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={6} className="text-center">
+            No warehouse entities found
+          </TableCell>
+        </TableRow>
+      )
+    }
+
+    return werehouseEntities.map((entity) => (
+      <TableRow key={entity._id}>
+        <TableCell>{entity.food?.name || "N/A"}</TableCell>
+        <TableCell>{entity.quantita}</TableCell>
+        <TableCell>{entity.location?.name || "N/A"}</TableCell>
+        <TableCell>{entity.warehouse?.name || "N/A"}</TableCell>
+        <TableCell className={getExpirationColor(entity.scadenza)}>
+          {new Date(entity.scadenza).getDate() <= new Date().getDate()
+            ? `Scaduto (${new Date(entity.scadenza).toLocaleDateString()})`
+            : new Date(entity.scadenza).toLocaleDateString()}
+        </TableCell>
+        <TableCell>
+          <div className="flex space-x-2">
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleEdit(entity)}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleDelete(entity._id)}
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    ))
   }
 
   if (loading) {
@@ -213,59 +274,6 @@ const WerehouseEntities: React.FC = () => {
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>
-  }
-
-  const generate = () => {
-    if (!Array.isArray(werehouseEntities)) {
-      // This means 'foods' is of type 'AlternativeFood'
-      return (
-        <TableRow>
-          <TableCell colSpan={2}>{werehouseEntities.message}</TableCell>
-        </TableRow>
-      )
-    } else if (werehouseEntities.length === 0) {
-      // Handle case when the array is empty
-      return (
-        <TableRow>
-          <TableCell>Loading...</TableCell>
-        </TableRow>
-      )
-    } else {
-      werehouseEntities.map((entity) => (
-        <TableRow key={entity._id}>
-          <TableCell>{entity.food?.name}</TableCell>
-          <TableCell>{entity.quantita}</TableCell>
-          <TableCell>{entity.location?.name || "N/A"}</TableCell>
-          <TableCell>{entity.warehouse?.name || "N/A"}</TableCell>
-          <TableCell className={getExpirationColor(entity.scadenza)}>
-            {new Date(entity.scadenza).getDate() <= new Date().getDate() &&
-              "Scaduto (" +
-                new Date(entity.scadenza).toLocaleDateString() +
-                ")"}
-            {new Date(entity.scadenza).getDate() > new Date().getDate() &&
-              new Date(entity.scadenza).toLocaleDateString()}
-          </TableCell>
-          <TableCell>
-            <div className="flex space-x-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleEdit(entity)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleDelete(entity._id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
-          </TableCell>
-        </TableRow>
-      ))
-    }
   }
 
   return (
@@ -303,13 +311,11 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select food" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(werehouseEntities) &&
-                      werehouseEntities.length > 0 &&
-                      foods.map((food) => (
-                        <SelectItem key={food._id} value={food._id}>
-                          {food.name}
-                        </SelectItem>
-                      ))}
+                    {foods.map((food) => (
+                      <SelectItem key={food._id} value={food._id}>
+                        {food.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -326,13 +332,11 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(werehouseEntities) &&
-                      werehouseEntities.length > 0 &&
-                      locations.map((location) => (
-                        <SelectItem key={location._id} value={location._id}>
-                          {location.name}
-                        </SelectItem>
-                      ))}
+                    {locations.map((location) => (
+                      <SelectItem key={location._id} value={location._id}>
+                        {location.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -349,13 +353,11 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select warehouse" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.isArray(werehouseEntities) &&
-                      werehouseEntities.length > 0 &&
-                      warehouses.map((warehouse) => (
-                        <SelectItem key={warehouse._id} value={warehouse._id}>
-                          {warehouse.name}
-                        </SelectItem>
-                      ))}
+                    {warehouses.map((warehouse) => (
+                      <SelectItem key={warehouse._id} value={warehouse._id}>
+                        {warehouse.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -401,7 +403,7 @@ const WerehouseEntities: React.FC = () => {
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>{generate()}</TableBody>
+          <TableBody>{renderTableRows()}</TableBody>
         </Table>
       </div>
     </div>
