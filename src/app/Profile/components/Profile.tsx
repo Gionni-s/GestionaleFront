@@ -9,7 +9,7 @@ import { Alert } from "@/components/ui/alert"
 import { logout } from "@/services/store/auth" // Added logout import
 import { LogOut } from "lucide-react" // Added for logout icon
 import { store } from "@/services/store"
-import { useNavigate } from "react-router-dom"
+import { useRouter } from "next/navigation"
 
 interface UserProfile {
   _id: string
@@ -29,7 +29,7 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const [successMessage, setSuccessMessage] = useState<string>()
-  const navigate = useNavigate()
+  const router = useRouter()
 
   useEffect(() => {
     fetchUserProfile()
@@ -74,9 +74,8 @@ const Profile: React.FC = () => {
   const handleLogout = async () => {
     try {
       store.dispatch(logout())
-      // navigate("/Auth", { replace: true })
-      // navigate(0)
-      // The logout function will handle the redirection
+      router.replace("/Auth")
+      router.refresh()
     } catch (error) {
       console.error("Failed to logout:", error)
     }

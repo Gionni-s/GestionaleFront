@@ -14,10 +14,10 @@ import { Label } from "@/components/ui/label"
 import { axiosInstance } from "@/services/axios"
 import { loginSuccess } from "@/services/store/auth"
 import { store } from "@/services/store"
-import { useNavigate } from "react-router-dom"
+import { useRouter } from "next/navigation"
 
 export function AuthCard() {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [isRegistration, setRegistration] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -33,8 +33,8 @@ export function AuthCard() {
         headers: { Authorization: `Basic ${encodedToken}` },
       })
       store.dispatch(loginSuccess(response.data))
-      // navigate("/Profile", { replace: true })
-      // navigate(0)
+      router.replace("/Profile")
+      router.refresh()
     } catch (error) {
       console.error("Login error:", error)
     }
@@ -49,7 +49,6 @@ export function AuthCard() {
         psw: password,
         mail: email,
       })
-      console.log(response.data)
 
       // Perform login after successful registration
       const token = `${email}:${password}`
@@ -58,9 +57,8 @@ export function AuthCard() {
         headers: { Authorization: `Basic ${encodedToken}` },
       })
       store.dispatch(loginSuccess(loginResponse.data))
-
-      // navigate("/Profile", { replace: true })
-      // navigate(0)
+      router.replace("/Profile")
+      router.refresh()
     } catch (error) {
       console.error("Registration error:", error)
     }
