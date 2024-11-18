@@ -84,7 +84,6 @@ const Foods: React.FC = () => {
 
   const generate = () => {
     if (!Array.isArray(foods)) {
-      console.log(foods)
       // This means 'foods' is of type 'AlternativeFood'
       return (
         <TableRow>

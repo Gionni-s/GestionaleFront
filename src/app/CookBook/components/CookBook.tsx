@@ -27,12 +27,18 @@ interface CookBook {
   fkProprietario: string
 }
 
+interface AlthernativeCookBook {
+  message: string
+}
+
 interface FormData {
   name: string
 }
 
 const CookBooks: React.FC = () => {
-  const [cookBooks, setCookBooks] = useState<CookBook[]>([])
+  const [cookBooks, setCookBooks] = useState<CookBook[] | AlthernativeCookBook>(
+    []
+  )
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -75,6 +81,50 @@ const CookBooks: React.FC = () => {
       fetch("/cookBooks")
     } catch (error) {
       console.error("Failed to delete cookBook:", error)
+    }
+  }
+  const generate = () => {
+    if (!Array.isArray(cookBooks)) {
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>{cookBooks.message}</TableCell>
+        </TableRow>
+      )
+    } else if (cookBooks.length === 0) {
+      // Handle case when the array is empty
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>Loading...</TableCell>
+        </TableRow>
+      )
+    } else {
+      cookBooks.map((cookBook) => (
+        <TableRow key={cookBook._id}>
+          <TableCell>{cookBook.name}</TableCell>
+          <TableCell>
+            <div className="flex space-x-2">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => {
+                  setForm({ name: cookBook.name })
+                  setEditingId(cookBook._id)
+                  setModalVisible(true)
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleDelete(cookBook._id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      ))
     }
   }
 
@@ -125,7 +175,7 @@ const CookBooks: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cookBooks.map((cookBook) => (
+            {/* {cookBooks.map((cookBook) => (
               <TableRow key={cookBook._id}>
                 <TableCell>{cookBook.name}</TableCell>
                 <TableCell>
@@ -151,7 +201,7 @@ const CookBooks: React.FC = () => {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            ))} */}
           </TableBody>
         </Table>
       </div>
