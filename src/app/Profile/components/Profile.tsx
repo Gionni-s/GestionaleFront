@@ -74,8 +74,8 @@ const Profile: React.FC = () => {
   const handleLogout = async () => {
     try {
       store.dispatch(logout())
-      navigate("/Auth", { replace: true })
-      navigate(0)
+      // navigate("/Auth", { replace: true })
+      // navigate(0)
       // The logout function will handle the redirection
     } catch (error) {
       console.error("Failed to logout:", error)

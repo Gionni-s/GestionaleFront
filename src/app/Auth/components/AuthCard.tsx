@@ -33,8 +33,8 @@ export function AuthCard() {
         headers: { Authorization: `Basic ${encodedToken}` },
       })
       store.dispatch(loginSuccess(response.data))
-      navigate("/Profile", { replace: true })
-      navigate(0)
+      // navigate("/Profile", { replace: true })
+      // navigate(0)
     } catch (error) {
       console.error("Login error:", error)
     }
@@ -59,8 +59,8 @@ export function AuthCard() {
       })
       store.dispatch(loginSuccess(loginResponse.data))
 
-      navigate("/Profile", { replace: true })
-      navigate(0)
+      // navigate("/Profile", { replace: true })
+      // navigate(0)
     } catch (error) {
       console.error("Registration error:", error)
     }
