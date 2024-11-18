@@ -4,7 +4,7 @@ import { store } from "../services/store"
 
 export function NavBar() {
   const state = store.getState() // Access the store state directly
-  const token = state.token.value
+  const token = state.auth.token
   return (
     <Menubar>
       <MenubarMenu>

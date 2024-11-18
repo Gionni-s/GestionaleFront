@@ -1,8 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit"
 import { persistStore, persistReducer } from "redux-persist"
 import storage from "redux-persist/lib/storage"
-import tokenReducer from "./token"
-import logReducer from "./log"
+import authReducer from "./auth"
 import logger from "redux-logger"
 
 const persistConfig = {
@@ -11,8 +10,7 @@ const persistConfig = {
 }
 
 const rootReducer = combineReducers({
-  token: tokenReducer, // Rename for clarity
-  log: logReducer, // Rename for clarity
+  auth: authReducer, // Rename for clarity
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

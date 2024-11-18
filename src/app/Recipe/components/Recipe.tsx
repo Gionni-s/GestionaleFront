@@ -25,9 +25,9 @@ import { PlusCircle, Pencil, Trash } from "lucide-react"
 interface Recipe {
   _id: string
   name: string
-  fkProprietario: string
+  userId: string
   ingridients: RecipeIngredient[]
-  fkBook: string
+  bookId: string
 }
 
 interface Ingredient {
@@ -41,13 +41,13 @@ interface CookBook {
 }
 
 interface RecipeIngredient {
-  fkFood: string
+  foodId: string
   quantity: number
 }
 
 interface FormData {
   name: string
-  fkBook: string
+  bookId: string
   ingridients: RecipeIngredient[]
 }
 
@@ -56,10 +56,10 @@ const Recipes: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({
     name: "",
-    fkBook: "",
+    bookId: "",
     ingridients: [
-      { fkFood: "", quantity: 1 },
-      { fkFood: "", quantity: 1 },
+      { foodId: "", quantity: 1 },
+      { foodId: "", quantity: 1 },
     ],
   })
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -129,7 +129,7 @@ const Recipes: React.FC = () => {
   const addIngredientField = () => {
     setForm({
       ...form,
-      ingridients: [...form.ingridients, { fkFood: "", quantity: 1 }],
+      ingridients: [...form.ingridients, { foodId: "", quantity: 1 }],
     })
   }
 
@@ -156,10 +156,10 @@ const Recipes: React.FC = () => {
   const resetForm = () => {
     setForm({
       name: "",
-      fkBook: "",
+      bookId: "",
       ingridients: [
-        { fkFood: "", quantity: 1 },
-        { fkFood: "", quantity: 1 },
+        { foodId: "", quantity: 1 },
+        { foodId: "", quantity: 1 },
       ],
     })
     setEditingId(null)
@@ -196,8 +196,8 @@ const Recipes: React.FC = () => {
                 <Label htmlFor="cookbook">CookBook</Label>
                 <select
                   id="cookbook"
-                  value={form.fkBook}
-                  onChange={(e) => handleFieldChange("fkBook", e.target.value)}
+                  value={form.bookId}
+                  onChange={(e) => handleFieldChange("bookId", e.target.value)}
                   className="border p-2 rounded w-full"
                   // required
                 >
@@ -216,9 +216,9 @@ const Recipes: React.FC = () => {
                 {form.ingridients.map((ingredient, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <select
-                      value={ingredient.fkFood}
+                      value={ingredient.foodId}
                       onChange={(e) =>
-                        handleFieldChange("fkFood", e.target.value, index)
+                        handleFieldChange("foodId", e.target.value, index)
                       }
                       className="border p-2 rounded"
                       required
@@ -273,44 +273,47 @@ const Recipes: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recipes.map((recipe) => (
-              <TableRow key={recipe._id}>
-                <TableCell>{recipe.name}</TableCell>
-                <TableCell>
-                  {cookbookOptions.find((book) => book._id === recipe.fkBook)
-                    ?.name || "N/A"}
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        setForm({
-                          name: recipe.name,
-                          fkBook: recipe.fkBook,
-                          ingridients: recipe.ingridients.map((ingredient) => ({
-                            fkFood: ingredient.fkFood,
-                            quantity: ingredient.quantity,
-                          })),
-                        })
-                        setEditingId(recipe._id)
-                        setModalVisible(true)
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => handleDelete(recipe._id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {recipes.length > 0 &&
+              recipes.map((recipe) => (
+                <TableRow key={recipe._id}>
+                  <TableCell>{recipe.name}</TableCell>
+                  <TableCell>
+                    {cookbookOptions.find((book) => book._id === recipe.bookId)
+                      ?.name || "N/A"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => {
+                          setForm({
+                            name: recipe.name,
+                            bookId: recipe.bookId,
+                            ingridients: recipe.ingridients.map(
+                              (ingredient) => ({
+                                foodId: ingredient.foodId,
+                                quantity: ingredient.quantity,
+                              })
+                            ),
+                          })
+                          setEditingId(recipe._id)
+                          setModalVisible(true)
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleDelete(recipe._id)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>

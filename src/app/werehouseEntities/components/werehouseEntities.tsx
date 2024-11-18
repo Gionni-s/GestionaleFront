@@ -33,10 +33,10 @@ interface WerehouseEntitie {
   _id: string
   quantita: number
   scadenza: string
-  fkFood: string
-  fkLocation: string
-  fkWarehouse: string
-  fkProprietario: string
+  foodId: string
+  locationId: string
+  warehouseId: string
+  userId: string
   food: {
     _id: string
     name: string
@@ -52,10 +52,10 @@ interface WerehouseEntitie {
 }
 
 interface FormData {
-  fkFood: string
-  fkLocation: string
-  fkWarehouse: string
-  fkProprietario: string
+  foodId: string
+  locationId: string
+  warehouseId: string
+  userId: string
   quantita: number
   scadenza: string
 }
@@ -65,10 +65,10 @@ const WerehouseEntities: React.FC = () => {
     WerehouseEntitie[]
   >([])
   const [form, setForm] = useState<FormData>({
-    fkFood: "",
-    fkLocation: "",
-    fkWarehouse: "",
-    fkProprietario: "",
+    foodId: "",
+    locationId: "",
+    warehouseId: "",
+    userId: "",
     quantita: 1,
     scadenza: "",
   })
@@ -166,10 +166,10 @@ const WerehouseEntities: React.FC = () => {
 
   const resetForm = () => {
     setForm({
-      fkFood: "",
-      fkLocation: "",
-      fkWarehouse: "",
-      fkProprietario: "",
+      foodId: "",
+      locationId: "",
+      warehouseId: "",
+      userId: "",
       quantita: 1,
       scadenza: "",
     })
@@ -177,10 +177,10 @@ const WerehouseEntities: React.FC = () => {
 
   const handleEdit = (werehouseEntitie: WerehouseEntitie) => {
     setForm({
-      fkFood: werehouseEntitie.fkFood,
-      fkLocation: werehouseEntitie.fkLocation,
-      fkWarehouse: werehouseEntitie.fkWarehouse,
-      fkProprietario: werehouseEntitie.fkProprietario,
+      foodId: werehouseEntitie.foodId,
+      locationId: werehouseEntitie.locationId,
+      warehouseId: werehouseEntitie.warehouseId,
+      userId: werehouseEntitie.userId,
       quantita: werehouseEntitie.quantita,
       scadenza: werehouseEntitie.scadenza.split("T")[0],
     })
@@ -238,8 +238,8 @@ const WerehouseEntities: React.FC = () => {
               <div>
                 <Label htmlFor="food">Food</Label>
                 <Select
-                  value={form.fkFood}
-                  onValueChange={(value) => setForm({ ...form, fkFood: value })}
+                  value={form.foodId}
+                  onValueChange={(value) => setForm({ ...form, foodId: value })}
                   required
                 >
                   <SelectTrigger>
@@ -257,9 +257,9 @@ const WerehouseEntities: React.FC = () => {
               <div>
                 <Label htmlFor="location">Location</Label>
                 <Select
-                  value={form.fkLocation}
+                  value={form.locationId}
                   onValueChange={(value) =>
-                    setForm({ ...form, fkLocation: value })
+                    setForm({ ...form, locationId: value })
                   }
                   required
                 >
@@ -278,9 +278,9 @@ const WerehouseEntities: React.FC = () => {
               <div>
                 <Label htmlFor="warehouse">Warehouse</Label>
                 <Select
-                  value={form.fkWarehouse}
+                  value={form.warehouseId}
                   onValueChange={(value) =>
-                    setForm({ ...form, fkWarehouse: value })
+                    setForm({ ...form, warehouseId: value })
                   }
                   required
                 >
@@ -351,7 +351,14 @@ const WerehouseEntities: React.FC = () => {
                   <TableCell>{entity.location?.name || "N/A"}</TableCell>
                   <TableCell>{entity.warehouse?.name || "N/A"}</TableCell>
                   <TableCell className={getExpirationColor(entity.scadenza)}>
-                    {new Date(entity.scadenza).toLocaleDateString()}
+                    {new Date(entity.scadenza).getDate() <=
+                      new Date().getDate() &&
+                      "Scaduto (" +
+                        new Date(entity.scadenza).toLocaleDateString() +
+                        ")"}
+                    {new Date(entity.scadenza).getDate() >
+                      new Date().getDate() &&
+                      new Date(entity.scadenza).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">

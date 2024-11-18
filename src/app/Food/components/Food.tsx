@@ -27,12 +27,16 @@ interface Food {
   fkProprietario: string
 }
 
+interface AlternativeFood {
+  message: string
+}
+
 interface FormData {
   name: string
 }
 
 const Foods: React.FC = () => {
-  const [foods, setFoods] = useState<Food[]>([])
+  const [foods, setFoods] = useState<Food[] | AlternativeFood>([])
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -75,6 +79,44 @@ const Foods: React.FC = () => {
       fetch("/foods")
     } catch (error) {
       console.error("Failed to delete food:", error)
+    }
+  }
+
+  const generate = () => {
+    if (foods.message == "No element Found") {
+      return (
+        <TableRow>
+          <TableCell>{foods.message}</TableCell>
+        </TableRow>
+      )
+    } else {
+      return foods.map((food) => (
+        <TableRow key={food._id}>
+          <TableCell>{food.name}</TableCell>
+          <TableCell>
+            <div className="flex space-x-2">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => {
+                  setForm({ name: food.name })
+                  setEditingId(food._id)
+                  setModalVisible(true)
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleDelete(food._id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      ))
     }
   }
 
@@ -123,7 +165,8 @@ const Foods: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {foods.map((food) => (
+            {generate()}
+            {/* {foods.map((food) => (
               <TableRow key={food._id}>
                 <TableCell>{food.name}</TableCell>
                 <TableCell>
@@ -149,7 +192,7 @@ const Foods: React.FC = () => {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            ))} */}
           </TableBody>
         </Table>
       </div>

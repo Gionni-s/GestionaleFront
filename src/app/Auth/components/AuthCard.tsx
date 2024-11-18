@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { axiosInstance } from "@/services/axios"
-import { addToken } from "@/services/store/token"
+import { loginSuccess } from "@/services/store/auth"
 import { store } from "@/services/store"
 
 export function AuthCard() {
@@ -30,7 +30,7 @@ export function AuthCard() {
       const response = await axiosInstance.get("/users", {
         headers: { Authorization: `Basic ${encodedToken}` },
       })
-      store.dispatch(addToken(response.data.token))
+      store.dispatch(loginSuccess(response.data))
       // console.log(response.data)
     } catch (error) {
       console.error("Login error:", error)
