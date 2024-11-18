@@ -13,36 +13,40 @@ export function NavBar() {
           {!token && <Link href={"/Auth"}>Login</Link>}
         </MenubarTrigger>
       </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Link href={"/Food"}>Food</Link>
-        </MenubarTrigger>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Link href={"/Location"}>Location</Link>
-        </MenubarTrigger>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Link href={"/CookBook"}>Recipe Book</Link>
-        </MenubarTrigger>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Link href={"/Recipe"}>Recipe</Link>
-        </MenubarTrigger>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Link href={"/werehouse"}>Werehouse</Link>
-        </MenubarTrigger>
-      </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger>
-          <Link href={"/werehouseEntities"}>Werehouse Entities</Link>
-        </MenubarTrigger>
-      </MenubarMenu>
+      {token && (
+        <>
+          <MenubarMenu>
+            <MenubarTrigger>
+              <Link href={"/Food"}>Food</Link>
+            </MenubarTrigger>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger>
+              <Link href={"/Location"}>Location</Link>
+            </MenubarTrigger>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger>
+              <Link href={"/CookBook"}>Recipe Book</Link>
+            </MenubarTrigger>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger>
+              <Link href={"/Recipe"}>Recipe</Link>
+            </MenubarTrigger>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger>
+              <Link href={"/werehouse"}>Werehouse</Link>
+            </MenubarTrigger>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger>
+              <Link href={"/werehouseEntities"}>Werehouse Entities</Link>
+            </MenubarTrigger>
+          </MenubarMenu>
+        </>
+      )}
     </Menubar>
   )
 }

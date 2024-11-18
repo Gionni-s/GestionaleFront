@@ -21,10 +21,14 @@ import {
 import { Label } from "@/components/ui/label"
 import { PlusCircle, Pencil, Trash } from "lucide-react"
 
-interface Werehouse {
+interface Warehouse {
   _id: string
   name: string
   fkProprietario: string
+}
+
+interface AlthernativeWarehouse {
+  message: string
 }
 
 interface FormData {
@@ -32,7 +36,9 @@ interface FormData {
 }
 
 const Werehouses: React.FC = () => {
-  const [werehouses, setWerehouses] = useState<Werehouse[]>([])
+  const [werehouses, setWerehouses] = useState<
+    Warehouse[] | AlthernativeWarehouse
+  >([])
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -43,7 +49,7 @@ const Werehouses: React.FC = () => {
 
   const fetch = async (url: string): Promise<void> => {
     try {
-      const response = await api.get<Werehouse[]>(url)
+      const response = await api.get<Warehouse[]>(url)
       setWerehouses(response.data)
     } catch (error) {
       console.error("Failed to fetch werehouses:", error)
@@ -75,6 +81,52 @@ const Werehouses: React.FC = () => {
       fetch("/werehouses")
     } catch (error) {
       console.error("Failed to delete werehouse:", error)
+    }
+  }
+
+  const generate = () => {
+    if (!Array.isArray(werehouses)) {
+      // This means 'foods' is of type 'AlternativeFood'
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>{werehouses.message}</TableCell>
+        </TableRow>
+      )
+    } else if (werehouses.length === 0) {
+      // Handle case when the array is empty
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>Loading...</TableCell>
+        </TableRow>
+      )
+    } else {
+      werehouses.map((werehouse) => (
+        <TableRow key={werehouse._id}>
+          <TableCell>{werehouse.name}</TableCell>
+          <TableCell>
+            <div className="flex space-x-2">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => {
+                  setForm({ name: werehouse.name })
+                  setEditingId(werehouse._id)
+                  setModalVisible(true)
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleDelete(werehouse._id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      ))
     }
   }
 
@@ -125,7 +177,8 @@ const Werehouses: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {werehouses.map((werehouse) => (
+            {generate()}
+            {/* {werehouses.map((werehouse) => (
               <TableRow key={werehouse._id}>
                 <TableCell>{werehouse.name}</TableCell>
                 <TableCell>
@@ -151,7 +204,7 @@ const Werehouses: React.FC = () => {
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            ))} */}
           </TableBody>
         </Table>
       </div>

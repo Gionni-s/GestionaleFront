@@ -1,11 +1,14 @@
 "use client"
 import React, { useState, useEffect } from "react"
-import { axiosInstance as api } from "@/services/axios" // Update with your axios instance
+import { axiosInstance as api } from "@/services/axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
-import { Alert } from "@/components/ui/alert" // Optional: Use an alert for success messages
+import { Alert } from "@/components/ui/alert"
+import { logout } from "@/services/store/auth" // Added logout import
+import { LogOut } from "lucide-react" // Added for logout icon
+import { store } from "@/services/store"
 
 interface UserProfile {
   _id: string
@@ -13,7 +16,7 @@ interface UserProfile {
   surname: string
   email: string
   isConfimer: boolean
-  password: string // Consider removing or masking this in a real application
+  password: string
   phoneNumber: number
   dateCreation: Date
   lastLogin: Date
@@ -32,9 +35,9 @@ const Profile: React.FC = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await api.get<UserProfile>("/users/me") // Adjust your API endpoint
+      const response = await api.get<UserProfile>("/users/me")
       setUserProfile(response.data)
-      setForm(response.data) // Set form state to current user data
+      setForm(response.data)
       setLoading(false)
     } catch (error) {
       console.error("Failed to fetch user profile:", error)
@@ -55,14 +58,23 @@ const Profile: React.FC = () => {
     e.preventDefault()
     if (form) {
       try {
-        await api.put(`/users/me`, form) // Update user profile
-        setUserProfile(form) // Update local state with new data
-        setIsEditing(false) // Stop editing mode
+        await api.put(`/users/me`, form)
+        setUserProfile(form)
+        setIsEditing(false)
         setSuccessMessage("Profile updated successfully!")
-        setTimeout(() => setSuccessMessage(undefined), 3000) // Clear message after 3 seconds
+        setTimeout(() => setSuccessMessage(undefined), 3000)
       } catch (error) {
         console.error("Failed to update profile:", error)
       }
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      store.dispatch(logout())
+      // The logout function will handle the redirection
+    } catch (error) {
+      console.error("Failed to logout:", error)
     }
   }
 
@@ -72,7 +84,17 @@ const Profile: React.FC = () => {
 
   return (
     <div className="w-full max-w-lg mx-auto p-6">
-      <div>
+      <div className="relative">
+        <div className="absolute right-0 top-0">
+          <Button
+            variant="ghost"
+            className="text-red-500 hover:text-red-700 hover:bg-red-100"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold mb-4 text-center">Profile</h1>
         {successMessage && (
           <Alert variant="default" className="mb-4">

@@ -30,6 +30,10 @@ interface Recipe {
   bookId: string
 }
 
+interface AlthernativeRecipe {
+  message: string
+}
+
 interface Ingredient {
   _id: string
   name: string
@@ -52,7 +56,7 @@ interface FormData {
 }
 
 const Recipes: React.FC = () => {
-  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [recipes, setRecipes] = useState<Recipe[] | AlthernativeRecipe>([])
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({
     name: "",
@@ -165,6 +169,63 @@ const Recipes: React.FC = () => {
     setEditingId(null)
   }
 
+  const generate = () => {
+    if (!Array.isArray(recipes)) {
+      // This means 'foods' is of type 'AlternativeFood'
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>{recipes.message}</TableCell>
+        </TableRow>
+      )
+    } else if (recipes.length === 0) {
+      // Handle case when the array is empty
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>Loading...</TableCell>
+        </TableRow>
+      )
+    } else {
+      recipes.map((recipe) => (
+        <TableRow key={recipe._id}>
+          <TableCell>{recipe.name}</TableCell>
+          <TableCell>
+            {cookbookOptions.find((book) => book._id === recipe.bookId)?.name ||
+              "N/A"}
+          </TableCell>
+          <TableCell>
+            <div className="flex space-x-2">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => {
+                  setForm({
+                    name: recipe.name,
+                    bookId: recipe.bookId,
+                    ingridients: recipe.ingridients.map((ingredient) => ({
+                      foodId: ingredient.foodId,
+                      quantity: ingredient.quantity,
+                    })),
+                  })
+                  setEditingId(recipe._id)
+                  setModalVisible(true)
+                }}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleDelete(recipe._id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      ))
+    }
+  }
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -202,7 +263,7 @@ const Recipes: React.FC = () => {
                   // required
                 >
                   <option value="">Select Cookbook</option>
-                  {cookbookOptions.map((book) => (
+                  {recipes.length > 0 && cookbookOptions.map((book) => (
                     <option key={book._id} value={book._id}>
                       {book.name}
                     </option>
@@ -213,7 +274,7 @@ const Recipes: React.FC = () => {
               {/* Ingredienti */}
               <div className="space-y-4">
                 <Label>Ingredients</Label>
-                {form.ingridients.map((ingredient, index) => (
+                {recipes.length > 0 && form.ingridients.map((ingredient, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <select
                       value={ingredient.foodId}
@@ -273,7 +334,8 @@ const Recipes: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recipes.length > 0 &&
+            {generate()}
+            {/* {recipes.length > 0 &&
               recipes.map((recipe) => (
                 <TableRow key={recipe._id}>
                   <TableCell>{recipe.name}</TableCell>
@@ -313,7 +375,7 @@ const Recipes: React.FC = () => {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              ))} */}
           </TableBody>
         </Table>
       </div>

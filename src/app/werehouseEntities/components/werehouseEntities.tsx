@@ -51,6 +51,10 @@ interface WerehouseEntitie {
   }
 }
 
+interface AlthernativeWarehouse {
+  message: string
+}
+
 interface FormData {
   foodId: string
   locationId: string
@@ -62,7 +66,7 @@ interface FormData {
 
 const WerehouseEntities: React.FC = () => {
   const [werehouseEntities, setWerehouseEntities] = useState<
-    WerehouseEntitie[]
+    WerehouseEntitie[] | AlthernativeWarehouse
   >([])
   const [form, setForm] = useState<FormData>({
     foodId: "",
@@ -211,6 +215,59 @@ const WerehouseEntities: React.FC = () => {
     return <div className="text-center text-red-500">{error}</div>
   }
 
+  const generate = () => {
+    if (!Array.isArray(werehouseEntities)) {
+      // This means 'foods' is of type 'AlternativeFood'
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>{werehouseEntities.message}</TableCell>
+        </TableRow>
+      )
+    } else if (werehouseEntities.length === 0) {
+      // Handle case when the array is empty
+      return (
+        <TableRow>
+          <TableCell>Loading...</TableCell>
+        </TableRow>
+      )
+    } else {
+      werehouseEntities.map((entity) => (
+        <TableRow key={entity._id}>
+          <TableCell>{entity.food?.name}</TableCell>
+          <TableCell>{entity.quantita}</TableCell>
+          <TableCell>{entity.location?.name || "N/A"}</TableCell>
+          <TableCell>{entity.warehouse?.name || "N/A"}</TableCell>
+          <TableCell className={getExpirationColor(entity.scadenza)}>
+            {new Date(entity.scadenza).getDate() <= new Date().getDate() &&
+              "Scaduto (" +
+                new Date(entity.scadenza).toLocaleDateString() +
+                ")"}
+            {new Date(entity.scadenza).getDate() > new Date().getDate() &&
+              new Date(entity.scadenza).toLocaleDateString()}
+          </TableCell>
+          <TableCell>
+            <div className="flex space-x-2">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleEdit(entity)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleDelete(entity._id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      ))
+    }
+  }
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -246,11 +303,12 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select food" />
                   </SelectTrigger>
                   <SelectContent>
-                    {foods.map((food) => (
-                      <SelectItem key={food._id} value={food._id}>
-                        {food.name}
-                      </SelectItem>
-                    ))}
+                    {werehouseEntities.length > 0 &&
+                      foods.map((food) => (
+                        <SelectItem key={food._id} value={food._id}>
+                          {food.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -267,11 +325,12 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location._id} value={location._id}>
-                        {location.name}
-                      </SelectItem>
-                    ))}
+                    {werehouseEntities.length > 0 &&
+                      locations.map((location) => (
+                        <SelectItem key={location._id} value={location._id}>
+                          {location.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -288,11 +347,12 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select warehouse" />
                   </SelectTrigger>
                   <SelectContent>
-                    {warehouses.map((warehouse) => (
-                      <SelectItem key={warehouse._id} value={warehouse._id}>
-                        {warehouse.name}
-                      </SelectItem>
-                    ))}
+                    {werehouseEntities.length > 0 &&
+                      warehouses.map((warehouse) => (
+                        <SelectItem key={warehouse._id} value={warehouse._id}>
+                          {warehouse.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -326,64 +386,21 @@ const WerehouseEntities: React.FC = () => {
         </Dialog>
       </div>
 
-      {werehouseEntities.length === 0 ? (
-        <div className="text-center text-gray-500">
-          No Warehouse Entities Found.
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Food</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Warehouse</TableHead>
-                <TableHead>Expiration Date</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {werehouseEntities.map((entity) => (
-                <TableRow key={entity._id}>
-                  <TableCell>{entity.food?.name}</TableCell>
-                  <TableCell>{entity.quantita}</TableCell>
-                  <TableCell>{entity.location?.name || "N/A"}</TableCell>
-                  <TableCell>{entity.warehouse?.name || "N/A"}</TableCell>
-                  <TableCell className={getExpirationColor(entity.scadenza)}>
-                    {new Date(entity.scadenza).getDate() <=
-                      new Date().getDate() &&
-                      "Scaduto (" +
-                        new Date(entity.scadenza).toLocaleDateString() +
-                        ")"}
-                    {new Date(entity.scadenza).getDate() >
-                      new Date().getDate() &&
-                      new Date(entity.scadenza).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleEdit(entity)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => handleDelete(entity._id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <div className="border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Food</TableHead>
+              <TableHead>Quantity</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Warehouse</TableHead>
+              <TableHead>Expiration Date</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>{generate()}</TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

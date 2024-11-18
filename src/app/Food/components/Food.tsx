@@ -84,6 +84,7 @@ const Foods: React.FC = () => {
 
   const generate = () => {
     if (!Array.isArray(foods)) {
+      console.log(foods)
       // This means 'foods' is of type 'AlternativeFood'
       return (
         <TableRow>
@@ -94,7 +95,7 @@ const Foods: React.FC = () => {
       // Handle case when the array is empty
       return (
         <TableRow>
-          <TableCell colSpan={2}>No foods available</TableCell>
+          <TableCell colSpan={2}>Loading...</TableCell>
         </TableRow>
       )
     } else {
@@ -173,36 +174,7 @@ const Foods: React.FC = () => {
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {generate()}
-            {/* {foods.map((food) => (
-              <TableRow key={food._id}>
-                <TableCell>{food.name}</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        setForm({ name: food.name })
-                        setEditingId(food._id)
-                        setModalVisible(true)
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => handleDelete(food._id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))} */}
-          </TableBody>
+          <TableBody>{generate()}</TableBody>
         </Table>
       </div>
     </div>
