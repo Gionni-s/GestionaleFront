@@ -24,7 +24,7 @@ import { PlusCircle, Pencil, Trash } from "lucide-react"
 interface Food {
   _id: string
   name: string
-  fkProprietario: string
+  userId: string
 }
 
 interface AlternativeFood {
@@ -83,13 +83,22 @@ const Foods: React.FC = () => {
   }
 
   const generate = () => {
-    if (foods.message == "No element Found") {
+    if (!Array.isArray(foods)) {
+      // This means 'foods' is of type 'AlternativeFood'
       return (
         <TableRow>
-          <TableCell>{foods.message}</TableCell>
+          <TableCell colSpan={2}>{foods.message}</TableCell>
+        </TableRow>
+      )
+    } else if (foods.length === 0) {
+      // Handle case when the array is empty
+      return (
+        <TableRow>
+          <TableCell colSpan={2}>No foods available</TableCell>
         </TableRow>
       )
     } else {
+      // 'foods' is a valid array of 'Food' items
       return foods.map((food) => (
         <TableRow key={food._id}>
           <TableCell>{food.name}</TableCell>

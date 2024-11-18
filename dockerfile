@@ -1,7 +1,7 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm i
 COPY . .
 RUN npm run build
 CMD ["npm","run","dev"]
@@ -9,7 +9,8 @@ CMD ["npm","run","dev"]
 FROM node:18-alpine AS runtime
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --production
+# RUN npm ci --production
+RUN npm i --production 
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 EXPOSE 3000
