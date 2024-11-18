@@ -174,35 +174,7 @@ const CookBooks: React.FC = () => {
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {/* {cookBooks.map((cookBook) => (
-              <TableRow key={cookBook._id}>
-                <TableCell>{cookBook.name}</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => {
-                        setForm({ name: cookBook.name })
-                        setEditingId(cookBook._id)
-                        setModalVisible(true)
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => handleDelete(cookBook._id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))} */}
-          </TableBody>
+          <TableBody>{generate()}</TableBody>
         </Table>
       </div>
     </div>

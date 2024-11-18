@@ -75,7 +75,7 @@ const Profile: React.FC = () => {
     try {
       store.dispatch(logout())
       navigate("/Auth", { replace: true })
-      location.reload()
+      navigate(0)
       // The logout function will handle the redirection
     } catch (error) {
       console.error("Failed to logout:", error)

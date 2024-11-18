@@ -34,7 +34,7 @@ export function AuthCard() {
       })
       store.dispatch(loginSuccess(response.data))
       navigate("/Profile", { replace: true })
-      location.reload()
+      navigate(0)
     } catch (error) {
       console.error("Login error:", error)
     }
@@ -60,7 +60,7 @@ export function AuthCard() {
       store.dispatch(loginSuccess(loginResponse.data))
 
       navigate("/Profile", { replace: true })
-      location.reload()
+      navigate(0)
     } catch (error) {
       console.error("Registration error:", error)
     }
