@@ -145,10 +145,10 @@ const Profile: React.FC = () => {
                   </AvatarFallback>
                 </Avatar>
                 {isEditing && (
-                  <div className="absolute bottom-0 right-0">
+                  <div className="absolute bottom-0 right-0 -mr-2 -mb-2">
                     <Label
                       htmlFor="profileImage"
-                      className="bg-black text-white rounded-full p-2 cursor-pointer hover:bg-gray-800 transition-colors"
+                      className="bg-black text-white rounded-full p-2 cursor-pointer hover:bg-gray-800 transition-colors flex items-center justify-center"
                     >
                       <Camera className="w-5 h-5" />
                       <Input
