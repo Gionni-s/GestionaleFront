@@ -27,12 +27,18 @@ interface Location {
   fkProprietario: string
 }
 
+interface AlthernativeLocation {
+  message: string
+}
+
 interface FormData {
   name: string
 }
 
 const Locations: React.FC = () => {
-  const [locations, setLocations] = useState<Location[]>([])
+  const [locations, setLocations] = useState<Location[] | AlthernativeLocation>(
+    []
+  )
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -92,7 +98,16 @@ const Locations: React.FC = () => {
         </TableRow>
       )
     }
-    if (locations.length === 0) {
+
+    if (!Array.isArray(locations)) {
+      return (
+        <TableRow>
+          <TableCell colSpan={2} className="text-center">
+            No locations available
+          </TableCell>
+        </TableRow>
+      )
+    } else if (locations.length === 0) {
       return (
         <TableRow>
           <TableCell colSpan={2} className="text-center">
@@ -101,6 +116,7 @@ const Locations: React.FC = () => {
         </TableRow>
       )
     }
+
     return locations.map((location) => (
       <TableRow key={location._id}>
         <TableCell>{location.name}</TableCell>
