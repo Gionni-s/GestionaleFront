@@ -219,7 +219,7 @@ const WerehouseEntities: React.FC = () => {
       return (
         <TableRow>
           <TableCell colSpan={6} className="text-center">
-            {(werehouseEntities as AlthernativeWarehouse).message}
+            No warehouseEntity found
           </TableCell>
         </TableRow>
       )
@@ -229,7 +229,7 @@ const WerehouseEntities: React.FC = () => {
       return (
         <TableRow>
           <TableCell colSpan={6} className="text-center">
-            No warehouse entities found
+            Loading...
           </TableCell>
         </TableRow>
       )
@@ -268,16 +268,12 @@ const WerehouseEntities: React.FC = () => {
     ))
   }
 
-  if (loading) {
-    return <div className="text-center">Loading...</div>
-  }
-
   if (error) {
     return <div className="text-center text-red-500">{error}</div>
   }
 
-  return (
-    <div className="w-full max-w-4xl mx-auto">
+  const formGenerator = () => {
+    return (
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Warehouse Entity Management</h1>
         <Dialog open={modalVisible} onOpenChange={setModalVisible}>
@@ -311,11 +307,13 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select food" />
                   </SelectTrigger>
                   <SelectContent>
-                    {foods.map((food) => (
-                      <SelectItem key={food._id} value={food._id}>
-                        {food.name}
-                      </SelectItem>
-                    ))}
+                    {(Array.isArray(foods) &&
+                      foods.map((food) => (
+                        <SelectItem key={food._id} value={food._id}>
+                          {food.name}
+                        </SelectItem>
+                      ))) ||
+                      "N/A  "}
                   </SelectContent>
                 </Select>
               </div>
@@ -332,11 +330,13 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location._id} value={location._id}>
-                        {location.name}
-                      </SelectItem>
-                    ))}
+                    {(Array.isArray(locations) &&
+                      locations.map((location) => (
+                        <SelectItem key={location._id} value={location._id}>
+                          {location.name}
+                        </SelectItem>
+                      ))) ||
+                      "N/A"}
                   </SelectContent>
                 </Select>
               </div>
@@ -353,11 +353,13 @@ const WerehouseEntities: React.FC = () => {
                     <SelectValue placeholder="Select warehouse" />
                   </SelectTrigger>
                   <SelectContent>
-                    {warehouses.map((warehouse) => (
-                      <SelectItem key={warehouse._id} value={warehouse._id}>
-                        {warehouse.name}
-                      </SelectItem>
-                    ))}
+                    {(Array.isArray(warehouses) &&
+                      warehouses.map((warehouse) => (
+                        <SelectItem key={warehouse._id} value={warehouse._id}>
+                          {warehouse.name}
+                        </SelectItem>
+                      ))) ||
+                      "N/A"}
                   </SelectContent>
                 </Select>
               </div>
@@ -390,6 +392,12 @@ const WerehouseEntities: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
+    )
+  }
+
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      {formGenerator()}
 
       <div className="border rounded-lg overflow-hidden">
         <Table>

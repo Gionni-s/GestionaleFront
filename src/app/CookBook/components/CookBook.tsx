@@ -90,7 +90,7 @@ const CookBooks: React.FC = () => {
       return (
         <TableRow>
           <TableCell colSpan={2} className="text-center">
-            Loading...
+            No cookbooks found
           </TableCell>
         </TableRow>
       )
@@ -99,7 +99,7 @@ const CookBooks: React.FC = () => {
     if (cookBooks.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={2}>No cookbooks found</TableCell>
+          <TableCell colSpan={2}>Loading...</TableCell>
         </TableRow>
       )
     }

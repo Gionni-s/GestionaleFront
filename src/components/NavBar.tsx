@@ -39,7 +39,6 @@ export function NavBar() {
     try {
       if (token) {
         const response = (await api.get<UserProfile>("/users/me")).data
-        console.log("Fetched user profile:", response)
         setUserProfile(response)
       }
     } catch (error) {

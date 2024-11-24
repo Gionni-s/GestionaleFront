@@ -89,7 +89,7 @@ const Werehouses: React.FC = () => {
       return (
         <TableRow>
           <TableCell colSpan={3} className="text-center">
-            Loading...
+            No warehouses found
           </TableCell>
         </TableRow>
       )
@@ -98,7 +98,7 @@ const Werehouses: React.FC = () => {
     if (werehouses.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={3}>No recipes found</TableCell>
+          <TableCell colSpan={3}>Loading...</TableCell>
         </TableRow>
       )
     }

@@ -83,7 +83,6 @@ const Recipes: React.FC = () => {
     try {
       const response = await api.get<Recipe[]>("/recipes")
       setRecipes(response.data)
-      console.log(response.data)
     } catch (error) {
       console.error("Failed to fetch recipes:", error)
       setRecipes({ message: "Failed to load recipes" })
@@ -177,7 +176,7 @@ const Recipes: React.FC = () => {
       return (
         <TableRow>
           <TableCell colSpan={3} className="text-center">
-            Loading...
+            No element found
           </TableCell>
         </TableRow>
       )
@@ -186,11 +185,10 @@ const Recipes: React.FC = () => {
     if (recipes.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={3}>No element found</TableCell>
+          <TableCell colSpan={3}>Loading...</TableCell>
         </TableRow>
       )
     }
-
     return recipes.map((recipe) => (
       <TableRow key={recipe._id}>
         <TableCell>{recipe.name}</TableCell>
@@ -268,11 +266,13 @@ const Recipes: React.FC = () => {
                   required
                 >
                   <option value="">Select Cookbook</option>
-                  {cookbookOptions.map((book) => (
-                    <option key={book._id} value={book._id}>
-                      {book.name}
-                    </option>
-                  ))}
+                  {(Array.isArray(cookbookOptions) &&
+                    cookbookOptions.map((book) => (
+                      <option key={book._id} value={book._id}>
+                        {book.name}
+                      </option>
+                    ))) ||
+                    "N/A"}
                 </select>
               </div>
 
@@ -290,11 +290,13 @@ const Recipes: React.FC = () => {
                       required
                     >
                       <option value="">Select Ingredient</option>
-                      {ingredientOptions.map((option) => (
-                        <option key={option._id} value={option._id}>
-                          {option.name}
-                        </option>
-                      ))}
+                      {(Array.isArray(ingredientOptions) &&
+                        ingredientOptions.map((option) => (
+                          <option key={option._id} value={option._id}>
+                            {option.name}
+                          </option>
+                        ))) ||
+                        "N/A"}
                     </select>
                     <Input
                       type="number"
