@@ -1,181 +1,156 @@
 "use client"
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { axiosInstance as api } from "@/services/axios/index"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { PlusCircle, Pencil, Trash } from "lucide-react"
-
-interface Food {
-  _id: string
-  name: string
-  userId: string
-}
-
-interface AlternativeFood {
-  message: string
-}
+import { Pencil, PlusCircle, Trash } from "lucide-react"
+import Form from "@/components/Generator/form"
+import { TagProps } from "@/components/Generator/tags"
 
 interface FormData {
   name: string
 }
 
 const Foods: React.FC = () => {
-  const [foods, setFoods] = useState<Food[] | AlternativeFood>([])
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch("/foods")
-  }, [])
+  // Configurazione dei campi per il modulo dinamico
+  const formFields: TagProps[] = [
+    {
+      title: "Foods Management",
+      url: "/foods",
+      structures: [
+        {
+          type: "table",
+          collaps: "label", // Colonna su cui effettuare il raggruppamento
+          useApiResult: true,
+          default: [
+            {
+              type: "button",
+              label: "Actions",
+              icon: <Pencil className="h-4 w-4" />,
+              handleEvent: (e: any) => {
+                setEditingId(e.value) // Setta l'ID in modifica
+                setForm({ name: e.name }) // Imposta i dati dell'elemento da modificare
+                setModalVisible(true) // Mostra il dialog per l'editing
+              },
+            },
+            {
+              type: "button",
+              label: "Actions",
+              icon: <Trash className="h-4 w-4" />,
+              handleEvent: async (e: any) => {
+                try {
+                  console.log(e)
+                  // await api.delete(`/foods/${e.value}`)
+                  // console.log("Elemento eliminato:", e.value)
+                  // Aggiorna i dati
+                } catch (error) {
+                  console.error("Errore durante l'eliminazione:", error)
+                }
+              },
+            },
+          ],
+        },
+      ],
+      tagsInfo: [
+        {
+          type: "input",
+          label: "Name",
+          dataType: "text",
+          placeholder: "Enter food name",
+          handleEvent: (e: any) => {
+            console.log(e.value)
+          },
+        },
+      ],
+    },
+  ]
 
-  const fetch = async (url: string): Promise<void> => {
-    try {
-      const response = await api.get<Food[]>(url)
-      setFoods(response.data)
-    } catch (error) {
-      console.error("Failed to fetch foods:", error)
-    }
-  }
-
+  // Funzione per salvare/modificare un alimento
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault()
     try {
       if (editingId) {
-        await api.put(`/foods/${editingId}`, form)
+        await api.put(`/foods/${editingId}`, form) // Modifica l'elemento esistente
       } else {
-        await api.post("/foods", form)
+        await api.post("/foods", form) // Crea un nuovo elemento
       }
       setModalVisible(false)
       setForm({ name: "" })
       setEditingId(null)
-      fetch("/foods")
     } catch (error) {
-      console.error("Failed to save food:", error)
-    }
-  }
-
-  const handleDelete = async (id: string): Promise<void> => {
-    try {
-      await api.delete(`/foods/${id}`)
-      fetch("/foods")
-    } catch (error) {
-      console.error("Failed to delete food:", error)
-    }
-  }
-
-  const generate = () => {
-    if (!Array.isArray(foods)) {
-      // This means 'foods' is of type 'AlternativeFood'
-      return (
-        <TableRow>
-          <TableCell colSpan={2}>{foods.message}</TableCell>
-        </TableRow>
-      )
-    } else if (foods.length === 0) {
-      // Handle case when the array is empty
-      return (
-        <TableRow>
-          <TableCell colSpan={2}>Loading...</TableCell>
-        </TableRow>
-      )
-    } else {
-      // 'foods' is a valid array of 'Food' items
-      return foods.map((food) => (
-        <TableRow key={food._id}>
-          <TableCell>{food.name}</TableCell>
-          <TableCell>
-            <div className="flex space-x-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => {
-                  setForm({ name: food.name })
-                  setEditingId(food._id)
-                  setModalVisible(true)
-                }}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleDelete(food._id)}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </div>
-          </TableCell>
-        </TableRow>
-      ))
+      console.error("Errore durante il salvataggio:", error)
     }
   }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
+      {/* Bottone per aggiungere un nuovo alimento */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Food Management</h1>
-        <Dialog open={modalVisible} onOpenChange={setModalVisible}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setForm({ name: "" })
-                setEditingId(null)
-              }}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Food
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingId ? "Edit Food" : "Add Food"}</DialogTitle>
-            </DialogHeader>
+        <h1 className="text-3xl font-bold">Foods Management</h1>
+        <Button
+          onClick={() => {
+            setForm({ name: "" })
+            setEditingId(null)
+            setModalVisible(true)
+          }}
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Food
+        </Button>
+      </div>
+
+      {/* Modulo dinamico */}
+      <Form fields={formFields} />
+
+      {/* Dialog per aggiungere/modificare un alimento */}
+      {modalVisible && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-96">
+            <h2 className="text-xl font-bold mb-4 flex items-center justify-between">
+              {editingId ? "Edit Food" : "Add Food"}
+
+              <button
+                onClick={() => {
+                  setForm({ name: "" })
+                  setEditingId(null)
+                  setModalVisible(false)
+                }}
+                className="text-gray-500 hover:text-gray-800 focus:outline-none"
+                aria-label="Close"
+              >
+                &#x2715; {/* Unicode per "X" */}
+              </button>
+            </h2>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
+                <label htmlFor="name" className="block text-sm font-medium">
+                  Name
+                </label>
+                <input
                   id="name"
+                  type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
+                  className="block w-full border rounded-md px-3 py-2"
                 />
               </div>
-              <Button type="submit">{editingId ? "Update" : "Create"}</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>{generate()}</TableBody>
-        </Table>
-      </div>
+              <div className="flex justify-end">
+                <Button type="submit" className="w-full">
+                  {editingId ? "Update" : "Create"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
