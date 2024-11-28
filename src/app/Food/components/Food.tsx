@@ -1,5 +1,6 @@
 "use client"
-import React, { useState } from "react"
+
+import React, { useState, useEffect } from "react"
 import { axiosInstance as api } from "@/services/axios/index"
 import { Button } from "@/components/ui/button"
 import { Pencil, PlusCircle, Trash } from "lucide-react"
@@ -31,8 +32,21 @@ const Foods: React.FC = () => {
               label: "Actions",
               icon: <Pencil className="h-4 w-4" />,
               handleEvent: (e: any) => {
-                setEditingId(e.value) // Setta l'ID in modifica
-                setForm({ name: e.name }) // Imposta i dati dell'elemento da modificare
+                const values: string[] = []
+                const id = e.currentTarget.id //take the id
+
+                //take all the row element
+                const nodeListReference =
+                  e.currentTarget.parentElement.parentElement.parentElement
+                    .childNodes
+
+                nodeListReference.forEach(function (currentValue: any) {
+                  values.push(currentValue.innerHTML)
+                })
+                values.pop()
+
+                setEditingId(e.currentTarget.id) // Setta l'ID in modifica
+                setForm({ name: values[0] }) // Imposta i dati dell'elemento da modificare
                 setModalVisible(true) // Mostra il dialog per l'editing
               },
             },
@@ -42,10 +56,8 @@ const Foods: React.FC = () => {
               icon: <Trash className="h-4 w-4" />,
               handleEvent: async (e: any) => {
                 try {
-                  console.log(e)
                   // await api.delete(`/foods/${e.value}`)
                   // console.log("Elemento eliminato:", e.value)
-                  // Aggiorna i dati
                 } catch (error) {
                   console.error("Errore durante l'eliminazione:", error)
                 }

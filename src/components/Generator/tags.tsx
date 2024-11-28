@@ -64,6 +64,7 @@ const Tag: React.FC<TagProps> = ({
             return (
               <Input
                 key={index}
+                id={index}
                 type={tag.dataType}
                 placeholder={tag.placeholder}
                 value={tag.value}
@@ -80,6 +81,7 @@ const Tag: React.FC<TagProps> = ({
         return (
           <Button
             key={index}
+            id={index}
             onClick={tag.handleEvent}
             className={tag.class || ""}
           >
@@ -163,21 +165,24 @@ const Tag: React.FC<TagProps> = ({
                             .filter((item) => item[lowercaseKey])
                             .map((item, rowIndex) => {
                               const exCell: any =
-                                structure.default?.map(
-                                  (struct, structIndex) => {
-                                    const id = `tag-${rowIndex}-${structIndex}-${Math.random()}`
-                                    return createTag(struct, id)
-                                  }
-                                ) || []
+                                structure.default?.map((struct) => {
+                                  const id = `tag-${rowIndex}-${
+                                    item._id
+                                  }-${Math.random()}`
+                                  return createTag(struct, id)
+                                }) || []
 
                               return (
                                 <TableRow key={`row-${rowIndex}`}>
+                                  {/* Display only the value */}
                                   <TableCell>{item[lowercaseKey]}</TableCell>
-                                  <TableCell>
-                                    <div className="flex space-x-2">
-                                      {exCell}
-                                    </div>
-                                  </TableCell>
+                                  {structure?.collaps && (
+                                    <TableCell>
+                                      <div className="flex space-x-2">
+                                        {exCell}
+                                      </div>
+                                    </TableCell>
+                                  )}
                                 </TableRow>
                               )
                             })
@@ -194,18 +199,15 @@ const Tag: React.FC<TagProps> = ({
                     : structure?.useApiResult
                     ? apiResult?.map((item, index) => (
                         <TableRow key={index}>
-                          {tagInsert.map((tag, tagIndex) => (
-                            <TableCell key={tagIndex}>
-                              {createTag(
-                                { ...tag, value: item[tag.label as string] },
-                                tagIndex
-                              )}
-                            </TableCell>
+                          {/* Only render values from apiResult */}
+                          {Object.keys(item).map((key, tagIndex) => (
+                            <TableCell key={tagIndex}>{item[key]}</TableCell>
                           ))}
                         </TableRow>
                       ))
                     : [
                         <TableRow key="default">
+                          {/* Only render default inputs if useApiResult is false */}
                           {tagInsert.map((tag, index) => (
                             <TableCell key={index}>
                               {createTag(tag, index)}

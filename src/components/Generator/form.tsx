@@ -10,6 +10,7 @@ export interface Entity {
 
 const Form = ({ fields }: { fields: TagProps[] }) => {
   const [formFields, setFields] = useState<TagProps[]>(fields)
+
   // Fetch data for a specific field
   const fetchData = async (url: string): Promise<Entity[]> => {
     try {
@@ -19,20 +20,6 @@ const Form = ({ fields }: { fields: TagProps[] }) => {
       console.error(`Failed to fetch ${url}:`, error)
       return []
     }
-  }
-
-  // Load data and assign it to `showInfo`
-  const loadData = async () => {
-    const updatedFields = await Promise.all(
-      formFields.map(async (field) => {
-        if (field.url) {
-          const fetchedData = await fetchData(field.url)
-          return { ...field, apiResult: fetchedData }
-        }
-        return field
-      })
-    )
-    setFields(updatedFields)
   }
 
   useEffect(() => {
@@ -55,7 +42,6 @@ const Form = ({ fields }: { fields: TagProps[] }) => {
   return (
     <div className="space-y-4">
       {formFields.map((field, index) => {
-        console.log({ show: field.apiResult })
         return (
           <Tag
             key={index}
