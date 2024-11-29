@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react"
 import { axiosInstance as api } from "@/services/axios/index"
 import { Button } from "@/components/ui/button"
-import { Pencil, PlusCircle, Trash } from "lucide-react"
+import { AlertCircle, Pencil, PlusCircle, Trash } from "lucide-react"
 import Form from "@/components/Generator/form"
 import { TagProps } from "@/components/Generator/tags"
+import Modal from "@/components/Generator/modal"
 
 interface FormData {
   name: string
@@ -16,11 +17,14 @@ const Foods: React.FC = () => {
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
 
+  const name = "Food"
+  const url = "/foods"
+
   // Configurazione dei campi per il modulo dinamico
   const formFields: TagProps[] = [
     {
-      title: "Foods Management",
-      url: "/foods",
+      title: name + " Management",
+      url: url,
       structures: [
         {
           type: "table",
@@ -31,9 +35,11 @@ const Foods: React.FC = () => {
               type: "button",
               label: "Actions",
               icon: <Pencil className="h-4 w-4" />,
+              variant: "outline",
+              size: "icon",
               handleEvent: (e: any) => {
                 const values: string[] = []
-                const id = e.currentTarget.id //take the id
+                const id = e.currentTarget.id.split("-")[2] //take the id
 
                 //take all the row element
                 const nodeListReference =
@@ -45,7 +51,7 @@ const Foods: React.FC = () => {
                 })
                 values.pop()
 
-                setEditingId(e.currentTarget.id) // Setta l'ID in modifica
+                setEditingId(id) // Setta l'ID in modifica
                 setForm({ name: values[0] }) // Imposta i dati dell'elemento da modificare
                 setModalVisible(true) // Mostra il dialog per l'editing
               },
@@ -54,10 +60,13 @@ const Foods: React.FC = () => {
               type: "button",
               label: "Actions",
               icon: <Trash className="h-4 w-4" />,
+              variant: "destructive",
+              size: "icon",
               handleEvent: async (e: any) => {
+                const id = e.currentTarget.id.split("-")[2]
                 try {
-                  // await api.delete(`/foods/${e.value}`)
-                  // console.log("Elemento eliminato:", e.value)
+                  // await api.delete(`/foods/${id}`)
+                  console.log("Elemento eliminato:", id)
                 } catch (error) {
                   console.error("Errore durante l'eliminazione:", error)
                 }
@@ -87,9 +96,9 @@ const Foods: React.FC = () => {
     e.preventDefault()
     try {
       if (editingId) {
-        await api.put(`/foods/${editingId}`, form) // Modifica l'elemento esistente
+        await api.put(`${url}/${editingId}`, form) // Modifica l'elemento esistente
       } else {
-        await api.post("/foods", form) // Crea un nuovo elemento
+        await api.post(url, form) // Crea un nuovo elemento
       }
       setModalVisible(false)
       setForm({ name: "" })
@@ -103,7 +112,7 @@ const Foods: React.FC = () => {
     <div className="w-full max-w-4xl mx-auto">
       {/* Bottone per aggiungere un nuovo alimento */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Foods Management</h1>
+        <h1 className="text-3xl font-bold">{name} Management</h1>
         <Button
           onClick={() => {
             setForm({ name: "" })
@@ -112,7 +121,7 @@ const Foods: React.FC = () => {
           }}
         >
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Food
+          Add {name}
         </Button>
       </div>
 
@@ -120,49 +129,14 @@ const Foods: React.FC = () => {
       <Form fields={formFields} />
 
       {/* Dialog per aggiungere/modificare un alimento */}
-      {modalVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-96">
-            <h2 className="text-xl font-bold mb-4 flex items-center justify-between">
-              {editingId ? "Edit Food" : "Add Food"}
-
-              <button
-                onClick={() => {
-                  setForm({ name: "" })
-                  setEditingId(null)
-                  setModalVisible(false)
-                }}
-                className="text-gray-500 hover:text-gray-800 focus:outline-none"
-                aria-label="Close"
-              >
-                &#x2715; {/* Unicode per "X" */}
-              </button>
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium">
-                  Name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                  className="block w-full border rounded-md px-3 py-2"
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button type="submit" className="w-full">
-                  {editingId ? "Update" : "Create"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Modal
+        isVisible={modalVisible}
+        title={editingId ? `Edit ${name}` : `Add ${name}`}
+        onClose={() => setModalVisible(false)}
+        onSubmit={handleSubmit}
+        form={form}
+        setForm={setForm}
+      />
     </div>
   )
 }

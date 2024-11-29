@@ -25,7 +25,7 @@ export function NavBar() {
   const menuItems = [
     { href: "/Food", label: "Food" },
     { href: "/Location", label: "Location" },
-    { href: "/CookBook", label: "Recipe Book" },
+    { href: "/CookBook", label: "Cook Book" },
     { href: "/Recipe", label: "Recipe" },
     { href: "/werehouse", label: "Warehouse" },
     { href: "/werehouseEntities", label: "Warehouse Entities" },
