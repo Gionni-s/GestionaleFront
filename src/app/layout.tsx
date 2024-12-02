@@ -20,14 +20,14 @@ export default function RootLayout({
   return (
     <html>
       <body>
-          <Provider store={store}>
-            <PersistGate loading={null} persistor={persistor}>
-              <div className={inter.className}>
-                <NavBar />
-                {children}
-              </div>
-            </PersistGate>
-          </Provider>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <div className={inter.className}>
+              <NavBar />
+              {children}
+            </div>
+          </PersistGate>
+        </Provider>
       </body>
     </html>
   )

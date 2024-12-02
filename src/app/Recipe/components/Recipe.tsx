@@ -46,6 +46,7 @@ interface CookBook {
 
 interface RecipeIngredient {
   foodId: string
+  name?: string
   quantity: number
 }
 
@@ -197,6 +198,13 @@ const Recipes: React.FC = () => {
             "N/A"}
         </TableCell>
         <TableCell>
+          {recipe.ingridients.map((val, index) => (
+            <p key={index}>
+              {val.name || "N/A"} : {val.quantity}
+            </p>
+          ))}
+        </TableCell>
+        <TableCell>
           <div className="flex space-x-2">
             <Button
               size="icon"
@@ -218,7 +226,7 @@ const Recipes: React.FC = () => {
             </Button>
             <Button
               size="icon"
-              variant="outline"
+              variant="destructive"
               onClick={() => handleDelete(recipe._id)}
             >
               <Trash className="h-4 w-4" />
@@ -328,7 +336,9 @@ const Recipes: React.FC = () => {
                 </Button>
               </div>
 
-              <Button type="submit">{editingId ? "Update" : "Create"}</Button>
+              <Button type="submit" className="w-full">
+                {editingId ? "Update" : "Create"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -340,6 +350,7 @@ const Recipes: React.FC = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>CookBook</TableHead>
+              <TableHead>Ingridients</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
