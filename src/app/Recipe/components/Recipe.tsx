@@ -46,6 +46,7 @@ interface CookBook {
 
 interface RecipeIngredient {
   foodId: string
+  name?: string
   quantity: number
 }
 
@@ -171,6 +172,7 @@ const Recipes: React.FC = () => {
     setEditingId(null)
   }
 
+
   const renderTableRows = () => {
     if (!Array.isArray(recipes)) {
       return (
@@ -195,6 +197,13 @@ const Recipes: React.FC = () => {
         <TableCell>
           {cookbookOptions.find((book) => book._id === recipe.bookId)?.name ||
             "N/A"}
+        </TableCell>
+        <TableCell>
+          {recipe.ingridients.map((val, index) => (
+            <p key={index}>
+              {val.name || "N/A"} : {val.quantity}
+            </p>
+          ))}
         </TableCell>
         <TableCell>
           <div className="flex space-x-2">
@@ -340,6 +349,7 @@ const Recipes: React.FC = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>CookBook</TableHead>
+              <TableHead>Ingridients</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>

@@ -80,7 +80,7 @@ const Foods: React.FC = () => {
           type: "input",
           label: "Name",
           dataType: "text",
-          placeholder: "Enter food name",
+          placeholder: `Enter ${name} name`,
           handleEvent: (e: any) => {
             console.log(e.value)
           },
@@ -95,12 +95,12 @@ const Foods: React.FC = () => {
   ): Promise<void> => {
     e.preventDefault()
     try {
+      setModalVisible(false)
       if (editingId) {
         await api.put(`${url}/${editingId}`, form) // Modifica l'elemento esistente
       } else {
         await api.post(url, form) // Crea un nuovo elemento
       }
-      setModalVisible(false)
       setForm({ name: "" })
       setEditingId(null)
     } catch (error) {
