@@ -1,187 +1,154 @@
 "use client"
+
 import React, { useState, useEffect } from "react"
 import { axiosInstance as api } from "@/services/axios/index"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { PlusCircle, Pencil, Trash } from "lucide-react"
-
-interface CookBook {
-  _id: string
-  name: string
-  fkProprietario: string
-}
-
-interface AlternativeCookBook {
-  message: string
-}
+import { AlertCircle, Pencil, PlusCircle, Trash } from "lucide-react"
+import Form from "@/components/Generator/form"
+import { TagProps } from "@/components/Generator/tags"
+import Modal from "@/components/Generator/modal"
 
 interface FormData {
   name: string
 }
 
 const CookBooks: React.FC = () => {
-  const [cookBooks, setCookBooks] = useState<CookBook[] | AlternativeCookBook>({
-    message: "",
-  })
   const [modalVisible, setModalVisible] = useState<boolean>(false)
   const [form, setForm] = useState<FormData>({ name: "" })
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchCookBooks()
-  }, [])
+  const name = "CookBook"
+  const url = "/cookBooks"
 
-  const fetchCookBooks = async (): Promise<void> => {
-    try {
-      const response = await api.get<CookBook[]>("/cookBooks")
-      setCookBooks(response.data)
-    } catch (error) {
-      console.error("Failed to fetch cookBooks:", error)
-      setCookBooks({ message: "Failed to load cookbooks" })
-    }
-  }
+  // Configurazione dei campi per il modulo dinamico
+  const formFields: TagProps[] = [
+    {
+      title: name + " Management",
+      url: url,
+      structures: [
+        {
+          type: "table",
+          collaps: "label", // Colonna su cui effettuare il raggruppamento
+          useApiResult: true,
+          default: [
+            {
+              type: "button",
+              label: "Actions",
+              icon: <Pencil className="h-4 w-4" />,
+              variant: "outline",
+              size: "icon",
+              handleEvent: (e: any) => {
+                const values: string[] = []
+                const id = e.currentTarget.id.split("-")[2] //take the id
 
+                //take all the row element
+                const nodeListReference =
+                  e.currentTarget.parentElement.parentElement.parentElement
+                    .childNodes
+
+                nodeListReference.forEach(function (currentValue: any) {
+                  values.push(currentValue.innerHTML)
+                })
+                values.pop()
+
+                setEditingId(id) // Setta l'ID in modifica
+                setForm({ name: values[0] }) // Imposta i dati dell'elemento da modificare
+                setModalVisible(true) // Mostra il dialog per l'editing
+              },
+            },
+            {
+              type: "button",
+              label: "Actions",
+              icon: <Trash className="h-4 w-4" />,
+              variant: "destructive",
+              size: "icon",
+              handleEvent: async (e: any) => {
+                const id = e.currentTarget.id.split("-")[2]
+                try {
+                  await api.delete(`${url}/${id}`)
+                } catch (error) {
+                  console.error("Errore durante l'eliminazione:", error)
+                }
+              },
+            },
+          ],
+        },
+        {
+          type: "dialog",
+          collaps: "label", // Colonna su cui effettuare il raggruppamento
+          default: [
+            {
+              type: "input",
+              dataType: "text",
+              label: "Name",
+              class: "block w-full border rounded-md px-3 py-2",
+            },
+          ],
+        },
+      ],
+      tagsInfo: [
+        {
+          type: "input",
+          label: "Name",
+          dataType: "text",
+          placeholder: `Enter ${name} name`,
+          handleEvent: (e: any) => {
+            console.log(e.value)
+          },
+        },
+      ],
+    },
+  ]
+
+  // Funzione per salvare/modificare un alimento
   const handleSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault()
     try {
-      if (editingId) {
-        await api.put(`/cookBooks/${editingId}`, form)
-      } else {
-        await api.post("/cookBooks", form)
-      }
       setModalVisible(false)
+      if (editingId) {
+        await api.put(`${url}/${editingId}`, form) // Modifica l'elemento esistente
+      } else {
+        await api.post(url, form) // Crea un nuovo elemento
+      }
       setForm({ name: "" })
       setEditingId(null)
-      fetchCookBooks()
     } catch (error) {
-      console.error("Failed to save cookBook:", error)
+      console.error("Errore durante il salvataggio:", error)
     }
-  }
-
-  const handleDelete = async (id: string): Promise<void> => {
-    try {
-      await api.delete(`/cookBooks/${id}`)
-      fetchCookBooks()
-    } catch (error) {
-      console.error("Failed to delete cookBook:", error)
-    }
-  }
-
-  const renderTableRows = () => {
-    if (!Array.isArray(cookBooks)) {
-      return (
-        <TableRow>
-          <TableCell colSpan={2} className="text-center">
-            No cookbooks found
-          </TableCell>
-        </TableRow>
-      )
-    }
-
-    if (cookBooks.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={2}>Loading...</TableCell>
-        </TableRow>
-      )
-    }
-
-    return cookBooks.map((cookBook) => (
-      <TableRow key={cookBook._id}>
-        <TableCell>{cookBook.name}</TableCell>
-        <TableCell>
-          <div className="flex space-x-2">
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => {
-                setForm({ name: cookBook.name })
-                setEditingId(cookBook._id)
-                setModalVisible(true)
-              }}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => handleDelete(cookBook._id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        </TableCell>
-      </TableRow>
-    ))
   }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
+      {/* Bottone per aggiungere un nuovo alimento */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">CookBook Management</h1>
-        <Dialog open={modalVisible} onOpenChange={setModalVisible}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setForm({ name: "" })
-                setEditingId(null)
-              }}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add CookBook
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingId ? "Edit CookBook" : "Add CookBook"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
-              </div>
-              <Button type="submit">{editingId ? "Update" : "Create"}</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <h1 className="text-3xl font-bold">{name} Management</h1>
+        <Button
+          onClick={() => {
+            setForm({ name: "" })
+            setEditingId(null)
+            setModalVisible(true)
+          }}
+        >
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add {name}
+        </Button>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>{renderTableRows()}</TableBody>
-        </Table>
-      </div>
+      {/* Modulo dinamico */}
+      <Form fields={formFields} />
+
+      {/* Dialog per aggiungere/modificare un alimento */}
+      <Modal
+        formField={formFields}
+        isVisible={modalVisible}
+        title={editingId ? `Edit ${name}` : `Add ${name}`}
+        onClose={() => setModalVisible(false)}
+        onSubmit={handleSubmit}
+        form={form}
+        setForm={setForm}
+      />
     </div>
   )
 }
