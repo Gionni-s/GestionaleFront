@@ -257,7 +257,7 @@ const WerehouseEntities: React.FC = () => {
             </Button>
             <Button
               size="icon"
-              variant="outline"
+              variant="destructive"
               onClick={() => handleDelete(entity._id)}
             >
               <Trash className="h-4 w-4" />
@@ -387,7 +387,9 @@ const WerehouseEntities: React.FC = () => {
                   required
                 />
               </div>
-              <Button type="submit">{editingId ? "Update" : "Create"}</Button>
+              <Button type="submit" className="w-full">
+                {editingId ? "Update" : "Create"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>

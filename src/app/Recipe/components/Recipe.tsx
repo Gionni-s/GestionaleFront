@@ -172,7 +172,6 @@ const Recipes: React.FC = () => {
     setEditingId(null)
   }
 
-
   const renderTableRows = () => {
     if (!Array.isArray(recipes)) {
       return (
@@ -227,7 +226,7 @@ const Recipes: React.FC = () => {
             </Button>
             <Button
               size="icon"
-              variant="outline"
+              variant="destructive"
               onClick={() => handleDelete(recipe._id)}
             >
               <Trash className="h-4 w-4" />
@@ -337,7 +336,9 @@ const Recipes: React.FC = () => {
                 </Button>
               </div>
 
-              <Button type="submit">{editingId ? "Update" : "Create"}</Button>
+              <Button type="submit" className="w-full">
+                {editingId ? "Update" : "Create"}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>

@@ -65,12 +65,23 @@ const CookBooks: React.FC = () => {
               handleEvent: async (e: any) => {
                 const id = e.currentTarget.id.split("-")[2]
                 try {
-                  // await api.delete(`/foods/${id}`)
-                  console.log("Elemento eliminato:", id)
+                  await api.delete(`${url}/${id}`)
                 } catch (error) {
                   console.error("Errore durante l'eliminazione:", error)
                 }
               },
+            },
+          ],
+        },
+        {
+          type: "dialog",
+          collaps: "label", // Colonna su cui effettuare il raggruppamento
+          default: [
+            {
+              type: "input",
+              dataType: "text",
+              label: "Name",
+              class: "block w-full border rounded-md px-3 py-2",
             },
           ],
         },
@@ -130,6 +141,7 @@ const CookBooks: React.FC = () => {
 
       {/* Dialog per aggiungere/modificare un alimento */}
       <Modal
+        formField={formFields}
         isVisible={modalVisible}
         title={editingId ? `Edit ${name}` : `Add ${name}`}
         onClose={() => setModalVisible(false)}

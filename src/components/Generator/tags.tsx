@@ -11,9 +11,10 @@ import {
 import { Button } from "../ui/button"
 import { removeDuplicate } from "./utils"
 
-interface TagInfoType {
+export interface TagInfoType {
   type: string
-  label: string | boolean | string[]
+  label: string
+  key?: string
   dataType?: string
   class?: string
   placeholder?: string
@@ -42,8 +43,8 @@ interface StructureType {
 export interface TagProps {
   title?: string
   url?: string
-  apiResult?: any[]
-  structures?: StructureType[]
+  apiResult?: any[] | { message: string }
+  structures: StructureType[]
   tagsInfo: TagInfoType[]
 }
 
@@ -90,7 +91,7 @@ const createTag = (tag: TagInfoType, index: number | string) => {
           onClick={tag.handleEvent}
           className={tag.class || ""}
         >
-          {tag.icon || tag.label || "Click"}
+          {tag.icon || tag.value || tag.label}
         </Button>
       )
 
@@ -159,15 +160,36 @@ const Tag: React.FC<TagProps> = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {structure.collaps
-                    ? structure.useApiResult
-                      ? apiResult.map((item, rowIndex) => (
+                  {structure.collaps ? (
+                    structure.useApiResult ? (
+                      Array.isArray(apiResult) ? (
+                        apiResult.map((item, rowIndex) => (
                           <TableRow key={rowIndex}>
                             {Object.keys(groupedTags).map((key) => {
                               const lowerKey = key.toLowerCase()
                               return item[lowerKey] ? (
                                 <TableCell key={rowIndex + lowerKey}>
-                                  {item[lowerKey]}
+                                  {typeof item[lowerKey] === "string"
+                                    ? item[lowerKey]
+                                    : Array.isArray(item[lowerKey])
+                                    ? item[lowerKey].map((element, index) => {
+                                        return (
+                                          <p key={index}>
+                                            {groupedTags[key][0].key
+                                              ?.split("-")
+                                              .map(
+                                                (val: any, index: number) => {
+                                                  return element[val]
+                                                }
+                                              )
+                                              .join(" : ")}
+                                          </p>
+                                        )
+                                      })
+                                    : groupedTags[key][0].key
+                                    ? item[lowerKey][groupedTags[key][0].key]
+                                    : "specificare il campo che si vuole visualizzare"}
+                                  {/* {item[lowerKey]} */}
                                 </TableCell>
                               ) : structLabels.includes(lowerKey) ? (
                                 <TableCell key={rowIndex}>
@@ -186,32 +208,51 @@ const Tag: React.FC<TagProps> = ({
                             })}
                           </TableRow>
                         ))
-                      : Object.keys(groupedTags).map((label, index) => (
-                          <TableRow key={label}>
-                            <TableCell>
-                              {groupedTags[label].map((tag, idx) =>
-                                createTag(tag, idx)
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                    : structure.useApiResult
-                    ? apiResult.map((item, index) => (
+                      ) : (
+                        <TableRow>
+                          <TableCell>
+                            {apiResult.message || "No element Found"}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    ) : (
+                      Object.keys(groupedTags).map((label, index) => (
+                        <TableRow key={label}>
+                          <TableCell>
+                            {groupedTags[label].map((tag, idx) =>
+                              createTag(tag, idx)
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )
+                  ) : structure.useApiResult ? (
+                    Array.isArray(apiResult) ? (
+                      apiResult.map((item, index) => (
                         <TableRow key={index}>
                           {Object.keys(item).map((key, tagIndex) => (
                             <TableCell key={tagIndex}>{item[key]}</TableCell>
                           ))}
                         </TableRow>
                       ))
-                    : [
-                        <TableRow key="default">
-                          {tagInsert.map((tag, index) => (
-                            <TableCell key={index}>
-                              {createTag(tag, index)}
-                            </TableCell>
-                          ))}
-                        </TableRow>,
-                      ]}
+                    ) : (
+                      <TableRow>
+                        <TableCell>
+                          {apiResult.message || "No element Found"}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  ) : (
+                    [
+                      <TableRow key="default">
+                        {tagInsert.map((tag, index) => (
+                          <TableCell key={index}>
+                            {createTag(tag, index)}
+                          </TableCell>
+                        ))}
+                      </TableRow>,
+                    ]
+                  )}
                 </TableBody>
               </Table>
             </div>

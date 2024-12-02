@@ -1,55 +1,139 @@
+import React, { memo, useMemo, useCallback } from "react"
 import { Button } from "../ui/button"
+import { Input } from "../ui/input"
+import { Label } from "../ui/label"
+import { TagInfoType, TagProps } from "./tags"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select"
 
-interface FormData {
-  name: string
-}
+// Comprehensive type definitions
 
-const Modal: React.FC<{
+interface ModalProps {
+  formField: TagProps[]
   isVisible: boolean
   title: string
   onClose: () => void
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>
-  form: FormData
-  setForm: React.Dispatch<React.SetStateAction<FormData>>
-}> = ({ isVisible, title, onClose, onSubmit, form, setForm }) => {
-  if (!isVisible) return null
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-xl font-bold mb-4 flex items-center justify-between">
-          {title}
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-800 focus:outline-none"
-            aria-label="Close"
-          >
-            &#x2715;
-          </button>
-        </h2>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium">
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-              className="block w-full border rounded-md px-3 py-2"
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button type="submit" className="w-full">
-              {title.includes("Edit") ? "Update" : "Create"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
+  form: Record<string, any>
+  setForm: React.Dispatch<React.SetStateAction<any>>
 }
+
+const Modal: React.FC<ModalProps> = memo(
+  ({ isVisible, formField, title, onClose, onSubmit, form, setForm }) => {
+    // Early return if not visible
+    if (!isVisible) return null
+
+    // Memoized tag creation function
+    const createTag = (tag: TagInfoType, index: number | string) => {
+      const supportedTypes = ["text", "number", "date", "email"]
+
+      try {
+        switch (tag.type?.toLowerCase()) {
+          case "input":
+            const dataType = tag.dataType?.toLowerCase() || "text"
+
+            if (supportedTypes.includes(dataType)) {
+              return (
+                <Input
+                  key={`input-${index}`}
+                  id={`input-${index}`}
+                  type={dataType as React.HTMLInputTypeAttribute}
+                  placeholder={tag.placeholder || ""}
+                  value={form[tag.label.toLowerCase()] || ""}
+                  onChange={(e) =>
+                    setForm((prev: any) => ({
+                      ...prev,
+                      [tag.label.toLowerCase()]: e.target.value,
+                    }))
+                  }
+                  className={tag.class || "w-full"}
+                  required
+                />
+              )
+            }
+            console.warn(`Unsupported input dataType: ${dataType}`)
+            return null
+
+          case "button":
+            return (
+              <Button
+                key={`button-${index}`}
+                type="button"
+                size={tag.size || "default"}
+                variant={tag.variant || "default"}
+                onClick={tag.handleEvent}
+                className={tag.class || ""}
+              >
+                {tag.icon || tag.value || tag.label}
+              </Button>
+            )
+
+          default:
+            console.warn(`Unsupported tag type: ${tag.type}`)
+            return null
+        }
+      } catch (error) {
+        console.error("Error creating tag:", error)
+        return null
+      }
+    }
+
+    // Memoized dialog fields generation
+    const dialogFields = () => {
+      try {
+        return formField.flatMap((formItem) =>
+          formItem.structures
+            .filter((structure) => structure.type === "dialog")
+            .flatMap(
+              (structure) =>
+                structure.default?.map((field, index) => (
+                  <div key={`dialog-field-${index}`} className="mb-4">
+                    {field.label && (
+                      <Label htmlFor={`input-${index}`} className="block mb-2">
+                        {field.label}
+                      </Label>
+                    )}
+                    {createTag(field, index)}
+                  </div>
+                )) || []
+            )
+        )
+      } catch (error) {
+        console.error("Error generating dialog fields:", error)
+        return []
+      }
+    }
+
+    return (
+      <Dialog open={isVisible} onOpenChange={onClose}>
+        <DialogContent aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={onSubmit} className="space-y-4">
+            {dialogFields()}
+            <div className="flex justify-end mt-4">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={Object.keys(form).length === 0}
+              >
+                {title.includes("Edit") ? "Update" : "Create"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+)
+
+Modal.displayName = "Modal"
 
 export default Modal
