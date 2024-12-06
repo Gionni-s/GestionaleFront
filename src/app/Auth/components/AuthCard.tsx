@@ -29,7 +29,7 @@ export function AuthCard() {
     try {
       const token = `${email}:${password}`
       const encodedToken = Buffer.from(token).toString("base64")
-      const response = await axiosInstance.get("/users", {
+      const response = await axiosInstance.get("/users/login", {
         headers: { Authorization: `Basic ${encodedToken}` },
       })
       store.dispatch(loginSuccess(response.data))

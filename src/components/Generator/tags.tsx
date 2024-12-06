@@ -14,6 +14,7 @@ import { removeDuplicate } from "./utils"
 export interface TagInfoType {
   type: string
   label: string
+  url?: string
   key?: string
   dataType?: string
   class?: string

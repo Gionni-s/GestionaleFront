@@ -15,13 +15,15 @@ interface UserProfile {
   phoneNumber: number
   dateCreation: Date
   lastLogin: Date
+  role: string // User role (e.g., "user" or "admin")
   profileImage?: string
 }
 
 export function NavBar() {
   const { token } = useSelector((state: any) => state.auth)
-  const [userProfile, setUserProfile] = useState<UserProfile>()
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
 
+  // Menu items with role-based access control
   const menuItems = [
     { href: "/Food", label: "Food" },
     { href: "/Location", label: "Location" },
@@ -29,39 +31,54 @@ export function NavBar() {
     { href: "/Recipe", label: "Recipe" },
     { href: "/werehouse", label: "Warehouse" },
     { href: "/werehouseEntities", label: "Warehouse Entities" },
+    { href: "/Dashbord", label: "Dashboard", roleRequired: "admin" }, // Only admins should see this
   ]
 
   useEffect(() => {
-    fetchUserProfile()
-  }, [])
+    if (token) {
+      fetchUserProfile()
+    }
+  }, [token])
 
   const fetchUserProfile = async () => {
     try {
-      if (token) {
-        const response = (await api.get<UserProfile>("/users/me")).data
-        setUserProfile(response)
-      }
+      const response = await api.get<UserProfile>("/users/me")
+      setUserProfile(response.data)
     } catch (error) {
       console.error("Failed to fetch user profile:", error)
     }
+  }
+
+  // Check if the user has the necessary role for the menu item
+  const hasPermission = (roleRequired: string | undefined): boolean => {
+    if (!roleRequired) return true // If no specific role required, allow access
+    if (userProfile?.role === "admin") return true // Admin has access to everything
+    if (userProfile?.role === "user" && roleRequired === "user") return true // User can access user-level items
+    return false // If role does not match, deny access
   }
 
   return (
     <Menubar className="flex justify-between items-center p-2 bg-gray-100">
       {token && (
         <div className="flex items-center">
-          {menuItems.map((item) => (
-            <MenubarMenu key={item.href}>
-              <MenubarTrigger>
-                <Link
-                  href={item.href}
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  {item.label}
-                </Link>
-              </MenubarTrigger>
-            </MenubarMenu>
-          ))}
+          {menuItems.map((item) => {
+            // Check role-based access
+            if (hasPermission(item.roleRequired)) {
+              return (
+                <MenubarMenu key={item.href}>
+                  <MenubarTrigger>
+                    <Link
+                      href={item.href}
+                      className="hover:text-blue-600 transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+              )
+            }
+            return null // If user doesn't have permission, return null (hide the menu item)
+          })}
         </div>
       )}
 

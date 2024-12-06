@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback } from "react"
+import React, { memo, useMemo, useCallback, useState, useEffect } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
@@ -11,8 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select"
-
-// Comprehensive type definitions
+import { axiosInstance as api } from "@/services/axios/index"
 
 interface ModalProps {
   formField: TagProps[]
@@ -24,9 +23,54 @@ interface ModalProps {
   setForm: React.Dispatch<React.SetStateAction<any>>
 }
 
+const groupByLabel = (tags: TagInfoType[]) =>
+  tags.reduce((acc, tag) => {
+    const label = typeof tag.label === "string" ? tag.label : "default"
+    if (!acc[label]) acc[label] = []
+    acc[label].push(tag)
+    return acc
+  }, {} as Record<string, TagInfoType[]>)
+
 const Modal: React.FC<ModalProps> = memo(
   ({ isVisible, formField, title, onClose, onSubmit, form, setForm }) => {
-    // Early return if not visible
+    const [apiResult, setApiResult] = useState<any[]>([])
+
+    const fetchResult = async () => {
+      try {
+        // Estrarre le URL dai formField
+        const urls = formField.flatMap(({ structures }) =>
+          structures
+            .filter((structure) => structure.type === "dialog")
+            .flatMap(
+              ({ default: fields }) =>
+                fields?.filter((field) => field.url).map(({ url }) => url) || []
+            )
+        )
+
+        // Eseguire tutte le richieste in parallelo
+        const responses = await Promise.all(
+          urls.map(async (url: any) => {
+            try {
+              const response = await api.get(url)
+              return { [url]: response.data }
+            } catch (error) {
+              console.error(`Error fetching data from ${url}:`, error)
+              return { [url]: null } // In caso di errore, restituire un valore nullo per questa URL
+            }
+          })
+        )
+
+        // Aggiornare lo stato con i risultati
+        setApiResult(responses)
+      } catch (error) {
+        console.error("Error in fetchResult:", error)
+      }
+    }
+
+    useEffect(() => {
+      fetchResult()
+    }, [])
+
     if (!isVisible) return null
 
     // Memoized tag creation function
@@ -60,6 +104,43 @@ const Modal: React.FC<ModalProps> = memo(
             console.warn(`Unsupported input dataType: ${dataType}`)
             return null
 
+          case "select":
+            const requestKey =
+              tag.key?.indexOf(".") == -1
+                ? form[tag.key.split(".")[0]][tag.key.split(".")[1]]
+                : form[tag.key || tag.label]
+            return (
+              <select
+                id="cookbook"
+                value={requestKey}
+                onChange={tag.handleEvent}
+                className="border p-2 rounded w-full"
+                required
+              >
+                <option value={tag.placeholder}>{tag.placeholder}</option>
+                {apiResult
+                  .filter((val) => {
+                    const key = Object.keys(val)
+                    if (key[0] == tag.url) return val[key[0]]
+                  })
+                  .map((val) => {
+                    // console.log(val)
+                    const key = Object.keys(val)
+                    return val[key[0]]
+                  })
+                  .map((val, index) => {
+                    // console.log({ val, index })
+                    return val.map((element: any, secondIndex: number) => {
+                      // console.log(element)
+                      return (
+                        <option value={element._id} key={index + secondIndex}>
+                          {element.name}
+                        </option>
+                      )
+                    })
+                  })}
+              </select>
+            )
           case "button":
             return (
               <Button
