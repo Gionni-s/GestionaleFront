@@ -27,7 +27,7 @@ interface Recipe {
   name: string
   userId: string
   ingridients: RecipeIngredient[]
-  bookId: string
+  book: { _id: string; name: string }
 }
 
 interface AlternativeRecipe {
@@ -193,10 +193,7 @@ const Recipes: React.FC = () => {
     return recipes.map((recipe) => (
       <TableRow key={recipe._id}>
         <TableCell>{recipe.name}</TableCell>
-        <TableCell>
-          {cookbookOptions.find((book) => book._id === recipe.bookId)?.name ||
-            "N/A"}
-        </TableCell>
+        <TableCell>{recipe.book?.name || "N/A"}</TableCell>
         <TableCell>
           {recipe.ingridients.map((val, index) => (
             <p key={index}>
@@ -212,7 +209,7 @@ const Recipes: React.FC = () => {
               onClick={() => {
                 setForm({
                   name: recipe.name,
-                  bookId: recipe.bookId,
+                  bookId: recipe.book._id,
                   ingridients: recipe.ingridients.map((ingredient) => ({
                     foodId: ingredient.foodId,
                     quantity: ingredient.quantity,
