@@ -230,7 +230,6 @@ const WerehouseEntities: React.FC = () => {
       )
     }
 
-    // TODO: non funziona bene la visualizzazione dell'alimento scaduto
     return werehouseEntities.map((entity) => (
       <TableRow key={entity._id}>
         <TableCell>{entity.foodId?.name || "N/A"}</TableCell>
@@ -238,7 +237,7 @@ const WerehouseEntities: React.FC = () => {
         <TableCell>{entity.locationId?.name || "N/A"}</TableCell>
         <TableCell>{entity.warehouseId?.name || "N/A"}</TableCell>
         <TableCell className={getExpirationColor(entity.scadenza)}>
-          {(new Date(entity.scadenza) - new Date()) < 0
+          {new Date(entity.scadenza) < new Date()
             ? `Scaduto (${new Date(entity.scadenza).toLocaleDateString()})`
             : new Date(entity.scadenza).toLocaleDateString()}
         </TableCell>
