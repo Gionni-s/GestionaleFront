@@ -33,22 +33,19 @@ interface WerehouseEntitie {
   _id: string
   quantita: number
   scadenza: string
-  foodId: string
-  locationId: string
-  warehouseId: string
+  foodId: {
+    _id: string
+    name: string
+  }
+  locationId: {
+    _id: string
+    name: string
+  }
+  warehouseId: {
+    _id: string
+    name: string
+  }
   userId: string
-  food: {
-    _id: string
-    name: string
-  }
-  location: {
-    _id: string
-    name: string
-  }
-  warehouse: {
-    _id: string
-    name: string
-  }
 }
 
 interface AlthernativeWarehouse {
@@ -151,9 +148,7 @@ const WerehouseEntities: React.FC = () => {
   ): Promise<void> => {
     e.preventDefault()
 
-    // TODO: Replace with actual user authentication
-    const mockUserId = "current-user-id"
-    const submissionForm = { ...form, userId: mockUserId }
+    const submissionForm = { ...form }
 
     try {
       if (editingId) {
@@ -194,9 +189,9 @@ const WerehouseEntities: React.FC = () => {
 
   const handleEdit = (werehouseEntitie: WerehouseEntitie) => {
     setForm({
-      foodId: werehouseEntitie.foodId,
-      locationId: werehouseEntitie.locationId,
-      warehouseId: werehouseEntitie.warehouseId,
+      foodId: werehouseEntitie.foodId._id,
+      locationId: werehouseEntitie.locationId._id,
+      warehouseId: werehouseEntitie.warehouseId._id,
       userId: werehouseEntitie.userId,
       quantita: werehouseEntitie.quantita,
       scadenza: werehouseEntitie.scadenza.split("T")[0],
@@ -235,14 +230,15 @@ const WerehouseEntities: React.FC = () => {
       )
     }
 
+    // TODO: non funziona bene la visualizzazione dell'alimento scaduto
     return werehouseEntities.map((entity) => (
       <TableRow key={entity._id}>
-        <TableCell>{entity.food?.name || "N/A"}</TableCell>
+        <TableCell>{entity.foodId?.name || "N/A"}</TableCell>
         <TableCell>{entity.quantita}</TableCell>
-        <TableCell>{entity.location?.name || "N/A"}</TableCell>
-        <TableCell>{entity.warehouse?.name || "N/A"}</TableCell>
+        <TableCell>{entity.locationId?.name || "N/A"}</TableCell>
+        <TableCell>{entity.warehouseId?.name || "N/A"}</TableCell>
         <TableCell className={getExpirationColor(entity.scadenza)}>
-          {new Date(entity.scadenza).getDate() <= new Date().getDate()
+          {(new Date(entity.scadenza) - new Date()) < 0
             ? `Scaduto (${new Date(entity.scadenza).toLocaleDateString()})`
             : new Date(entity.scadenza).toLocaleDateString()}
         </TableCell>
