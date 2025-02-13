@@ -1,8 +1,9 @@
-"use client"
-import React, { useState, useEffect } from "react"
-import { axiosInstance as api } from "@/services/axios/index"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+'use client';
+import React, { useState, useEffect } from 'react';
+import Select from '@/components/Select';
+import { axiosInstance as api } from '@/services/axios/index';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -10,170 +11,170 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { PlusCircle, Pencil, Trash } from "lucide-react"
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { PlusCircle, Pencil, Trash } from 'lucide-react';
 
 // Interfaces for data types
 interface Recipe {
-  _id: string
-  name: string
-  userId: string
-  ingridients: RecipeIngredient[]
-  cookbookId: { _id: string; name: string }
+  _id: string;
+  name: string;
+  userId: string;
+  ingridients: RecipeIngredient[];
+  cookbookId: { _id: string; name: string };
 }
 
 interface AlternativeRecipe {
-  message: string
+  message: string;
 }
 
 interface Ingredient {
-  _id: string
-  name: string
+  _id: string;
+  name: string;
 }
 
 interface CookBook {
-  _id: string
-  name: string
+  _id: string;
+  name: string;
 }
 
 interface RecipeIngredient {
-  foodId: { _id: string; name: string }
-  name?: string
-  quantity: number
+  foodId: { _id: string; name: string };
+  name?: string;
+  quantity: number;
 }
 
 interface FormData {
-  name: string
-  cookbookId: string
-  ingridients: RecipeIngredient[]
+  name: string;
+  cookbookId: string;
+  ingridients: RecipeIngredient[];
 }
 
 const Recipes: React.FC = () => {
   const [recipes, setRecipes] = useState<Recipe[] | AlternativeRecipe>({
-    message: "",
-  })
-  const [modalVisible, setModalVisible] = useState<boolean>(false)
+    message: '',
+  });
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [form, setForm] = useState<FormData>({
-    name: "",
-    cookbookId: "",
+    name: '',
+    cookbookId: '',
     ingridients: [
-      { foodId: { _id: "", name: "" }, quantity: 1 },
-      { foodId: { _id: "", name: "" }, quantity: 1 },
+      { foodId: { _id: '', name: '' }, quantity: 1 },
+      { foodId: { _id: '', name: '' }, quantity: 1 },
     ],
-  })
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [ingredientOptions, setIngredientOptions] = useState<Ingredient[]>([])
-  const [cookbookOptions, setCookbookOptions] = useState<CookBook[]>([])
+  });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [ingredientOptions, setIngredientOptions] = useState<Ingredient[]>([]);
+  const [cookbookOptions, setCookbookOptions] = useState<CookBook[]>([]);
 
   // Effect for loading recipes, ingredients, and cookbooks
   useEffect(() => {
-    fetchRecipes()
-    fetchIngredients()
-    fetchCookBooks()
-  }, [])
+    fetchRecipes();
+    fetchIngredients();
+    fetchCookBooks();
+  }, []);
 
   const fetchRecipes = async () => {
     try {
-      const response = await api.get<Recipe[]>("/recipes")
-      setRecipes(response.data)
+      const response = await api.get<Recipe[]>('/recipes');
+      setRecipes(response.data);
     } catch (error) {
-      console.error("Failed to fetch recipes:", error)
-      setRecipes({ message: "Failed to load recipes" })
+      console.error('Failed to fetch recipes:', error);
+      setRecipes({ message: 'Failed to load recipes' });
     }
-  }
+  };
 
   const fetchIngredients = async () => {
     try {
-      const response = await api.get<Ingredient[]>("/foods")
-      setIngredientOptions(response.data)
+      const response = await api.get<Ingredient[]>('/foods');
+      setIngredientOptions(response.data);
     } catch (error) {
-      console.error("Failed to fetch ingredients:", error)
+      console.error('Failed to fetch ingredients:', error);
     }
-  }
+  };
 
   const fetchCookBooks = async () => {
     try {
-      const response = await api.get<CookBook[]>("/cookBooks")
-      setCookbookOptions(response.data)
+      const response = await api.get<CookBook[]>('/cookBooks');
+      setCookbookOptions(response.data);
     } catch (error) {
-      console.error("Failed to fetch cookbooks:", error)
+      console.error('Failed to fetch cookbooks:', error);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (editingId) {
-        await api.put(`/recipes/${editingId}`, form)
+        await api.put(`/recipes/${editingId}`, form);
       } else {
-        await api.post("/recipes", form)
+        await api.post('/recipes', form);
       }
-      setModalVisible(false)
-      resetForm()
-      fetchRecipes()
+      setModalVisible(false);
+      resetForm();
+      fetchRecipes();
     } catch (error) {
-      console.error("Failed to save recipe:", error)
+      console.error('Failed to save recipe:', error);
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/recipes/${id}`)
-      fetchRecipes()
+      await api.delete(`/recipes/${id}`);
+      fetchRecipes();
     } catch (error) {
-      console.error("Failed to delete recipe:", error)
+      console.error('Failed to delete recipe:', error);
     }
-  }
+  };
 
   const addIngredientField = () => {
     setForm({
       ...form,
       ingridients: [
         ...form.ingridients,
-        { foodId: { _id: "", name: "" }, quantity: 1 },
+        { foodId: { _id: '', name: '' }, quantity: 1 },
       ],
-    })
-  }
+    });
+  };
 
   const removeIngredientField = (index: number) => {
-    const updatedIngredients = form.ingridients.filter((_, i) => i !== index)
-    setForm({ ...form, ingridients: updatedIngredients })
-  }
+    const updatedIngredients = form.ingridients.filter((_, i) => i !== index);
+    setForm({ ...form, ingridients: updatedIngredients });
+  };
 
   const handleFieldChange = (
     field: string,
     value: string | number,
     index?: number
   ) => {
-    if (field === "name" || field === "bookId") {
-      setForm({ ...form, [field]: value })
+    if (field === 'name' || field === 'bookId') {
+      setForm({ ...form, [field]: value });
     } else if (index !== undefined) {
       const updatedIngredients = form.ingridients.map((ingredient, i) =>
         i === index ? { ...ingredient, [field]: value } : ingredient
-      )
-      setForm({ ...form, ingridients: updatedIngredients })
+      );
+      setForm({ ...form, ingridients: updatedIngredients });
     }
-  }
+  };
 
   const resetForm = () => {
     setForm({
-      name: "",
-      cookbookId: "",
+      name: '',
+      cookbookId: '',
       ingridients: [
-        { foodId: { _id: "", name: "" }, quantity: 1 },
-        { foodId: { _id: "", name: "" }, quantity: 1 },
+        { foodId: { _id: '', name: '' }, quantity: 1 },
+        { foodId: { _id: '', name: '' }, quantity: 1 },
       ],
-    })
-    setEditingId(null)
-  }
+    });
+    setEditingId(null);
+  };
 
   const renderTableRows = () => {
     if (!Array.isArray(recipes)) {
@@ -183,7 +184,7 @@ const Recipes: React.FC = () => {
             No element found
           </TableCell>
         </TableRow>
-      )
+      );
     }
 
     if (recipes.length === 0) {
@@ -191,16 +192,16 @@ const Recipes: React.FC = () => {
         <TableRow>
           <TableCell colSpan={3}>Loading...</TableCell>
         </TableRow>
-      )
+      );
     }
     return recipes.map((recipe) => (
       <TableRow key={recipe._id}>
         <TableCell>{recipe.name}</TableCell>
-        <TableCell>{recipe.cookbookId?.name || "N/A"}</TableCell>
+        <TableCell>{recipe.cookbookId?.name || 'N/A'}</TableCell>
         <TableCell>
           {recipe.ingridients.map((val, index) => (
             <p key={index}>
-              {val.foodId?.name || "N/A"} : {val.quantity}
+              {val.foodId?.name || 'N/A'} : {val.quantity}
             </p>
           ))}
         </TableCell>
@@ -217,9 +218,9 @@ const Recipes: React.FC = () => {
                     foodId: ingredient.foodId,
                     quantity: ingredient.quantity,
                   })),
-                })
-                setEditingId(recipe._id)
-                setModalVisible(true)
+                });
+                setEditingId(recipe._id);
+                setModalVisible(true);
               }}
             >
               <Pencil className="h-4 w-4" />
@@ -234,8 +235,8 @@ const Recipes: React.FC = () => {
           </div>
         </TableCell>
       </TableRow>
-    ))
-  }
+    ));
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -251,7 +252,7 @@ const Recipes: React.FC = () => {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingId ? "Edit Recipe" : "Add Recipe"}
+                {editingId ? 'Edit Recipe' : 'Add Recipe'}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -260,28 +261,19 @@ const Recipes: React.FC = () => {
                 <Input
                   id="name"
                   value={form.name}
-                  onChange={(e) => handleFieldChange("name", e.target.value)}
+                  onChange={(e) => handleFieldChange('name', e.target.value)}
                   required
                 />
               </div>
               <div>
                 <Label htmlFor="cookbook">CookBook</Label>
-                <select
-                  id="cookbook"
-                  value={form.cookbookId}
-                  onChange={(e) => handleFieldChange("bookId", e.target.value)}
-                  className="border p-2 rounded w-full"
-                  required
-                >
-                  <option value="">Select Cookbook</option>
-                  {(Array.isArray(cookbookOptions) &&
-                    cookbookOptions.map((book) => (
-                      <option key={book._id} value={book._id}>
-                        {book.name}
-                      </option>
-                    ))) ||
-                    "N/A"}
-                </select>
+                <Select
+                  label="Seleziona un Libro di ricette"
+                  body={cookbookOptions}
+                  form={form}
+                  setForm={setForm}
+                  fieldToMap="cookbookId"
+                />
               </div>
 
               {/* Ingredients */}
@@ -292,7 +284,7 @@ const Recipes: React.FC = () => {
                     <select
                       value={ingredient.foodId._id}
                       onChange={(e) =>
-                        handleFieldChange("foodId", e.target.value, index)
+                        handleFieldChange('foodId', e.target.value, index)
                       }
                       className="border p-2 rounded"
                       required
@@ -304,14 +296,14 @@ const Recipes: React.FC = () => {
                             {option.name}
                           </option>
                         ))) ||
-                        "N/A"}
+                        'N/A'}
                     </select>
                     <Input
                       type="number"
                       value={ingredient.quantity}
                       onChange={(e) =>
                         handleFieldChange(
-                          "quantity",
+                          'quantity',
                           Number(e.target.value),
                           index
                         )
@@ -337,7 +329,7 @@ const Recipes: React.FC = () => {
               </div>
 
               <Button type="submit" className="w-full">
-                {editingId ? "Update" : "Create"}
+                {editingId ? 'Update' : 'Create'}
               </Button>
             </form>
           </DialogContent>
@@ -358,7 +350,7 @@ const Recipes: React.FC = () => {
         </Table>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Recipes
+export default Recipes;
