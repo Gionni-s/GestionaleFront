@@ -1,110 +1,110 @@
-"use client"
-import React, { useState, useEffect, ChangeEvent } from "react"
-import { axiosInstance as api } from "@/services/axios"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Alert } from "@/components/ui/alert"
-import { logout } from "@/services/store/auth"
-import { LogOut, Camera, UserCircle } from "lucide-react"
-import { store } from "@/services/store"
-import { useRouter } from "next/navigation"
+'use client';
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import { axiosInstance as api } from '@/services/axios';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert } from '@/components/ui/alert';
+import { logout } from '@/services/store/auth';
+import { LogOut, Camera, UserCircle } from 'lucide-react';
+import { store } from '@/services/store';
+import { useRouter } from 'next/navigation';
 
 interface UserProfile {
-  _id: string
-  name: string
-  surname: string
-  email: string
-  isConfimer: boolean
-  password: string
-  phoneNumber: number
-  dateCreation: Date
-  lastLogin: Date
-  profileImage?: string
+  _id: string;
+  name: string;
+  surname: string;
+  email: string;
+  isConfimer: boolean;
+  password: string;
+  phoneNumber: number;
+  dateCreation: Date;
+  lastLogin: Date;
+  profileImage?: string;
+  color: string;
 }
 
 const Profile: React.FC = () => {
-  const [userProfile, setUserProfile] = useState<UserProfile>()
-  const [form, setForm] = useState<UserProfile>()
-  const [loading, setLoading] = useState<boolean>(true)
-  const [isEditing, setIsEditing] = useState<boolean>(false)
-  const [successMessage, setSuccessMessage] = useState<string>()
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const router = useRouter()
+  const [userProfile, setUserProfile] = useState<UserProfile>();
+  const [form, setForm] = useState<UserProfile>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    fetchUserProfile()
-  }, [])
+    fetchUserProfile();
+  }, []);
 
   const fetchUserProfile = async () => {
     try {
-      const response = (await api.get<UserProfile>("/users/me")).data
-      console.log("Fetched user profile:", response)
-      setUserProfile(response)
-      setForm(response)
-      setLoading(false)
+      const response = (await api.get<UserProfile>('/users/me')).data;
+      setUserProfile(response);
+      setForm(response);
+      setLoading(false);
     } catch (error) {
-      console.error("Failed to fetch user profile:", error)
-      setLoading(false)
+      console.error('Failed to fetch user profile:', error);
+      setLoading(false);
     }
-  }
+  };
 
   const handleFieldChange = (
     field: keyof UserProfile,
     value: string | number | boolean
   ) => {
     if (form) {
-      setForm({ ...form, [field]: value })
+      setForm({ ...form, [field]: value });
     }
-  }
+  };
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImage(reader.result as string)
+        setPreviewImage(reader.result as string);
         if (form) {
-          setForm({ ...form, profileImage: reader.result as string })
+          setForm({ ...form, profileImage: reader.result as string });
         }
-      }
-      reader.readAsDataURL(file)
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (form) {
       try {
-        await api.put(`/users/me`, form)
-        setUserProfile(form)
-        setIsEditing(false)
-        setSuccessMessage("Profilo aggiornato con successo!")
-        setTimeout(() => setSuccessMessage(undefined), 3000)
+        await api.put(`/users/me`, form);
+        setUserProfile(form);
+        setIsEditing(false);
+        setSuccessMessage('Profilo aggiornato con successo!');
+        setTimeout(() => setSuccessMessage(undefined), 3000);
       } catch (error) {
-        console.error("Aggiornamento profilo fallito:", error)
+        console.error('Aggiornamento profilo fallito:', error);
       }
     }
-  }
+  };
 
   const handleLogout = async () => {
     try {
-      store.dispatch(logout())
-      router.replace("/Auth")
-      router.refresh()
+      store.dispatch(logout());
+      router.replace('/Auth');
+      router.refresh();
     } catch (error) {
-      console.error("Logout fallito:", error)
+      console.error('Logout fallito:', error);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <UserCircle className="w-16 h-16 animate-pulse text-gray-400" />
       </div>
-    )
+    );
   }
 
   return (
@@ -172,7 +172,7 @@ const Profile: React.FC = () => {
                 <Input
                   id="name"
                   value={form.name}
-                  onChange={(e) => handleFieldChange("name", e.target.value)}
+                  onChange={(e) => handleFieldChange('name', e.target.value)}
                   required
                   disabled={!isEditing}
                   className="mt-1 bg-white border-gray-300 focus:border-black transition-colors"
@@ -185,7 +185,7 @@ const Profile: React.FC = () => {
                 <Input
                   id="surname"
                   value={form.surname}
-                  onChange={(e) => handleFieldChange("surname", e.target.value)}
+                  onChange={(e) => handleFieldChange('surname', e.target.value)}
                   required
                   disabled={!isEditing}
                   className="mt-1 bg-white border-gray-300 focus:border-black transition-colors"
@@ -201,7 +201,7 @@ const Profile: React.FC = () => {
                 id="email"
                 type="email"
                 value={form.email}
-                onChange={(e) => handleFieldChange("email", e.target.value)}
+                onChange={(e) => handleFieldChange('email', e.target.value)}
                 required
                 disabled
                 className="mt-1 bg-gray-100 border-gray-300"
@@ -217,8 +217,23 @@ const Profile: React.FC = () => {
                 type="number"
                 value={form.phoneNumber}
                 onChange={(e) =>
-                  handleFieldChange("phoneNumber", Number(e.target.value))
+                  handleFieldChange('phoneNumber', Number(e.target.value))
                 }
+                required
+                disabled={!isEditing}
+                className="mt-1 bg-white border-gray-300 focus:border-black transition-colors"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="phoneNumber" className="text-gray-700">
+                Colore
+              </Label>
+              <Input
+                id="color"
+                type="color"
+                value={form.color}
+                onChange={(e) => handleFieldChange('color', e.target.value)}
                 required
                 disabled={!isEditing}
                 className="mt-1 bg-white border-gray-300 focus:border-black transition-colors"
@@ -239,14 +254,14 @@ const Profile: React.FC = () => {
                 onClick={() => setIsEditing(!isEditing)}
                 className="border-black text-black hover:bg-gray-100 transition-colors"
               >
-                {isEditing ? "Annulla" : "Modifica"}
+                {isEditing ? 'Annulla' : 'Modifica'}
               </Button>
             </div>
           </form>
         )}
       </div>
     </Card>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;
