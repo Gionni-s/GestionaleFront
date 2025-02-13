@@ -27,7 +27,7 @@ interface Recipe {
   _id: string;
   name: string;
   userId: string;
-  ingridients: RecipeIngredient[];
+  ingridients: RecipeIngridient[];
   cookbookId: { _id: string; name: string };
 }
 
@@ -35,7 +35,7 @@ interface AlternativeRecipe {
   message: string;
 }
 
-interface Ingredient {
+interface Ingridient {
   _id: string;
   name: string;
 }
@@ -45,7 +45,7 @@ interface CookBook {
   name: string;
 }
 
-interface RecipeIngredient {
+interface RecipeIngridient {
   foodId: { _id: string; name: string };
   name?: string;
   quantity: number;
@@ -54,7 +54,7 @@ interface RecipeIngredient {
 interface FormData {
   name: string;
   cookbookId: string;
-  ingridients: RecipeIngredient[];
+  ingridients: RecipeIngridient[];
 }
 
 const Recipes: React.FC = () => {
@@ -71,13 +71,13 @@ const Recipes: React.FC = () => {
     ],
   });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [ingredientOptions, setIngredientOptions] = useState<Ingredient[]>([]);
+  const [ingridientOptions, setIngridientOptions] = useState<Ingridient[]>([]);
   const [cookbookOptions, setCookbookOptions] = useState<CookBook[]>([]);
 
-  // Effect for loading recipes, ingredients, and cookbooks
+  // Effect for loading recipes, ingridients, and cookbooks
   useEffect(() => {
     fetchRecipes();
-    fetchIngredients();
+    fetchIngridients();
     fetchCookBooks();
   }, []);
 
@@ -91,12 +91,12 @@ const Recipes: React.FC = () => {
     }
   };
 
-  const fetchIngredients = async () => {
+  const fetchIngridients = async () => {
     try {
-      const response = await api.get<Ingredient[]>('/foods');
-      setIngredientOptions(response.data);
+      const response = await api.get<Ingridient[]>('/foods');
+      setIngridientOptions(response.data);
     } catch (error) {
-      console.error('Failed to fetch ingredients:', error);
+      console.error('Failed to fetch ingridients:', error);
     }
   };
 
@@ -134,7 +134,7 @@ const Recipes: React.FC = () => {
     }
   };
 
-  const addIngredientField = () => {
+  const addIngridientField = () => {
     setForm({
       ...form,
       ingridients: [
@@ -144,9 +144,9 @@ const Recipes: React.FC = () => {
     });
   };
 
-  const removeIngredientField = (index: number) => {
-    const updatedIngredients = form.ingridients.filter((_, i) => i !== index);
-    setForm({ ...form, ingridients: updatedIngredients });
+  const removeIngridientField = (index: number) => {
+    const updatedIngridients = form.ingridients.filter((_, i) => i !== index);
+    setForm({ ...form, ingridients: updatedIngridients });
   };
 
   const handleFieldChange = (
@@ -157,10 +157,10 @@ const Recipes: React.FC = () => {
     if (field === 'name' || field === 'bookId') {
       setForm({ ...form, [field]: value });
     } else if (index !== undefined) {
-      const updatedIngredients = form.ingridients.map((ingredient, i) =>
-        i === index ? { ...ingredient, [field]: value } : ingredient
+      const updatedIngridients = form.ingridients.map((ingridient, i) =>
+        i === index ? { ...ingridient, [field]: value } : ingridient
       );
-      setForm({ ...form, ingridients: updatedIngredients });
+      setForm({ ...form, ingridients: updatedIngridients });
     }
   };
 
@@ -214,9 +214,9 @@ const Recipes: React.FC = () => {
                 setForm({
                   name: recipe.name,
                   cookbookId: recipe.cookbookId._id,
-                  ingridients: recipe.ingridients.map((ingredient) => ({
-                    foodId: ingredient.foodId,
-                    quantity: ingredient.quantity,
+                  ingridients: recipe.ingridients.map((ingridient) => ({
+                    foodId: ingridient.foodId,
+                    quantity: ingridient.quantity,
                   })),
                 });
                 setEditingId(recipe._id);
@@ -276,22 +276,22 @@ const Recipes: React.FC = () => {
                 />
               </div>
 
-              {/* Ingredients */}
+              {/* Ingridients */}
               <div className="space-y-4">
-                <Label>Ingredients</Label>
-                {form.ingridients.map((ingredient, index) => (
+                <Label>Ingridients</Label>
+                {form.ingridients.map((ingridient, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <select
-                      value={ingredient.foodId._id}
+                      value={ingridient.foodId?._id || ''}
                       onChange={(e) =>
                         handleFieldChange('foodId', e.target.value, index)
                       }
                       className="border p-2 rounded"
                       required
                     >
-                      <option value="">Select Ingredient</option>
-                      {(Array.isArray(ingredientOptions) &&
-                        ingredientOptions.map((option) => (
+                      <option value="">Select Ingridient</option>
+                      {(Array.isArray(ingridientOptions) &&
+                        ingridientOptions.map((option) => (
                           <option key={option._id} value={option._id}>
                             {option.name}
                           </option>
@@ -300,7 +300,7 @@ const Recipes: React.FC = () => {
                     </select>
                     <Input
                       type="number"
-                      value={ingredient.quantity}
+                      value={ingridient.quantity}
                       onChange={(e) =>
                         handleFieldChange(
                           'quantity',
@@ -316,15 +316,15 @@ const Recipes: React.FC = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => removeIngredientField(index)}
+                        onClick={() => removeIngridientField(index)}
                       >
                         Remove
                       </Button>
                     )}
                   </div>
                 ))}
-                <Button type="button" onClick={addIngredientField}>
-                  Add Ingredient
+                <Button type="button" onClick={addIngridientField}>
+                  Add Ingridient
                 </Button>
               </div>
 

@@ -6,14 +6,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type body = {
+type Body = {
   _id: string;
   name: string;
 };
 
 type Props = {
   label: string;
-  body: body[];
+  body: Body[];
   form: Object;
   setForm: Function;
   fieldToMap: string;
@@ -26,39 +26,47 @@ export default function MySelect({
   setForm,
   fieldToMap,
 }: Props) {
-  console.log({
-    label,
-    body,
-    form,
-    setForm,
-    fieldToMap,
-  });
+  // Validate form value exists and is a string
+  const currentValue = form[fieldToMap] as string;
+
   const handleChange = (value: string) => {
-    setForm({ ...form, [fieldToMap]: value });
+    setForm({
+      ...form,
+      [fieldToMap]: value,
+    });
   };
 
+  // Check if the current value exists in the options
+  const isValidValue = body.some((item) => item._id === currentValue);
+
   return (
-    <Select
-      value={(form?.[fieldToMap] as string) || ''}
-      onValueChange={handleChange}
-      required
-    >
-      <SelectTrigger>
-        <SelectValue placeholder={label} />
-      </SelectTrigger>
-      <SelectContent>
-        {body.length > 0 ? (
-          body.map((elem) => (
-            <SelectItem key={elem._id} value={elem._id}>
-              {elem.name}
+    <div className="w-full">
+      <Select
+        value={isValidValue ? currentValue : ''}
+        onValueChange={handleChange}
+        required
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder={label} />
+        </SelectTrigger>
+        <SelectContent>
+          {body.length > 0 ? (
+            body.map(({ _id, name }) => (
+              <SelectItem
+                key={_id}
+                value={_id}
+                className="cursor-pointer hover:bg-gray-100"
+              >
+                {name}
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem disabled value="undefined" className="text-gray-400">
+              Nessuna opzione disponibile
             </SelectItem>
-          ))
-        ) : (
-          <SelectItem disabled value="undefined">
-            Nessuna opzione disponibile
-          </SelectItem>
-        )}
-      </SelectContent>
-    </Select>
+          )}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
