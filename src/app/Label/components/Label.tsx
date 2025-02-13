@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchData } from '../utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -22,24 +20,54 @@ interface Item {
   name: string;
 }
 
-const Labels: React.FC = () => {
-  const [foods, setFoods] = useState<Item[]>([]);
-  const [locations, setLocations] = useState<Item[]>([]);
-  const [warehouses, setWarehouses] = useState<Item[]>([]);
-  const [cookbook, setCookbook] = useState<Item[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newItemName, setNewItemName] = useState('');
-  const [currentUrl, setCurrentUrl] = useState('');
-  const [editingId, setEditingId] = useState('');
-  const [urlNow, setUrlNow] = useState('');
+type Category = {
+  title: string;
+  data: Item[];
+  url: string;
+};
+
+const fetchData = async (url: string): Promise<Item[]> => {
+  try {
+    const response = await axios.get<Item[]>(url);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching data from ${url}:`, error);
+    return [];
+  }
+};
+
+const Labels = () => {
+  // Initialize categories with empty arrays
+  const [categories, setCategories] = useState<Record<string, Item[]>>({
+    foods: [],
+    locations: [],
+    warehouses: [],
+    cookbook: [],
+  });
+
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    itemName: '',
+    currentUrl: '',
+    editingId: '',
+  });
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        await fetchData('/foods', setFoods);
-        await fetchData('/locations', setLocations);
-        await fetchData('/warehouses', setWarehouses);
-        await fetchData('/cookBooks', setCookbook);
+        const [foods, locations, warehouses, cookbook] = await Promise.all([
+          fetchData('/foods'),
+          fetchData('/locations'),
+          fetchData('/warehouses'),
+          fetchData('/cookBooks'),
+        ]);
+
+        setCategories({
+          foods,
+          locations,
+          warehouses,
+          cookbook,
+        });
       } catch (error) {
         console.error('Error loading data:', error);
       }
@@ -48,77 +76,108 @@ const Labels: React.FC = () => {
     loadData();
   }, []);
 
-  async function addItem() {
-    try {
-      setIsModalOpen(false);
-      const item = { name: newItemName, userId: editingId };
+  const handleModalOpen = (url: string, item?: Item) => {
+    setModalState({
+      isOpen: true,
+      itemName: item?.name || '',
+      currentUrl: url,
+      editingId: item?._id || '',
+    });
+  };
 
-      let updatedData;
+  const handleModalClose = () => {
+    setModalState({
+      isOpen: false,
+      itemName: '',
+      currentUrl: '',
+      editingId: '',
+    });
+  };
+
+  const handleSave = async () => {
+    try {
+      const { itemName, currentUrl, editingId } = modalState;
+
+      let updatedItem: Item;
       if (editingId) {
-        // Modifica l'elemento esistente
-        await axios.put(`${currentUrl}/${editingId}`, item);
-        updatedData = (prevData: Item[]) =>
-          prevData.map((el) =>
-            el._id === editingId ? { ...el, name: newItemName } : el
-          );
+        const response = await axios.put(`${currentUrl}/${editingId}`, {
+          name: itemName,
+        });
+        updatedItem = response.data;
       } else {
-        // Crea un nuovo elemento
-        const response = await axios.post(currentUrl, item);
-        updatedData = (prevData: Item[]) => [...prevData, response.data];
+        const response = await axios.post(currentUrl, {
+          name: itemName,
+          userId: 'default-user-id', // Sostituisci con l'ID utente effettivo
+        });
+        updatedItem = response.data;
       }
 
-      // Aggiorna lo stato corrispondente alla categoria
-      updateState(currentUrl, updatedData);
+      const categoryKey = currentUrl
+        .replace('/', '')
+        .replace('Books', 'book') as keyof typeof categories;
 
-      setNewItemName('');
-      setEditingId('');
+      setCategories((prev) => {
+        // Assicuriamoci che l'array esista e sia valido
+        const currentArray = Array.isArray(prev[categoryKey])
+          ? prev[categoryKey]
+          : [];
+
+        return {
+          ...prev,
+          [categoryKey]: editingId
+            ? currentArray.map((item) =>
+                item._id === editingId
+                  ? { ...item, name: updatedItem.name }
+                  : item
+              )
+            : [...currentArray, updatedItem],
+        };
+      });
+
+      handleModalClose();
     } catch (error) {
-      console.error('Errore durante il salvataggio:', error);
+      console.error('Error saving item:', error);
     }
-  }
+  };
 
-  async function deleteItem(item: Item, url: string) {
+  // Aggiorniamo anche handleDelete per sicurezza
+  const handleDelete = async (item: Item, url: string) => {
     try {
       await axios.delete(`${url}/${item._id}`);
+      const categoryKey = url
+        .replace('/', '')
+        .replace('Books', 'book') as keyof typeof categories;
 
-      // Aggiorna lo stato corrispondente rimuovendo l'elemento
-      updateState(url, (prevData: Item[]) =>
-        prevData.filter((el) => el._id !== item._id)
-      );
+      setCategories((prev) => {
+        const currentArray = Array.isArray(prev[categoryKey])
+          ? prev[categoryKey]
+          : [];
+        return {
+          ...prev,
+          [categoryKey]: currentArray.filter((el) => el._id !== item._id),
+        };
+      });
     } catch (error) {
-      console.error("Errore durante l'eliminazione:", error);
+      console.error('Error deleting item:', error);
     }
-  }
+  };
 
-  function updateState(url: string, updateFn: (prevData: Item[]) => Item[]) {
-    switch (url) {
-      case '/foods':
-        setFoods(updateFn);
-        break;
-      case '/locations':
-        setLocations(updateFn);
-        break;
-      case '/warehouses':
-        setWarehouses(updateFn);
-        break;
-      case '/cookBooks':
-        setCookbook(updateFn);
-        break;
-      default:
-        console.error('URL non riconosciuto:', url);
-    }
-  }
+  const categoryConfigs: Category[] = [
+    { title: 'Foods', data: categories.foods || [], url: '/foods' },
+    { title: 'Locations', data: categories.locations || [], url: '/locations' },
+    {
+      title: 'Warehouses',
+      data: categories.warehouses || [],
+      url: '/warehouses',
+    },
+    { title: 'Cookbook', data: categories.cookbook || [], url: '/cookBooks' },
+  ];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
-      {[
-        { title: 'Foods', data: foods, url: '/foods' },
-        { title: 'Locations', data: locations, url: '/locations' },
-        { title: 'Warehouses', data: warehouses, url: '/warehouses' },
-        { title: 'Cookbook', data: cookbook, url: '/cookBooks' },
-      ].map(({ title, data, url }, index) => (
+      {categoryConfigs.map(({ title, data, url }) => (
         <Card
-          key={index}
+          key={title}
           className="bg-white shadow-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl border border-gray-200"
         >
           <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-4 px-6 flex justify-between items-center">
@@ -126,20 +185,17 @@ const Labels: React.FC = () => {
             <Button
               variant="ghost"
               className="text-white hover:text-gray-300"
-              onClick={() => {
-                setCurrentUrl(url);
-                setIsModalOpen(true);
-              }}
+              onClick={() => handleModalOpen(url)}
             >
               <PlusCircle className="w-5 h-5" />
             </Button>
           </CardHeader>
           <CardContent className="p-4">
             <ul className="space-y-2">
-              {data.length > 0 ? (
-                data.map((element, index) => (
+              {data?.length > 0 ? (
+                data.map((element) => (
                   <li
-                    key={index}
+                    key={element._id}
                     className="flex justify-between items-center bg-gray-100 p-2 rounded-lg"
                   >
                     <span className="text-gray-800 text-base font-medium">
@@ -149,20 +205,14 @@ const Labels: React.FC = () => {
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => {
-                          setIsModalOpen(true);
-                          setUrlNow(url);
-                          setEditingId(element._id);
-                          setNewItemName(element.name);
-                        }}
-                        // disabled
+                        onClick={() => handleModalOpen(url, element)}
                       >
                         <Pencil className="w-5 h-5" />
                       </Button>
                       <Button
                         variant="destructive"
                         size="icon"
-                        onClick={() => deleteItem(element, url)}
+                        onClick={() => handleDelete(element, url)}
                       >
                         <Trash className="w-5 h-5" />
                       </Button>
@@ -177,26 +227,31 @@ const Labels: React.FC = () => {
         </Card>
       ))}
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Dialog
+        open={modalState.isOpen}
+        onOpenChange={(open) => !open && handleModalClose()}
+      >
         <DialogContent className="p-6 rounded-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">
-              {editingId ? 'Update Item' : 'Add New Item'}
+              {modalState.editingId ? 'Update Item' : 'Add New Item'}
             </DialogTitle>
           </DialogHeader>
           <Input
             type="text"
             placeholder="Enter name"
-            value={newItemName}
-            onChange={(e) => setNewItemName(e.target.value)}
+            value={modalState.itemName}
+            onChange={(e) =>
+              setModalState((prev) => ({ ...prev, itemName: e.target.value }))
+            }
             className="mt-4 p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
           />
           <DialogFooter className="mt-4 flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+            <Button variant="outline" onClick={handleModalClose}>
               Cancel
             </Button>
-            <Button onClick={addItem} disabled={!newItemName.trim()}>
-              {editingId ? 'Update' : 'Save'}
+            <Button onClick={handleSave} disabled={!modalState.itemName.trim()}>
+              {modalState.editingId ? 'Update' : 'Save'}
             </Button>
           </DialogFooter>
         </DialogContent>
