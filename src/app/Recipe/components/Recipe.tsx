@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Select from '@/components/Select';
 import { axiosInstance as api } from '@/services/axios/index';
 import { Button } from '@/components/ui/button';
@@ -74,12 +74,26 @@ const Recipes: React.FC = () => {
   const [ingridientOptions, setIngridientOptions] = useState<Ingridient[]>([]);
   const [cookbookOptions, setCookbookOptions] = useState<CookBook[]>([]);
 
+  const fetchData = useCallback(async () => {
+    try {
+      const [recipesRes, ingridientsRes, cookbooksRes] = await Promise.all([
+        api.get<Recipe[]>('/recipes'),
+        api.get<Ingridient[]>('/foods'),
+        api.get<CookBook[]>('/cookBooks'),
+      ]);
+      setRecipes(recipesRes.data);
+      setIngridientOptions(ingridientsRes.data);
+      setCookbookOptions(cookbooksRes.data);
+    } catch (error) {
+      // if(error.)
+      console.error('Failed to fetch data:', error);
+    }
+  }, []);
+
   // Effect for loading recipes, ingridients, and cookbooks
   useEffect(() => {
-    fetchRecipes();
-    fetchIngridients();
-    fetchCookBooks();
-  }, []);
+    fetchData();
+  }, [fetchData]);
 
   const fetchRecipes = async () => {
     try {
@@ -88,24 +102,6 @@ const Recipes: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch recipes:', error);
       setRecipes({ message: 'Failed to load recipes' });
-    }
-  };
-
-  const fetchIngridients = async () => {
-    try {
-      const response = await api.get<Ingridient[]>('/foods');
-      setIngridientOptions(response.data);
-    } catch (error) {
-      console.error('Failed to fetch ingridients:', error);
-    }
-  };
-
-  const fetchCookBooks = async () => {
-    try {
-      const response = await api.get<CookBook[]>('/cookBooks');
-      setCookbookOptions(response.data);
-    } catch (error) {
-      console.error('Failed to fetch cookbooks:', error);
     }
   };
 
@@ -282,7 +278,7 @@ const Recipes: React.FC = () => {
                 {form.ingridients.map((ingridient, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <select
-                      value={ingridient.foodId?._id || ''}
+                      value={ingridient.foodId?._id}
                       onChange={(e) =>
                         handleFieldChange('foodId', e.target.value, index)
                       }
