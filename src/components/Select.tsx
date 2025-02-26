@@ -14,7 +14,7 @@ type Body = {
 type Props = {
   label: string;
   body: Body[];
-  form: Object;
+  form: { [key: string]: any };
   setForm: Function;
   fieldToMap: string;
 };
@@ -27,7 +27,7 @@ export default function MySelect({
   fieldToMap,
 }: Props) {
   // Validate form value exists and is a string
-  const currentValue = form[fieldToMap] as string;
+  const currentValue = form[fieldToMap];
 
   const handleChange = (value: string) => {
     setForm({
