@@ -1,4 +1,4 @@
-import { baseUrl } from '@/app/config';
+import { baseUrl } from '../../../config';
 import axios from 'axios';
 import { store } from '../store';
 import { logout, updateToken } from '../store/auth';
