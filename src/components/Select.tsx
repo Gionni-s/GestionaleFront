@@ -21,7 +21,7 @@ type Props = {
 
 export default function MySelect({
   label,
-  body,
+  body = [],
   form,
   setForm,
   fieldToMap,

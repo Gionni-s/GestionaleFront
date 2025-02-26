@@ -1,5 +1,3 @@
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
 import { AuthCard } from "./components/AuthCard"
 
 export default function Page() {

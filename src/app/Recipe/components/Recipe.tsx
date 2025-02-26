@@ -108,12 +108,12 @@ const Recipes: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      setModalVisible(false);
       if (editingId) {
         await api.put(`/recipes/${editingId}`, form);
       } else {
         await api.post('/recipes', form);
       }
-      setModalVisible(false);
       resetForm();
       fetchRecipes();
     } catch (error) {
@@ -202,36 +202,42 @@ const Recipes: React.FC = () => {
           ))}
         </TableCell>
         <TableCell>
-          <div className="flex space-x-2">
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => {
-                setForm({
-                  name: recipe.name,
-                  cookbookId: recipe.cookbookId._id,
-                  ingridients: recipe.ingridients.map((ingridient) => ({
-                    foodId: ingridient.foodId,
-                    quantity: ingridient.quantity,
-                  })),
-                });
-                setEditingId(recipe._id);
-                setModalVisible(true);
-              }}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="destructive"
-              onClick={() => handleDelete(recipe._id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
+          <div className="flex space-x-2">{generateDefaultFields(recipe)}</div>
         </TableCell>
       </TableRow>
     ));
+  };
+
+  const generateDefaultFields = (recipe: Recipe) => {
+    return (
+      <>
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => {
+            setForm({
+              name: recipe.name,
+              cookbookId: recipe.cookbookId._id,
+              ingridients: recipe.ingridients.map((ingridient) => ({
+                foodId: ingridient.foodId,
+                quantity: ingridient.quantity,
+              })),
+            });
+            setEditingId(recipe._id);
+            setModalVisible(true);
+          }}
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="destructive"
+          onClick={() => handleDelete(recipe._id)}
+        >
+          <Trash className="h-4 w-4" />
+        </Button>
+      </>
+    );
   };
 
   return (

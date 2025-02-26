@@ -107,11 +107,9 @@ const Labels = () => {
       } else {
         const response = await axios.post(currentUrl, {
           name: itemName,
-          userId: 'default-user-id', // Sostituisci con l'ID utente effettivo
         });
         updatedItem = response.data;
       }
-
       const categoryKey = currentUrl
         .replace('/', '')
         .replace('Books', 'book') as keyof typeof categories;

@@ -1,7 +1,7 @@
-"use client" // Ensures this is a client-side component
+'use client'; // Ensures this is a client-side component
 
-import React, { useEffect, useState } from "react"
-import { axiosInstance as api } from "@/services/axios/index"
+import React, { useEffect, useState } from 'react';
+import { axiosInstance as api } from '@/services/axios/index';
 import {
   Table,
   TableRow,
@@ -9,50 +9,50 @@ import {
   TableHead,
   TableHeader,
   TableBody,
-} from "@/components/ui/table"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar" // Import Avatar component
+} from '@/components/ui/table';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'; // Import Avatar component
+import { Badge } from '@/components/ui/badge';
 
 const Dashboard: React.FC = () => {
   const [users, setUsers] = useState<Array<{
-    _id: string
-    name: string
-    surname: string
-    role: string
-    email: string
-    lastLogin: string
-    profileImage: string
-  }> | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
+    _id: string;
+    name: string;
+    surname: string;
+    role: string;
+    email: string;
+    lastLogin: string;
+    profileImage: string;
+  }> | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        setLoading(true)
-        const response = await api.get("/users") // Assuming the API returns an array of user objects
-        console.log(response)
+        setLoading(true);
+        const response = await api.get('/users'); // Assuming the API returns an array of user objects
         if (Array.isArray(response.data)) {
-          setUsers(response.data)
+          setUsers(response.data);
         } else {
-          setUsers(response.data)
+          setUsers(response.data);
         }
       } catch (err) {
-        setError("Failed to fetch users")
-        console.error("Fetch error:", err)
+        setError('Failed to fetch users');
+        console.error('Fetch error:', err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
   if (loading) {
-    return <p className="text-center text-gray-500 text-lg">Loading...</p>
+    return <p className="text-center text-gray-500 text-lg">Loading...</p>;
   }
 
   if (error) {
-    return <p className="text-center text-red-500 text-lg">{error}</p>
+    return <p className="text-center text-red-500 text-lg">{error}</p>;
   }
 
   return (
@@ -98,9 +98,15 @@ const Dashboard: React.FC = () => {
                   <TableCell className="px-6 py-4 font-medium text-gray-900">
                     {user.email}
                   </TableCell>
-                  <TableCell className="px-6 py-4">{user.role}</TableCell>
                   <TableCell className="px-6 py-4">
-                    {user.lastLogin ? new Date(user.lastLogin?.split("T")[0]).toLocaleDateString() : ""}
+                    <Badge>{user.role}</Badge>
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    {user.lastLogin
+                      ? new Date(
+                          user.lastLogin?.split('T')[0]
+                        ).toLocaleDateString()
+                      : ''}
                   </TableCell>
                 </TableRow>
               ))
@@ -118,7 +124,7 @@ const Dashboard: React.FC = () => {
         </Table>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
