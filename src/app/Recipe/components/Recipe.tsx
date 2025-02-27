@@ -19,8 +19,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Pencil, Trash } from 'lucide-react';
+import { PlusCircle, Pencil, Trash, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // Interfaces for data types
 interface Recipe {
@@ -31,6 +33,7 @@ interface Recipe {
   cookbookId: string;
   cookBook: CookBook;
   food: Ingridient;
+  note?: string;
 }
 
 interface AlternativeRecipe {
@@ -58,9 +61,11 @@ interface FormData {
   name: string;
   cookbookId: string;
   ingridients: RecipeIngridient[];
+  note?: string;
 }
 
 const Recipes: React.FC = () => {
+  const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[] | AlternativeRecipe>({
     message: '',
   });
@@ -150,7 +155,7 @@ const Recipes: React.FC = () => {
     value: string | number,
     index?: number
   ) => {
-    if (field === 'name' || field === 'bookId') {
+    if (field === 'name' || field === 'bookId' || field === 'note') {
       setForm({ ...form, [field]: value });
     } else if (index !== undefined) {
       const updatedIngridients = form.ingridients.map((ingridient, i) =>
@@ -168,6 +173,7 @@ const Recipes: React.FC = () => {
         { foodId: '', name: '', quantity: 1 },
         { foodId: '', name: '', quantity: 1 },
       ],
+      note: '',
     });
     setEditingId(null);
   };
@@ -215,6 +221,16 @@ const Recipes: React.FC = () => {
           size="icon"
           variant="outline"
           onClick={() => {
+            console.log(recipe._id);
+            router.replace('/RecipeDetail?id=' + recipe._id);
+          }}
+        >
+          <ExternalLink className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => {
             setForm({
               name: recipe.name,
               cookbookId: recipe.cookbookId,
@@ -223,6 +239,7 @@ const Recipes: React.FC = () => {
                 quantity: ingridient.quantity,
                 name: ingridient.name,
               })),
+              note: recipe.note,
             });
             setEditingId(recipe._id);
             setModalVisible(true);
@@ -281,7 +298,10 @@ const Recipes: React.FC = () => {
 
               {/* Ingridients */}
               <div className="space-y-4">
-                <Label>Ingridients</Label>
+                <Label>Ingridients </Label>
+                <Button type="button" onClick={addIngridientField}>
+                  Add Ingridient
+                </Button>
                 {form.ingridients.map((ingridient, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <select
@@ -326,11 +346,17 @@ const Recipes: React.FC = () => {
                     )}
                   </div>
                 ))}
-                <Button type="button" onClick={addIngridientField}>
+                {/* <Button type="button" onClick={addIngridientField}>
                   Add Ingridient
-                </Button>
+                </Button> */}
               </div>
-
+              <div className="space-y-4">
+                <Label>Note:</Label>
+                <Textarea
+                  value={form.note}
+                  onChange={(e) => handleFieldChange('note', e.target.value)}
+                ></Textarea>
+              </div>
               <Button type="submit" className="w-full">
                 {editingId ? 'Update' : 'Create'}
               </Button>
