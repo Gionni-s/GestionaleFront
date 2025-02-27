@@ -28,7 +28,9 @@ interface Recipe {
   name: string;
   userId: string;
   ingridients: RecipeIngridient[];
-  cookbookId: { _id: string; name: string };
+  cookbookId: string;
+  cookBook: CookBook;
+  food: Ingridient;
 }
 
 interface AlternativeRecipe {
@@ -46,9 +48,10 @@ interface CookBook {
 }
 
 interface RecipeIngridient {
-  foodId: { _id: string; name: string };
-  name?: string;
+  foodId: string;
+  name: string;
   quantity: number;
+  food?: { _id: string; name: string };
 }
 
 interface FormData {
@@ -66,8 +69,8 @@ const Recipes: React.FC = () => {
     name: '',
     cookbookId: '',
     ingridients: [
-      { foodId: { _id: '', name: '' }, quantity: 1 },
-      { foodId: { _id: '', name: '' }, quantity: 1 },
+      { foodId: '', quantity: 1, name: '' },
+      { foodId: '', quantity: 1, name: '' },
     ],
   });
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -133,10 +136,7 @@ const Recipes: React.FC = () => {
   const addIngridientField = () => {
     setForm({
       ...form,
-      ingridients: [
-        ...form.ingridients,
-        { foodId: { _id: '', name: '' }, quantity: 1 },
-      ],
+      ingridients: [...form.ingridients, { foodId: '', name: '', quantity: 1 }],
     });
   };
 
@@ -165,8 +165,8 @@ const Recipes: React.FC = () => {
       name: '',
       cookbookId: '',
       ingridients: [
-        { foodId: { _id: '', name: '' }, quantity: 1 },
-        { foodId: { _id: '', name: '' }, quantity: 1 },
+        { foodId: '', name: '', quantity: 1 },
+        { foodId: '', name: '', quantity: 1 },
       ],
     });
     setEditingId(null);
@@ -193,11 +193,11 @@ const Recipes: React.FC = () => {
     return recipes.map((recipe) => (
       <TableRow key={recipe._id}>
         <TableCell>{recipe.name}</TableCell>
-        <TableCell>{recipe.cookbookId?.name || 'N/A'}</TableCell>
+        <TableCell>{recipe.cookBook?.name || 'N/A'}</TableCell>
         <TableCell>
           {recipe.ingridients.map((val, index) => (
             <p key={index}>
-              {val.foodId?.name || 'N/A'} : {val.quantity}
+              {val.food?.name || 'N/A'} : {val.quantity}
             </p>
           ))}
         </TableCell>
@@ -217,10 +217,11 @@ const Recipes: React.FC = () => {
           onClick={() => {
             setForm({
               name: recipe.name,
-              cookbookId: recipe.cookbookId._id,
+              cookbookId: recipe.cookbookId,
               ingridients: recipe.ingridients.map((ingridient) => ({
                 foodId: ingridient.foodId,
                 quantity: ingridient.quantity,
+                name: ingridient.name,
               })),
             });
             setEditingId(recipe._id);
@@ -284,7 +285,7 @@ const Recipes: React.FC = () => {
                 {form.ingridients.map((ingridient, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <select
-                      value={ingridient.foodId?._id}
+                      value={ingridient.foodId}
                       onChange={(e) =>
                         handleFieldChange('foodId', e.target.value, index)
                       }
