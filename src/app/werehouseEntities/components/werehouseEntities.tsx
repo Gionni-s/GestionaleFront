@@ -27,18 +27,12 @@ interface WerehouseEntitie {
   _id: string;
   quantita: number;
   scadenza: string;
-  foodId: {
-    _id: string;
-    name: string;
-  };
-  locationId: {
-    _id: string;
-    name: string;
-  };
-  warehouseId: {
-    _id: string;
-    name: string;
-  };
+  foodId: string;
+  food: { name: string };
+  locationId: string;
+  location: { name: string };
+  warehouseId: string;
+  warehouse: { name: string };
   userId: string;
 }
 
@@ -183,9 +177,9 @@ const WerehouseEntities: React.FC = () => {
 
   const handleEdit = (werehouseEntitie: WerehouseEntitie) => {
     setForm({
-      foodId: werehouseEntitie.foodId._id,
-      locationId: werehouseEntitie.locationId._id,
-      warehouseId: werehouseEntitie.warehouseId._id,
+      foodId: werehouseEntitie.foodId,
+      locationId: werehouseEntitie.locationId,
+      warehouseId: werehouseEntitie.warehouseId,
       userId: werehouseEntitie.userId,
       quantita: werehouseEntitie.quantita,
       scadenza: werehouseEntitie.scadenza.split('T')[0],
@@ -226,10 +220,10 @@ const WerehouseEntities: React.FC = () => {
 
     return werehouseEntities.map((entity) => (
       <TableRow key={entity._id}>
-        <TableCell>{entity.foodId?.name || 'N/A'}</TableCell>
+        <TableCell>{entity.food?.name || 'N/A'}</TableCell>
         <TableCell>{entity.quantita || 0}</TableCell>
-        <TableCell>{entity.locationId?.name || 'N/A'}</TableCell>
-        <TableCell>{entity.warehouseId?.name || 'N/A'}</TableCell>
+        <TableCell>{entity.location?.name || 'N/A'}</TableCell>
+        <TableCell>{entity.warehouse?.name || 'N/A'}</TableCell>
         <TableCell className={getExpirationColor(entity.scadenza)}>
           {new Date(entity.scadenza) < new Date()
             ? `Scaduto (${new Date(entity.scadenza).toLocaleDateString()})`
