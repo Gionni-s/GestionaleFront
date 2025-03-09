@@ -293,6 +293,7 @@ const WerehouseEntities: React.FC = () => {
                 <Label htmlFor="location">Location</Label>
                 <Select
                   label="Seleziona un Luogo"
+                  base={locations.length == 1 ? locations[0] : ''}
                   body={locations}
                   form={form}
                   setForm={setForm}
@@ -303,6 +304,7 @@ const WerehouseEntities: React.FC = () => {
                 <Label htmlFor="warehouse">Warehouse</Label>
                 <Select
                   label="Seleziona una Warehouse"
+                  base={warehouses.length == 1 ? warehouses[0] : ''}
                   body={warehouses}
                   form={form}
                   setForm={setForm}

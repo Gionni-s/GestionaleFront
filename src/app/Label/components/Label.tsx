@@ -13,28 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { axiosInstance as axios } from '@/services/axios';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
-
-interface Item {
-  _id: string;
-  userId: string;
-  name: string;
-}
-
-type Category = {
-  title: string;
-  data: Item[];
-  url: string;
-};
-
-const fetchData = async (url: string): Promise<Item[]> => {
-  try {
-    const response = await axios.get<Item[]>(url);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching data from ${url}:`, error);
-    return [];
-  }
-};
+import { loadData } from '../utils';
+import { Category, Item } from '../types';
 
 const Labels = () => {
   // Initialize categories with empty arrays
@@ -53,27 +33,7 @@ const Labels = () => {
   });
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [foods, locations, warehouses, cookbook] = await Promise.all([
-          fetchData('/foods'),
-          fetchData('/locations'),
-          fetchData('/warehouses'),
-          fetchData('/cookBooks'),
-        ]);
-
-        setCategories({
-          foods,
-          locations,
-          warehouses,
-          cookbook,
-        });
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-    };
-
-    loadData();
+    loadData(setCategories);
   }, []);
 
   const handleModalOpen = (url: string, item?: Item) => {

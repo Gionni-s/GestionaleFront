@@ -23,46 +23,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-// Interfaces for data types
-interface Recipe {
-  _id: string;
-  name: string;
-  userId: string;
-  ingridients: RecipeIngridient[];
-  cookbookId: string;
-  cookBook: CookBook;
-  food: Ingridient;
-  note?: string;
-}
-
-interface AlternativeRecipe {
-  message: string;
-}
-
-interface Ingridient {
-  _id: string;
-  name: string;
-}
-
-interface CookBook {
-  _id: string;
-  name: string;
-}
-
-interface RecipeIngridient {
-  foodId: string;
-  name: string;
-  quantity: number;
-  food?: { _id: string; name: string };
-}
-
-interface FormData {
-  name: string;
-  cookbookId: string;
-  ingridients: RecipeIngridient[];
-  note?: string;
-}
+import {
+  AlternativeRecipe,
+  CookBook,
+  FormData,
+  Ingridient,
+  Recipe,
+} from '../types';
 
 const Recipes: React.FC = () => {
   const router = useRouter();
