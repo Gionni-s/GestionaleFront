@@ -1,89 +1,89 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { axiosInstance } from "@/services/axios"
-import { loginSuccess } from "@/services/store/auth"
-import { store } from "@/services/store"
-import { useRouter } from "next/navigation"
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { axiosInstance } from '@/services/axios';
+import { loginSuccess } from '@/services/store/auth';
+import { store } from '@/services/store';
+import { useRouter } from 'next/navigation';
 
 export function AuthCard() {
-  const router = useRouter()
-  const [isRegistration, setRegistration] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [name, setName] = useState("")
-  const [surname, setSurname] = useState("")
-  const [phone, setPhone] = useState("")
+  const router = useRouter();
+  const [isRegistration, setRegistration] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [surname, setSurname] = useState('');
+  const [phone, setPhone] = useState('');
 
   const handleLogin = async () => {
     try {
-      const token = `${email}:${password}`
-      const encodedToken = Buffer.from(token).toString("base64")
-      const response = await axiosInstance.get("/users/login", {
+      const token = `${email}:${password}`;
+      const encodedToken = Buffer.from(token).toString('base64');
+      const response = await axiosInstance.post('/users/login', undefined, {
         headers: { Authorization: `Basic ${encodedToken}` },
-      })
-      store.dispatch(loginSuccess(response.data))
-      router.replace("/Profile")
-      router.refresh()
+      });
+      store.dispatch(loginSuccess(response.data));
+      router.replace('/Profile');
+      router.refresh();
     } catch (error) {
-      console.error("Login error:", error)
+      console.error('Login error:', error);
     }
-  }
+  };
 
   const handleRegistration = async () => {
     try {
-      const response = await axiosInstance.post("/users", {
+      const response = await axiosInstance.post('/users', {
         name,
         surname,
         phone,
         psw: password,
         mail: email,
-      })
+      });
 
       // Perform login after successful registration
-      const token = `${email}:${password}`
-      const encodedToken = Buffer.from(token).toString("base64")
-      const loginResponse = await axiosInstance.get("/users/login", {
+      const token = `${email}:${password}`;
+      const encodedToken = Buffer.from(token).toString('base64');
+      const loginResponse = await axiosInstance.get('/users/login', {
         headers: { Authorization: `Basic ${encodedToken}` },
-      })
-      store.dispatch(loginSuccess(loginResponse.data))
-      router.replace("/Profile")
-      router.refresh()
+      });
+      store.dispatch(loginSuccess(loginResponse.data));
+      router.replace('/Profile');
+      router.refresh();
     } catch (error) {
-      console.error("Registration error:", error)
+      console.error('Registration error:', error);
     }
-  }
+  };
 
   const handleSubmit = () => {
     if (isRegistration) {
-      handleRegistration()
+      handleRegistration();
     } else {
-      handleLogin()
+      handleLogin();
     }
-  }
+  };
 
   const clearFields = () => {
-    setEmail("")
-    setPassword("")
-    setName("")
-    setSurname("")
-    setPhone("")
-  }
+    setEmail('');
+    setPassword('');
+    setName('');
+    setSurname('');
+    setPhone('');
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto my-4">
       <CardHeader>
-        <CardTitle>{isRegistration ? "Registrati" : "Login"}</CardTitle>
+        <CardTitle>{isRegistration ? 'Registrati' : 'Login'}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid gap-4">
@@ -135,7 +135,7 @@ export function AuthCard() {
           <Button onClick={() => setRegistration(!isRegistration)}>
             {isRegistration
               ? "Sei già registrato? Fai l'accesso"
-              : "Non hai un account? Registrati"}
+              : 'Non hai un account? Registrati'}
           </Button>
         </div>
       </CardContent>
@@ -144,9 +144,9 @@ export function AuthCard() {
           Annulla
         </Button>
         <Button onClick={handleSubmit}>
-          {isRegistration ? "Registrati" : "Login"}
+          {isRegistration ? 'Registrati' : 'Login'}
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }
