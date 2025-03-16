@@ -32,6 +32,7 @@ export function NavBar() {
     { href: '/Recipe', label: 'Recipe' },
     // { href: '/werehouse', label: 'Warehouse' },
     { href: '/werehouseEntities', label: 'Warehouse Entities' },
+    { href: '/budget', label: 'Budget' },
     { href: '/Dashbord', label: 'Dashboard', roleRequired: 'admin' }, // Only admins should see this
   ];
 
