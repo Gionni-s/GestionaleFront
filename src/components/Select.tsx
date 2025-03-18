@@ -5,8 +5,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Warehouse } from 'lucide-react';
 import { useEffect } from 'react';
+import Combobox from './Combobox';
 
 type Body = {
   _id: string;
@@ -20,6 +20,7 @@ type Props = {
   setForm: Function;
   fieldToMap: string;
   base?: string | { [key: string]: any };
+  useCombobox?: boolean;
 };
 export default function MySelect({
   label,
@@ -28,6 +29,7 @@ export default function MySelect({
   setForm,
   fieldToMap,
   base,
+  useCombobox = false,
 }: Props) {
   const currentValue = form[fieldToMap];
 
@@ -57,29 +59,47 @@ export default function MySelect({
   console.log({ selectedValue });
 
   return (
-    <div className="w-full">
-      <Select value={selectedValue} onValueChange={handleChange} required>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={label} />
-        </SelectTrigger>
-        <SelectContent>
-          {body.length > 0 ? (
-            body.map(({ _id, name }) => (
-              <SelectItem
-                key={_id}
-                value={_id}
-                className="cursor-pointer hover:bg-gray-100"
-              >
-                {name}
-              </SelectItem>
-            ))
-          ) : (
-            <SelectItem disabled value="undefined" className="text-gray-400">
-              Nessuna opzione disponibile
-            </SelectItem>
-          )}
-        </SelectContent>
-      </Select>
-    </div>
+    <>
+      {useCombobox ? (
+        <Combobox
+          label={label}
+          body={body}
+          form={form}
+          setForm={setForm}
+          fieldToMap={fieldToMap}
+        />
+      ) : (
+        <>
+          <div className="w-full">
+            <Select value={selectedValue} onValueChange={handleChange} required>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={label} />
+              </SelectTrigger>
+              <SelectContent>
+                {body.length > 0 ? (
+                  body.map(({ _id, name }) => (
+                    <SelectItem
+                      key={_id}
+                      value={_id}
+                      className="cursor-pointer hover:bg-gray-100"
+                    >
+                      {name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem
+                    disabled
+                    value="undefined"
+                    className="text-gray-400"
+                  >
+                    Nessuna opzione disponibile
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        </>
+      )}
+    </>
   );
 }
