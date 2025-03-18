@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { axiosInstance as api } from '@/services/axios';
+import axios from '@/services/axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,7 @@ import { LogOut, Camera, UserCircle } from 'lucide-react';
 import { store } from '@/services/store';
 import { useRouter } from 'next/navigation';
 
-interface UserProfile {
+export interface UserProfile {
   _id: string;
   name: string;
   surname: string;
@@ -41,9 +41,9 @@ const Profile: React.FC = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = (await api.get<UserProfile>('/users/me')).data;
-      setUserProfile(response);
-      setForm(response);
+      const { data } = await axios.get<UserProfile>('/users/me');
+      setUserProfile(data);
+      setForm(data);
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
@@ -78,7 +78,7 @@ const Profile: React.FC = () => {
     e.preventDefault();
     if (form) {
       try {
-        await api.put(`/users/me`, form);
+        await axios.put(`/users/me`, form);
         setUserProfile(form);
         setIsEditing(false);
         setSuccessMessage('Profilo aggiornato con successo!');

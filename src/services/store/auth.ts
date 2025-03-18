@@ -1,3 +1,4 @@
+import { UserProfile } from '@/app/Profile/components';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Types
@@ -24,6 +25,7 @@ interface LoginPayload {
 
 interface TokenUpdatePayload {
   token: string;
+  user: UserProfile;
   refreshToken?: string;
 }
 

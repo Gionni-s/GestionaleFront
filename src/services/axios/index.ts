@@ -4,7 +4,7 @@ import { store } from '../store';
 import { logout, updateToken } from '../store/auth';
 
 // Create refresh token instance without interceptors to prevent infinite loops
-const axiosRefresh = axios.create({
+export const axiosRefresh = axios.create({
   baseURL: baseUrl,
   timeout: 5000,
   headers: {
@@ -75,6 +75,7 @@ axiosInstance.interceptors.response.use(
         store.dispatch(
           updateToken({
             token: data.token,
+            user: data.user,
             refreshToken: data.refreshToken,
           })
         );
@@ -111,4 +112,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export { axiosInstance };
+export default axiosInstance;

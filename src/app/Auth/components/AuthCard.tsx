@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { axiosInstance } from '@/services/axios';
+import axios from '@/services/axios';
 import { loginSuccess } from '@/services/store/auth';
 import { store } from '@/services/store';
 import { useRouter } from 'next/navigation';
@@ -29,7 +29,7 @@ export function AuthCard() {
     try {
       const token = `${email}:${password}`;
       const encodedToken = Buffer.from(token).toString('base64');
-      const response = await axiosInstance.post('/users/login', undefined, {
+      const response = await axios.post('/users/login', undefined, {
         headers: { Authorization: `Basic ${encodedToken}` },
       });
       store.dispatch(loginSuccess(response.data));
@@ -42,7 +42,7 @@ export function AuthCard() {
 
   const handleRegistration = async () => {
     try {
-      const response = await axiosInstance.post('/users', {
+      const response = await axios.post('/users', {
         name,
         surname,
         phone,
@@ -53,7 +53,7 @@ export function AuthCard() {
       // Perform login after successful registration
       const token = `${email}:${password}`;
       const encodedToken = Buffer.from(token).toString('base64');
-      const loginResponse = await axiosInstance.get('/users/login', {
+      const loginResponse = await axios.post('/users/login', {
         headers: { Authorization: `Basic ${encodedToken}` },
       });
       store.dispatch(loginSuccess(loginResponse.data));

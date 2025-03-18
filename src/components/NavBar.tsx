@@ -1,6 +1,6 @@
 import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { axiosInstance as api } from '@/services/axios';
+import axios from '@/services/axios';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
@@ -44,7 +44,7 @@ export function NavBar() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await api.get<UserProfile>('/users/me');
+      const response = await axios.get<UserProfile>('/users/me');
       setUserProfile(response.data);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
