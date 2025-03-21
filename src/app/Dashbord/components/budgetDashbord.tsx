@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from '@radix-ui/react-select';
 
-const TIME_OPTIONS = ['day', 'month', 'year'];
+const TIME_OPTIONS = ['month', 'year'];
 const month = [
   'January',
   'February',
@@ -65,21 +65,16 @@ const BudgetChart = () => {
 
         let dateKeys: string[] = [];
 
-        if (timeRange === 'day') {
+        if (timeRange === 'month') {
           dateKeys = eachDayOfInterval({
             start: startOfMonth(currentDate),
             end: endOfMonth(currentDate),
           }).map((d) => format(d, 'yyyy-MM-dd'));
-        } else if (timeRange === 'month') {
+        } else if (timeRange === 'year') {
           dateKeys = eachMonthOfInterval({
             start: startOfYear(currentDate),
             end: endOfYear(currentDate),
           }).map((d) => format(d, 'yyyy-MM'));
-        } else {
-          dateKeys = Array.from(
-            { length: 5 },
-            (_, i) => String(currentDate.getFullYear() - 2 + i) // Centra l'anno attuale
-          );
         }
 
         const groupedData: Record<string, any> = {};
@@ -95,8 +90,6 @@ const BudgetChart = () => {
             if (!item.dateTime) return;
             const dateKey =
               timeRange === 'year'
-                ? format(parseISO(item.dateTime), 'yyyy')
-                : timeRange === 'month'
                 ? format(parseISO(item.dateTime), 'yyyy-MM')
                 : format(parseISO(item.dateTime), 'yyyy-MM-dd');
 
@@ -114,17 +107,14 @@ const BudgetChart = () => {
         const filteredData = Object.values(groupedData).filter((entry) => {
           const entryDate = parseISO(entry.date);
 
-          if (timeRange === 'day') {
+          if (timeRange === 'month') {
             return (
               entryDate >= startOfMonth(currentDate) &&
               entryDate <= endOfMonth(currentDate)
             );
           }
-          if (timeRange === 'month') {
-            return format(entryDate, 'yyyy') === format(currentDate, 'yyyy');
-          }
           if (timeRange === 'year') {
-            return entry.date >= String(currentDate.getFullYear() - 2);
+            return format(entryDate, 'yyyy') === format(currentDate, 'yyyy');
           }
           return false;
         });
@@ -163,11 +153,7 @@ const BudgetChart = () => {
                   value={option}
                   className="hover:bg-gray-100 cursor-pointer"
                 >
-                  {option === 'day'
-                    ? 'Giorni'
-                    : option === 'month'
-                    ? 'Mesi'
-                    : 'Anni'}
+                  {option === 'month' ? 'Mese' : 'Anno'}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -181,7 +167,7 @@ const BudgetChart = () => {
             onClick={() =>
               setCurrentDate(
                 (prev) =>
-                  timeRange === 'year' || timeRange === 'month'
+                  timeRange === 'year'
                     ? subYears(prev, 1) // Cambia l'anno se sei su 'mesi'
                     : subMonths(prev, 1) // Cambia il mese se sei su 'giorni'
               )
@@ -193,10 +179,6 @@ const BudgetChart = () => {
 
           <span className="font-semibold">
             {timeRange === 'year'
-              ? `${currentDate.getFullYear() - 2}-${
-                  currentDate.getFullYear() + 2
-                }`
-              : timeRange === 'month'
               ? currentDate.getFullYear()
               : format(currentDate, 'MMMM yyyy')}
           </span>
@@ -205,7 +187,7 @@ const BudgetChart = () => {
             onClick={() =>
               setCurrentDate(
                 (prev) =>
-                  timeRange === 'year' || timeRange === 'month'
+                  timeRange === 'year'
                     ? addYears(prev, 1) // Cambia l'anno se sei su 'mesi'
                     : addMonths(prev, 1) // Cambia il mese se sei su 'giorni'
               )
