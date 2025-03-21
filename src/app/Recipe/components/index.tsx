@@ -226,7 +226,7 @@ const Recipes: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Recipe Management</h1>
         <Dialog open={modalVisible} onOpenChange={setModalVisible}>
@@ -260,6 +260,7 @@ const Recipes: React.FC = () => {
                   form={form}
                   setForm={setForm}
                   fieldToMap="cookbookId"
+                  useCombobox={true}
                 />
               </div>
 

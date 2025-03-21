@@ -60,7 +60,6 @@ const BudgetChart = () => {
       try {
         const today = new Date();
         let thisMonth = month[today.getMonth()];
-        console.log(thisMonth);
         const response = await axios.get('/budgets/chart');
 
         let dateKeys: string[] = [];
