@@ -1,7 +1,7 @@
 'use client'; // Ensures this is a client-side component
 
 import React, { useEffect, useState } from 'react';
-import { axiosInstance as api } from '@/services/axios/index';
+import axios from '@/services/axios/index';
 import {
   Table,
   TableRow,
@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableBody,
 } from '@/components/ui/table';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'; // Import Avatar component
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 const Dashboard: React.FC = () => {
@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/users'); // Assuming the API returns an array of user objects
+        const response = await axios.get('/users');
         if (Array.isArray(response.data)) {
           setUsers(response.data);
         } else {

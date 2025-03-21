@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import Select from '@/components/Select';
-import { axiosInstance as api } from '@/services/axios/index';
+import axios from '@/services/axios/index';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -52,9 +52,9 @@ const Recipes: React.FC = () => {
   const fetchData = useCallback(async () => {
     try {
       const [recipesRes, ingridientsRes, cookbooksRes] = await Promise.all([
-        api.get<Recipe[]>('/recipes'),
-        api.get<Ingridient[]>('/foods'),
-        api.get<CookBook[]>('/cookBooks'),
+        axios.get<Recipe[]>('/recipes'),
+        axios.get<Ingridient[]>('/foods'),
+        axios.get<CookBook[]>('/cookBooks'),
       ]);
       setRecipes(recipesRes.data);
       setIngridientOptions(ingridientsRes.data);
@@ -72,7 +72,7 @@ const Recipes: React.FC = () => {
 
   const fetchRecipes = async () => {
     try {
-      const response = await api.get<Recipe[]>('/recipes');
+      const response = await axios.get<Recipe[]>('/recipes');
       setRecipes(response.data);
     } catch (error) {
       console.error('Failed to fetch recipes:', error);
@@ -85,9 +85,9 @@ const Recipes: React.FC = () => {
     try {
       setModalVisible(false);
       if (editingId) {
-        await api.put(`/recipes/${editingId}`, form);
+        await axios.put(`/recipes/${editingId}`, form);
       } else {
-        await api.post('/recipes', form);
+        await axios.post('/recipes', form);
       }
       resetForm();
       fetchRecipes();
@@ -98,7 +98,7 @@ const Recipes: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await api.delete(`/recipes/${id}`);
+      await axios.delete(`/recipes/${id}`);
       fetchRecipes();
     } catch (error) {
       console.error('Failed to delete recipe:', error);

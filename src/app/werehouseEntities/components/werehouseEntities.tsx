@@ -1,8 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { axiosInstance as api } from '@/services/axios/index';
+import axios from '@/services/axios/index';
 import { Button } from '@/components/ui/button';
 import Select from '@/components/Select';
+import Combobox from '@/components/Combobox';
 import {
   Table,
   TableBody,
@@ -96,7 +97,9 @@ const WerehouseEntities: React.FC = () => {
 
   const fetchWerehouseEntities = async (): Promise<void> => {
     try {
-      const response = await api.get<WerehouseEntitie[]>('/werehouseEntities');
+      const response = await axios.get<WerehouseEntitie[]>(
+        '/werehouseEntities'
+      );
       setWerehouseEntities(response.data || []);
     } catch (err) {
       // setError('Failed to fetch warehouse entities.');
@@ -106,7 +109,7 @@ const WerehouseEntities: React.FC = () => {
 
   const fetchFoods = async () => {
     try {
-      const response = await api.get('/foods');
+      const response = await axios.get('/foods');
       setFoods(response.data || []);
     } catch (error) {
       console.error('Failed to fetch foods:', error);
@@ -115,7 +118,7 @@ const WerehouseEntities: React.FC = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await api.get('/locations');
+      const response = await axios.get('/locations');
       setLocations(response.data || []);
     } catch (error) {
       console.error('Failed to fetch locations:', error);
@@ -124,7 +127,7 @@ const WerehouseEntities: React.FC = () => {
 
   const fetchWarehouses = async () => {
     try {
-      const response = await api.get('/warehouses');
+      const response = await axios.get('/warehouses');
       setWarehouses(response.data || []);
     } catch (error) {
       console.error('Failed to fetch warehouses:', error);
@@ -140,9 +143,9 @@ const WerehouseEntities: React.FC = () => {
 
     try {
       if (editingId) {
-        await api.put(`/werehouseEntities/${editingId}`, submissionForm);
+        await axios.put(`/werehouseEntities/${editingId}`, submissionForm);
       } else {
-        await api.post('/werehouseEntities', submissionForm);
+        await axios.post('/werehouseEntities', submissionForm);
       }
       setModalVisible(false);
       resetForm();
@@ -156,7 +159,7 @@ const WerehouseEntities: React.FC = () => {
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await api.delete(`/werehouseEntities/${id}`);
+      await axios.delete(`/werehouseEntities/${id}`);
       await fetchWerehouseEntities();
     } catch (error) {
       console.error('Failed to delete warehouse entity:', error);
@@ -287,6 +290,7 @@ const WerehouseEntities: React.FC = () => {
                   form={form}
                   setForm={setForm}
                   fieldToMap="foodId"
+                  useCombobox={true}
                 />
               </div>
               <div>
@@ -298,6 +302,7 @@ const WerehouseEntities: React.FC = () => {
                   form={form}
                   setForm={setForm}
                   fieldToMap="locationId"
+                  useCombobox={true}
                 />
               </div>
               <div>
@@ -309,6 +314,7 @@ const WerehouseEntities: React.FC = () => {
                   form={form}
                   setForm={setForm}
                   fieldToMap="warehouseId"
+                  useCombobox={true}
                 />
               </div>
               <div>

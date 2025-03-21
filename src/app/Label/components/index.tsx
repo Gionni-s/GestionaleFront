@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { axiosInstance as axios } from '@/services/axios';
+import axios from '@/services/axios';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
 import { loadData } from '../utils';
 import { Category, Item } from '../types';

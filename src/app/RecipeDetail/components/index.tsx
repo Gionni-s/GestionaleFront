@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { axiosInstance as api } from '@/services/axios/index';
+import axios from '@/services/axios/index';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
@@ -49,7 +49,7 @@ const RecipeDetail: React.FC = () => {
 
     const fetchRecipe = async () => {
       try {
-        const response = await api.get<Recipe>(`/recipes/${id}`);
+        const response = await axios.get<Recipe>(`/recipes/${id}`);
         setRecipe(response.data);
       } catch (error) {
         console.error('Failed to fetch recipe:', error);

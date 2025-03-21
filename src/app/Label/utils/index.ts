@@ -1,4 +1,4 @@
-import { axiosInstance as axios } from '@/services/axios';
+import axios from '@/services/axios';
 import { Item } from '../types';
 
 export const fetchData = async (url: string): Promise<Item[]> => {

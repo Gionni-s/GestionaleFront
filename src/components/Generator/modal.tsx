@@ -1,86 +1,86 @@
-import React, { memo, useMemo, useCallback, useState, useEffect } from "react"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { TagInfoType, TagProps } from "./tags"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { TagInfoType, TagProps } from './tags';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select"
-import { axiosInstance as api } from "@/services/axios/index"
+} from '../ui/select';
+import axios from '@/services/axios/index';
 
 interface ModalProps {
-  formField: TagProps[]
-  isVisible: boolean
-  title: string
-  onClose: () => void
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>
-  form: Record<string, any>
-  setForm: React.Dispatch<React.SetStateAction<any>>
+  formField: TagProps[];
+  isVisible: boolean;
+  title: string;
+  onClose: () => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  form: Record<string, any>;
+  setForm: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const groupByLabel = (tags: TagInfoType[]) =>
   tags.reduce((acc, tag) => {
-    const label = typeof tag.label === "string" ? tag.label : "default"
-    if (!acc[label]) acc[label] = []
-    acc[label].push(tag)
-    return acc
-  }, {} as Record<string, TagInfoType[]>)
+    const label = typeof tag.label === 'string' ? tag.label : 'default';
+    if (!acc[label]) acc[label] = [];
+    acc[label].push(tag);
+    return acc;
+  }, {} as Record<string, TagInfoType[]>);
 
 const Modal: React.FC<ModalProps> = memo(
   ({ isVisible, formField, title, onClose, onSubmit, form, setForm }) => {
-    const [apiResult, setApiResult] = useState<any[]>([])
+    const [apiResult, setApiResult] = useState<any[]>([]);
 
     const fetchResult = async () => {
       try {
         // Estrarre le URL dai formField
         const urls = formField.flatMap(({ structures }) =>
           structures
-            .filter((structure) => structure.type === "dialog")
+            .filter((structure) => structure.type === 'dialog')
             .flatMap(
               ({ default: fields }) =>
                 fields?.filter((field) => field.url).map(({ url }) => url) || []
             )
-        )
+        );
 
         // Eseguire tutte le richieste in parallelo
         const responses = await Promise.all(
           urls.map(async (url: any) => {
             try {
-              const response = await api.get(url)
-              return { [url]: response.data }
+              const response = await axios.get(url);
+              return { [url]: response.data };
             } catch (error) {
-              console.error(`Error fetching data from ${url}:`, error)
-              return { [url]: null } // In caso di errore, restituire un valore nullo per questa URL
+              console.error(`Error fetching data from ${url}:`, error);
+              return { [url]: null }; // In caso di errore, restituire un valore nullo per questa URL
             }
           })
-        )
+        );
 
         // Aggiornare lo stato con i risultati
-        setApiResult(responses)
+        setApiResult(responses);
       } catch (error) {
-        console.error("Error in fetchResult:", error)
+        console.error('Error in fetchResult:', error);
       }
-    }
+    };
 
     useEffect(() => {
-      fetchResult()
-    }, [])
+      fetchResult();
+    }, []);
 
-    if (!isVisible) return null
+    if (!isVisible) return null;
 
     // Memoized tag creation function
     const createTag = (tag: TagInfoType, index: number | string) => {
-      const supportedTypes = ["text", "number", "date", "email"]
+      const supportedTypes = ['text', 'number', 'date', 'email'];
 
       try {
         switch (tag.type?.toLowerCase()) {
-          case "input":
-            const dataType = tag.dataType?.toLowerCase() || "text"
+          case 'input':
+            const dataType = tag.dataType?.toLowerCase() || 'text';
 
             if (supportedTypes.includes(dataType)) {
               return (
@@ -88,27 +88,27 @@ const Modal: React.FC<ModalProps> = memo(
                   key={`input-${index}`}
                   id={`input-${index}`}
                   type={dataType as React.HTMLInputTypeAttribute}
-                  placeholder={tag.placeholder || ""}
-                  value={form[tag.label.toLowerCase()] || ""}
+                  placeholder={tag.placeholder || ''}
+                  value={form[tag.label.toLowerCase()] || ''}
                   onChange={(e) =>
                     setForm((prev: any) => ({
                       ...prev,
                       [tag.label.toLowerCase()]: e.target.value,
                     }))
                   }
-                  className={tag.class || "w-full"}
+                  className={tag.class || 'w-full'}
                   required
                 />
-              )
+              );
             }
-            console.warn(`Unsupported input dataType: ${dataType}`)
-            return null
+            console.warn(`Unsupported input dataType: ${dataType}`);
+            return null;
 
-          case "select":
+          case 'select':
             const requestKey =
-              tag.key?.indexOf(".") == -1
-                ? form[tag.key.split(".")[0]][tag.key.split(".")[1]]
-                : form[tag.key || tag.label]
+              tag.key?.indexOf('.') == -1
+                ? form[tag.key.split('.')[0]][tag.key.split('.')[1]]
+                : form[tag.key || tag.label];
             return (
               <select
                 id="cookbook"
@@ -120,13 +120,13 @@ const Modal: React.FC<ModalProps> = memo(
                 <option value={tag.placeholder}>{tag.placeholder}</option>
                 {apiResult
                   .filter((val) => {
-                    const key = Object.keys(val)
-                    if (key[0] == tag.url) return val[key[0]]
+                    const key = Object.keys(val);
+                    if (key[0] == tag.url) return val[key[0]];
                   })
                   .map((val) => {
                     // console.log(val)
-                    const key = Object.keys(val)
-                    return val[key[0]]
+                    const key = Object.keys(val);
+                    return val[key[0]];
                   })
                   .map((val, index) => {
                     // console.log({ val, index })
@@ -136,41 +136,41 @@ const Modal: React.FC<ModalProps> = memo(
                         <option value={element._id} key={index + secondIndex}>
                           {element.name}
                         </option>
-                      )
-                    })
+                      );
+                    });
                   })}
               </select>
-            )
-          case "button":
+            );
+          case 'button':
             return (
               <Button
                 key={`button-${index}`}
                 type="button"
-                size={tag.size || "default"}
-                variant={tag.variant || "default"}
+                size={tag.size || 'default'}
+                variant={tag.variant || 'default'}
                 onClick={tag.handleEvent}
-                className={tag.class || ""}
+                className={tag.class || ''}
               >
                 {tag.icon || tag.value || tag.label}
               </Button>
-            )
+            );
 
           default:
-            console.warn(`Unsupported tag type: ${tag.type}`)
-            return null
+            console.warn(`Unsupported tag type: ${tag.type}`);
+            return null;
         }
       } catch (error) {
-        console.error("Error creating tag:", error)
-        return null
+        console.error('Error creating tag:', error);
+        return null;
       }
-    }
+    };
 
     // Memoized dialog fields generation
     const dialogFields = () => {
       try {
         return formField.flatMap((formItem) =>
           formItem.structures
-            .filter((structure) => structure.type === "dialog")
+            .filter((structure) => structure.type === 'dialog')
             .flatMap(
               (structure) =>
                 structure.default?.map((field, index) => (
@@ -184,12 +184,12 @@ const Modal: React.FC<ModalProps> = memo(
                   </div>
                 )) || []
             )
-        )
+        );
       } catch (error) {
-        console.error("Error generating dialog fields:", error)
-        return []
+        console.error('Error generating dialog fields:', error);
+        return [];
       }
-    }
+    };
 
     return (
       <Dialog open={isVisible} onOpenChange={onClose}>
@@ -205,16 +205,16 @@ const Modal: React.FC<ModalProps> = memo(
                 className="w-full"
                 disabled={Object.keys(form).length === 0}
               >
-                {title.includes("Edit") ? "Update" : "Create"}
+                {title.includes('Edit') ? 'Update' : 'Create'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
-)
+);
 
-Modal.displayName = "Modal"
+Modal.displayName = 'Modal';
 
-export default Modal
+export default Modal;

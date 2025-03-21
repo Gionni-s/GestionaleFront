@@ -1,43 +1,43 @@
-import { useEffect, useState } from "react"
-import { axiosInstance as api } from "@/services/axios/index"
-import Tag, { TagProps } from "./tags"
+import { useEffect, useState } from 'react';
+import axios from '@/services/axios/index';
+import Tag, { TagProps } from './tags';
 
 export interface Entity {
-  _id: string
-  name: string
-  [key: string]: any
+  _id: string;
+  name: string;
+  [key: string]: any;
 }
 
 const Form = ({ fields }: { fields: TagProps[] }) => {
-  const [formFields, setFields] = useState<TagProps[]>(fields)
+  const [formFields, setFields] = useState<TagProps[]>(fields);
 
   // Fetch data for a specific field
   const fetchData = async (url: string): Promise<Entity[]> => {
     try {
-      const response = await api.get(url)
-      return response.data || []
+      const response = await axios.get(url);
+      return response.data || [];
     } catch (error) {
-      console.error(`Failed to fetch ${url}:`, error)
-      return []
+      console.error(`Failed to fetch ${url}:`, error);
+      return [];
     }
-  }
+  };
 
   useEffect(() => {
     const loadData = async () => {
       const updatedFields = await Promise.all(
         formFields.map(async (field) => {
           if (field.url) {
-            const fetchedData = await fetchData(field.url)
-            return { ...field, apiResult: fetchedData }
+            const fetchedData = await fetchData(field.url);
+            return { ...field, apiResult: fetchedData };
           }
-          return field
+          return field;
         })
-      )
-      setFields(updatedFields)
-    }
+      );
+      setFields(updatedFields);
+    };
 
-    loadData()
-  }, [fields])
+    loadData();
+  }, [fields]);
 
   return (
     <div className="space-y-4">
@@ -51,10 +51,10 @@ const Form = ({ fields }: { fields: TagProps[] }) => {
             title={field.title}
             apiResult={field.apiResult}
           />
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default Form
+export default Form;
