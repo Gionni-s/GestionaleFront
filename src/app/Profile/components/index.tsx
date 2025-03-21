@@ -24,6 +24,7 @@ export interface UserProfile {
   lastLogin: Date;
   profileImage?: string;
   color: string;
+  role: string;
 }
 
 const Profile: React.FC = () => {

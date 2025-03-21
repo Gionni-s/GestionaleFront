@@ -6,6 +6,9 @@ interface User {
   id: string | undefined;
   email?: string;
   name?: string;
+  surname?: string;
+  role?: string;
+  profileImage?: string | null;
 }
 
 interface AuthState extends User {
@@ -16,11 +19,16 @@ interface AuthState extends User {
 }
 
 interface LoginPayload {
-  id: string;
-  email?: string;
-  name?: string;
   token: string;
-  refreshToken: string;
+  user: {
+    id: string;
+    email?: string;
+    name?: string;
+    surname?: string;
+    role: string;
+    profileImage?: string | null;
+  };
+  refreshToken?: string;
 }
 
 interface TokenUpdatePayload {
@@ -33,6 +41,9 @@ const initialState: AuthState = {
   id: undefined,
   email: undefined,
   name: undefined,
+  surname: undefined,
+  role: undefined,
+  profileImage: undefined,
   isAuthenticated: false,
   token: null,
   refreshToken: null,
@@ -67,15 +78,27 @@ export const authSlice = createSlice({
       state.loading = true;
     },
     loginSuccess: (state, action: PayloadAction<LoginPayload>) => {
+      const { token, user, refreshToken } = action.payload;
+
       state.isAuthenticated = true;
-      state.id = action.payload.id;
-      state.email = action.payload.email;
-      state.name = action.payload.name;
-      state.token = action.payload.token;
-      state.refreshToken = action.payload.refreshToken;
+      state.id = user.id;
+      state.email = user.email;
+      state.name = user.name;
+      state.surname = user.surname;
+      state.role = user.role;
+      state.profileImage = user.profileImage;
+      state.token = token;
+      state.refreshToken = refreshToken || null;
       state.loading = false;
-      safeLocalStorage.setItem('token', action.payload.token);
-      safeLocalStorage.setItem('refreshToken', action.payload.refreshToken);
+
+      safeLocalStorage.setItem('token', token);
+      safeLocalStorage.setItem('role', user.role);
+      safeLocalStorage.setItem('email', user.email || '');
+      safeLocalStorage.setItem('name', user.name || '');
+      safeLocalStorage.setItem('surname', user.surname || '');
+      if (refreshToken) {
+        safeLocalStorage.setItem('refreshToken', refreshToken);
+      }
     },
     loginFailure: (state) => {
       state.loading = false;
@@ -84,22 +107,58 @@ export const authSlice = createSlice({
       Object.assign(state, initialState);
       safeLocalStorage.removeItem('token');
       safeLocalStorage.removeItem('refreshToken');
+      safeLocalStorage.removeItem('role');
+      safeLocalStorage.removeItem('email');
+      safeLocalStorage.removeItem('name');
+      safeLocalStorage.removeItem('surname');
     },
     updateToken: (state, action: PayloadAction<TokenUpdatePayload>) => {
-      state.token = action.payload.token;
-      if (action.payload.refreshToken) {
-        state.refreshToken = action.payload.refreshToken;
-        safeLocalStorage.setItem('refreshToken', action.payload.refreshToken);
+      const { token, user, refreshToken } = action.payload;
+
+      state.token = token;
+      state.refreshToken = refreshToken || state.refreshToken;
+      state.id = user._id;
+      state.email = user.email;
+      state.name = user.name;
+      state.surname = user.surname;
+      state.role = user.role;
+      state.profileImage = user.profileImage;
+
+      safeLocalStorage.setItem('token', token);
+      if (refreshToken) {
+        safeLocalStorage.setItem('refreshToken', refreshToken);
       }
-      safeLocalStorage.setItem('token', action.payload.token);
+      safeLocalStorage.setItem('role', user.role);
+      safeLocalStorage.setItem('email', user.email || '');
+      safeLocalStorage.setItem('name', user.name || '');
+      safeLocalStorage.setItem('surname', user.surname || '');
     },
     hydrate: (state) => {
       const token = safeLocalStorage.getItem('token');
       const refreshToken = safeLocalStorage.getItem('refreshToken');
-      if (token && refreshToken) {
+      const role = safeLocalStorage.getItem('role');
+      const email = safeLocalStorage.getItem('email');
+      const name = safeLocalStorage.getItem('name');
+      const surname = safeLocalStorage.getItem('surname');
+
+      if (token) {
         state.token = token;
-        state.refreshToken = refreshToken;
         state.isAuthenticated = true;
+      }
+      if (refreshToken) {
+        state.refreshToken = refreshToken;
+      }
+      if (role) {
+        state.role = role;
+      }
+      if (email) {
+        state.email = email;
+      }
+      if (name) {
+        state.name = name;
+      }
+      if (surname) {
+        state.surname = surname;
       }
     },
   },
@@ -122,6 +181,10 @@ export const selectUser = (state: { auth: AuthState }): User => ({
   id: state.auth.id,
   email: state.auth.email,
   name: state.auth.name,
+  surname: state.auth.surname,
+  role: state.auth.role,
+  profileImage: state.auth.profileImage,
 });
+export const selectUserRole = (state: { auth: AuthState }) => state.auth.role;
 export const selectToken = (state: { auth: AuthState }) => state.auth.token;
 export const selectAuthState = (state: { auth: AuthState }) => state.auth;

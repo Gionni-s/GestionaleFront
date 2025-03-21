@@ -33,7 +33,7 @@ export function NavBar() {
       roleRequired: 'user',
     },
     { href: '/budget', label: 'Budget', roleRequired: 'user' },
-    { href: '/Dashbord', label: 'Dashboard', roleRequired: 'admin' }, // Only admins should see this
+    { href: '/Dashbord', label: 'Dashboard', roleRequired: 'user' },
   ];
 
   useEffect(() => {
