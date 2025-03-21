@@ -15,10 +15,11 @@ import axios from '@/services/axios';
 import { loginSuccess } from '@/services/store/auth';
 import { store } from '@/services/store';
 import { useRouter } from 'next/navigation';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 export function AuthCard() {
   const router = useRouter();
-  const [isRegistration, setRegistration] = useState(false);
+  const [tab, setTab] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -50,10 +51,9 @@ export function AuthCard() {
         mail: email,
       });
 
-      // Perform login after successful registration
       const token = `${email}:${password}`;
       const encodedToken = Buffer.from(token).toString('base64');
-      const loginResponse = await axios.post('/users/login', {
+      const loginResponse = await axios.post('/users/login', undefined, {
         headers: { Authorization: `Basic ${encodedToken}` },
       });
       store.dispatch(loginSuccess(loginResponse.data));
@@ -61,14 +61,6 @@ export function AuthCard() {
       router.refresh();
     } catch (error) {
       console.error('Registration error:', error);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (isRegistration) {
-      handleRegistration();
-    } else {
-      handleLogin();
     }
   };
 
@@ -81,48 +73,54 @@ export function AuthCard() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto my-4">
+    <Card className="w-full max-w-md mx-auto my-4 p-6 shadow-lg rounded-lg">
       <CardHeader>
-        <CardTitle>{isRegistration ? 'Registrati' : 'Login'}</CardTitle>
+        <CardTitle>Benvenuto</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              type="email"
-              id="email"
-              placeholder="example@example.com"
-              value={email}
-              onChange={({ target }) => setEmail(target.value)}
-            />
-            <Label htmlFor="password">Password</Label>
-            <Input
-              type="password"
-              id="password"
-              placeholder="············"
-              maxLength={20}
-              value={password}
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          {isRegistration && (
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Username</Label>
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register">Registrati</TabsTrigger>
+          </TabsList>
+          <TabsContent value="login">
+            <div className="grid gap-4">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                type="email"
+                id="email"
+                placeholder="example@example.com"
+                value={email}
+                onChange={({ target }) => setEmail(target.value)}
+              />
+              <Label htmlFor="password">Password</Label>
+              <Input
+                type="password"
+                id="password"
+                placeholder="············"
+                maxLength={20}
+                value={password}
+                onChange={({ target }) => setPassword(target.value)}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="register">
+            <div className="grid gap-4">
+              <Label htmlFor="name">Nome</Label>
               <Input
                 id="name"
-                placeholder="Username"
+                placeholder="Nome"
                 value={name}
                 onChange={({ target }) => setName(target.value)}
               />
-              <Label htmlFor="surname">Surname</Label>
+              <Label htmlFor="surname">Cognome</Label>
               <Input
                 id="surname"
-                placeholder="Surname"
+                placeholder="Cognome"
                 value={surname}
                 onChange={({ target }) => setSurname(target.value)}
               />
-              <Label htmlFor="phone">Phone number</Label>
+              <Label htmlFor="phone">Telefono</Label>
               <Input
                 type="tel"
                 id="phone"
@@ -130,21 +128,33 @@ export function AuthCard() {
                 value={phone}
                 onChange={({ target }) => setPhone(target.value)}
               />
+              <Label htmlFor="email">Email</Label>
+              <Input
+                type="email"
+                id="email"
+                placeholder="example@example.com"
+                value={email}
+                onChange={({ target }) => setEmail(target.value)}
+              />
+              <Label htmlFor="password">Password</Label>
+              <Input
+                type="password"
+                id="password"
+                placeholder="············"
+                maxLength={20}
+                value={password}
+                onChange={({ target }) => setPassword(target.value)}
+              />
             </div>
-          )}
-          <Button onClick={() => setRegistration(!isRegistration)}>
-            {isRegistration
-              ? "Sei già registrato? Fai l'accesso"
-              : 'Non hai un account? Registrati'}
-          </Button>
-        </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={clearFields}>
           Annulla
         </Button>
-        <Button onClick={handleSubmit}>
-          {isRegistration ? 'Registrati' : 'Login'}
+        <Button onClick={tab === 'login' ? handleLogin : handleRegistration}>
+          {tab === 'login' ? 'Login' : 'Registrati'}
         </Button>
       </CardFooter>
     </Card>

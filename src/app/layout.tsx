@@ -1,34 +1,40 @@
-"use client"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import Link from "next/link"
-import { NavBar } from "@/components/NavBar"
+'use client';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { NavBar } from '@/components/NavBar';
+import React from 'react';
+import { store, persistor } from '../services/store';
+import { Provider, useSelector } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { AuthCard } from './Auth/components/AuthCard';
 
-import React from "react"
-import { store, persistor } from "../services/store"
-import { Provider } from "react-redux"
-import { PersistGate } from "redux-persist/integration/react"
+const inter = Inter({ subsets: ['latin'] });
 
-const inter = Inter({ subsets: ["latin"] })
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
+  const token = useSelector((state: any) => state.auth?.token);
+  return (
+    <div className={inter.className}>
+      {token ? <NavBar /> : null}
+      {token ? children : <AuthCard />}
+    </div>
+  );
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html>
       <body>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-            <div className={inter.className}>
-              <NavBar />
-              {children}
-            </div>
+            <LayoutWrapper>{children}</LayoutWrapper>
           </PersistGate>
         </Provider>
       </body>
     </html>
-  )
+  );
 }

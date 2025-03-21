@@ -25,14 +25,14 @@ export function NavBar() {
 
   // Menu items with role-based access control
   const menuItems = [
-    { href: '/Label', label: 'Labels' },
-    // { href: '/Food', label: 'Food' },
-    // { href: '/Location', label: 'Location' },
-    // { href: '/CookBook', label: 'Cook Book' },
-    { href: '/Recipe', label: 'Recipe' },
-    // { href: '/werehouse', label: 'Warehouse' },
-    { href: '/werehouseEntities', label: 'Warehouse Entities' },
-    { href: '/budget', label: 'Budget' },
+    { href: '/Label', label: 'Labels', roleRequired: 'user' },
+    { href: '/Recipe', label: 'Recipe', roleRequired: 'user' },
+    {
+      href: '/werehouseEntities',
+      label: 'Warehouse Entities',
+      roleRequired: 'user',
+    },
+    { href: '/budget', label: 'Budget', roleRequired: 'user' },
     { href: '/Dashbord', label: 'Dashboard', roleRequired: 'admin' }, // Only admins should see this
   ];
 
@@ -85,28 +85,15 @@ export function NavBar() {
       )}
 
       <div className="flex items-center">
-        {token ? (
-          <Link href="/Profile">
-            <Avatar className="w-8 h-8 cursor-pointer border-2 border-gray-300 hover:border-blue-500 transition-colors">
-              <AvatarImage src={userProfile?.profileImage} alt="Profile" />
-              <AvatarFallback>
-                {userProfile?.name?.[0]}
-                {userProfile?.surname?.[0]}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-        ) : (
-          <MenubarMenu>
-            <MenubarTrigger>
-              <Link
-                href="/Auth"
-                className="hover:text-blue-600 transition-colors"
-              >
-                Login
-              </Link>
-            </MenubarTrigger>
-          </MenubarMenu>
-        )}
+        <Link href="/Profile">
+          <Avatar className="w-8 h-8 cursor-pointer border-2 border-gray-300 hover:border-blue-500 transition-colors">
+            <AvatarImage src={userProfile?.profileImage} alt="Profile" />
+            <AvatarFallback>
+              {userProfile?.name?.[0]}
+              {userProfile?.surname?.[0]}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
       </div>
     </Menubar>
   );
