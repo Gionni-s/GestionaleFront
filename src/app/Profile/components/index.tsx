@@ -108,7 +108,7 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <Card className="p-8 shadow-xl rounded-xl">
+    <Card className="p-8 h-full w-full shadow-xl rounded-xl">
       <div className="relative">
         <div className="absolute right-0 top-0">
           <Button
@@ -133,63 +133,65 @@ const Profile: React.FC = () => {
         )}
         {form && (
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex flex-col items-center mb-6">
-              <div className="relative group">
-                <Avatar className="w-44 h-44 border-2 border-gray-300 transition-transform">
-                  <AvatarImage
-                    src={previewImage || form.profileImage}
-                    alt="Profilo"
-                  />
-                  <AvatarFallback>
-                    {form.name?.charAt(0)} {form.surname?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                {isEditing && (
-                  <div className="absolute bottom-0 right-0 -mr-2 -mb-2">
-                    <Label
-                      htmlFor="profileImage"
-                      className="bg-black text-white rounded-full p-2 cursor-pointer hover:bg-gray-800 transition-colors flex items-center justify-center"
-                    >
-                      <Camera className="w-5 h-5" />
-                      <Input
-                        id="profileImage"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleImageUpload}
-                      />
-                    </Label>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div className="flex flex-col items-center w-full mb-10">
+              <div className="grid grid-cols-[1fr_2fr] gap-6 w-full max-w-4xl">
+                {/* Avatar */}
+                <div className="relative flex">
+                  <Avatar className="w-48 h-48 border-2 border-gray-300 transition-transform">
+                    <AvatarImage
+                      src={previewImage || form.profileImage}
+                      alt="Profilo"
+                    />
+                    <AvatarFallback>
+                      {form.name?.charAt(0)} {form.surname?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isEditing && (
+                    <div className="absolute bottom-0 right-0">
+                      <Label
+                        htmlFor="profileImage"
+                        className="bg-black text-white rounded-full p-2 cursor-pointer hover:bg-gray-800 transition-colors flex items-center justify-center"
+                      >
+                        <Camera className="w-5 h-5" />
+                        <Input
+                          id="profileImage"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
+                      </Label>
+                    </div>
+                  )}
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name" className="text-gray-700">
-                  Nome
-                </Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => handleFieldChange('name', e.target.value)}
-                  required
-                  disabled={!isEditing}
-                  className="mt-1 bg-white border-gray-300 focus:border-black transition-colors"
-                />
-              </div>
-              <div>
-                <Label htmlFor="surname" className="text-gray-700">
-                  Cognome
-                </Label>
-                <Input
-                  id="surname"
-                  value={form.surname}
-                  onChange={(e) => handleFieldChange('surname', e.target.value)}
-                  required
-                  disabled={!isEditing}
-                  className="mt-1 bg-white border-gray-300 focus:border-black transition-colors"
-                />
+                {/* Form */}
+                <div className="flex flex-col justify-center w-full">
+                  <Label htmlFor="name" className="text-gray-700">
+                    Nome
+                  </Label>
+                  <Input
+                    id="name"
+                    value={form.name}
+                    onChange={(e) => handleFieldChange('name', e.target.value)}
+                    required
+                    disabled={!isEditing}
+                    className="mt-1 w-full bg-white border-gray-300 focus:border-black transition-colors"
+                  />
+                  <Label htmlFor="surname" className="text-gray-700 mt-4">
+                    Cognome
+                  </Label>
+                  <Input
+                    id="surname"
+                    value={form.surname}
+                    onChange={(e) =>
+                      handleFieldChange('surname', e.target.value)
+                    }
+                    required
+                    disabled={!isEditing}
+                    className="mt-1 w-full bg-white border-gray-300 focus:border-black transition-colors"
+                  />
+                </div>
               </div>
             </div>
 
