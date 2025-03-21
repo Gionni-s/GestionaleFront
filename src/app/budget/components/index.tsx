@@ -1,8 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { axiosInstance as api } from '@/services/axios/index';
+import axios from '@/services/axios';
 import { Button } from '@/components/ui/button';
-import Select from '@/components/Select';
 import {
   Table,
   TableBody,
@@ -21,113 +20,86 @@ import {
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import Select from '@/components/Select';
 
-// Define types for data
-interface WerehouseEntitie {
+interface User {
   _id: string;
-  quantita: number;
-  scadenza: string;
-  foodId: string;
-  food: { name: string };
-  locationId: string;
-  location: { name: string };
-  warehouseId: string;
-  warehouse: { name: string };
+  email: string;
+  name: string;
+  surname: string;
+}
+
+interface BudgetGroup {
+  _id: string;
+  name: string;
+  max: number;
   userId: string;
 }
 
-interface AlthernativeWarehouse {
-  message: string;
+interface Budget {
+  _id: string;
+  name: string;
+  amount: number;
+  amountType: String;
+  beneficiary: string;
+  groupId: string;
+  'Budget-Group': BudgetGroup;
+  note: string;
+  dateTime: string;
+  userId: string;
+  User: User;
 }
 
 interface FormData {
-  foodId: string;
-  locationId: string;
-  warehouseId: string;
+  name: string;
+  amount: number;
+  amountType: String;
+  beneficiary: string;
+  groupId: string;
+  note: string;
+  dateTime: string;
   userId: string;
-  quantita: number;
-  scadenza: string;
 }
 
-const WerehouseEntities: React.FC = () => {
-  const [werehouseEntities, setWerehouseEntities] = useState<
-    WerehouseEntitie[] | AlthernativeWarehouse
-  >([]);
+const BudgetComponent: React.FC = () => {
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
   const [form, setForm] = useState<FormData>({
-    foodId: '',
-    locationId: '',
-    warehouseId: '',
+    name: '',
+    amount: 0,
+    beneficiary: '',
+    groupId: '',
+    amountType: '€',
+    note: '',
+    dateTime: '',
     userId: '',
-    quantita: 1,
-    scadenza: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [foods, setFoods] = useState<{ _id: string; name: string }[]>([]);
-  const [locations, setLocations] = useState<{ _id: string; name: string }[]>(
-    []
-  );
-  const [warehouses, setWarehouses] = useState<{ _id: string; name: string }[]>(
-    []
-  );
-
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await Promise.all([
-          fetchWerehouseEntities(),
-          fetchFoods(),
-          fetchLocations(),
-          fetchWarehouses(),
-        ]);
-      } catch (err) {
-        setError('Failed to fetch initial data');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchBudgets();
+    fetchBudgetGroups();
   }, []);
 
-  const fetchWerehouseEntities = async (): Promise<void> => {
+  const fetchBudgets = async (): Promise<void> => {
     try {
-      const response = await api.get<WerehouseEntitie[]>('/werehouseEntities');
-      setWerehouseEntities(response.data || []);
+      const response = await axios.get<Budget[]>('/budgets');
+      setBudgets(response.data || []);
     } catch (err) {
-      // setError('Failed to fetch warehouse entities.');
-      console.error(err);
+      console.error('Failed to fetch budgets:', err);
+      setError('Failed to fetch budgets');
     }
   };
 
-  const fetchFoods = async () => {
+  const fetchBudgetGroups = async (): Promise<void> => {
     try {
-      const response = await api.get('/foods');
-      setFoods(response.data || []);
-    } catch (error) {
-      console.error('Failed to fetch foods:', error);
-    }
-  };
-
-  const fetchLocations = async () => {
-    try {
-      const response = await api.get('/locations');
-      setLocations(response.data || []);
-    } catch (error) {
-      console.error('Failed to fetch locations:', error);
-    }
-  };
-
-  const fetchWarehouses = async () => {
-    try {
-      const response = await api.get('/warehouses');
-      setWarehouses(response.data || []);
-    } catch (error) {
-      console.error('Failed to fetch warehouses:', error);
+      const response = await axios.get<BudgetGroup[]>('/budget-groups');
+      setBudgetGroups(response.data || []);
+    } catch (err) {
+      console.error('Failed to fetch budgets:', err);
+      setError('Failed to fetch budgets');
     }
   };
 
@@ -135,130 +107,64 @@ const WerehouseEntities: React.FC = () => {
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault();
-
-    const submissionForm = { ...form };
-
     try {
       if (editingId) {
-        await api.put(`/werehouseEntities/${editingId}`, submissionForm);
+        await axios.put(`/budgets/${editingId}`, form);
       } else {
-        await api.post('/werehouseEntities', submissionForm);
+        await axios.post('/budgets', form);
       }
       setModalVisible(false);
       resetForm();
       setEditingId(null);
-      await fetchWerehouseEntities();
+      fetchBudgets();
     } catch (error) {
-      console.error('Failed to save warehouse entity:', error);
-      setError('Failed to save warehouse entity');
+      console.error('Failed to save budget:', error);
+      setError('Failed to save budget');
     }
   };
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await api.delete(`/werehouseEntities/${id}`);
-      await fetchWerehouseEntities();
+      await axios.delete(`/budgets/${id}`);
+      fetchBudgets();
     } catch (error) {
-      console.error('Failed to delete warehouse entity:', error);
-      setError('Failed to delete warehouse entity');
+      console.error('Failed to delete budget:', error);
+      setError('Failed to delete budget');
     }
   };
 
   const resetForm = () => {
     setForm({
-      foodId: '',
-      locationId: '',
-      warehouseId: '',
+      name: '',
+      amount: 0,
+      beneficiary: '',
+      amountType: '€',
+      groupId: '',
+      note: '',
+      dateTime: '',
       userId: '',
-      quantita: 1,
-      scadenza: '',
     });
   };
 
-  const handleEdit = (werehouseEntitie: WerehouseEntitie) => {
+  const handleEdit = (budget: Budget) => {
     setForm({
-      foodId: werehouseEntitie.foodId,
-      locationId: werehouseEntitie.locationId,
-      warehouseId: werehouseEntitie.warehouseId,
-      userId: werehouseEntitie.userId,
-      quantita: werehouseEntitie.quantita,
-      scadenza: werehouseEntitie.scadenza.split('T')[0],
+      name: budget.name,
+      amount: budget.amount,
+      beneficiary: budget.beneficiary,
+      amountType: '€',
+      groupId: budget.groupId,
+      note: budget.note,
+      dateTime: budget.dateTime,
+      userId: budget.userId,
     });
-    setEditingId(werehouseEntitie._id);
+    setEditingId(budget._id);
     setModalVisible(true);
   };
 
-  const getExpirationColor = (expirationDate: string) => {
-    const daysUntilExpiration =
-      (new Date(expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-    if (daysUntilExpiration <= 0) return 'text-red-600';
-    if (daysUntilExpiration <= 7) return 'text-red-500';
-    if (daysUntilExpiration <= 30) return 'text-orange-400';
-    return 'text-gray-700';
-  };
-
-  const renderTableRows = () => {
-    if (!Array.isArray(werehouseEntities)) {
-      return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center">
-            No warehouseEntity found
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    if (werehouseEntities.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center">
-            Loading...
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return werehouseEntities.map((entity) => (
-      <TableRow key={entity._id}>
-        <TableCell>{entity.food?.name || 'N/A'}</TableCell>
-        <TableCell>{entity.quantita || 0}</TableCell>
-        <TableCell>{entity.location?.name || 'N/A'}</TableCell>
-        <TableCell>{entity.warehouse?.name || 'N/A'}</TableCell>
-        <TableCell className={getExpirationColor(entity.scadenza)}>
-          {new Date(entity.scadenza) < new Date()
-            ? `Scaduto (${new Date(entity.scadenza).toLocaleDateString()})`
-            : new Date(entity.scadenza).toLocaleDateString()}
-        </TableCell>
-        <TableCell>
-          <div className="flex space-x-2">
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => handleEdit(entity)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="destructive"
-              onClick={() => handleDelete(entity._id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        </TableCell>
-      </TableRow>
-    ));
-  };
-
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
-
-  const formGenerator = () => {
-    return (
+  return (
+    <div className="w-full flex flex-col p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Warehouse Entity Management</h1>
+        <h1 className="text-3xl font-bold">Budget Management</h1>
         <Dialog open={modalVisible} onOpenChange={setModalVisible}>
           <DialogTrigger asChild>
             <Button
@@ -268,69 +174,78 @@ const WerehouseEntities: React.FC = () => {
                 setModalVisible(true);
               }}
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Warehouse Entity
+              <PlusCircle className="mr-2 h-4 w-4" /> Add Budget
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingId ? 'Edit Warehouse Entity' : 'Add Warehouse Entity'}
+                {editingId ? 'Edit Budget' : 'Add Budget'}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="food">Food</Label>
-                <Select
-                  label="Seleziona un cibo"
-                  body={foods}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="foodId"
-                />
-              </div>
-              <div>
-                <Label htmlFor="location">Location</Label>
-                <Select
-                  label="Seleziona un Luogo"
-                  base={locations.length == 1 ? locations[0] : ''}
-                  body={locations}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="locationId"
-                />
-              </div>
-              <div>
-                <Label htmlFor="warehouse">Warehouse</Label>
-                <Select
-                  label="Seleziona una Warehouse"
-                  base={warehouses.length == 1 ? warehouses[0] : ''}
-                  body={warehouses}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="warehouseId"
-                />
-              </div>
-              <div>
-                <Label htmlFor="quantita">Quantity</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
-                  id="quantita"
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="importo">Importo</Label>
+                <Input
+                  id="importo"
                   type="number"
-                  value={form.quantita}
+                  value={form.amount}
                   onChange={(e) =>
-                    setForm({ ...form, quantita: +e.target.value })
+                    setForm({ ...form, amount: +e.target.value })
                   }
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="scadenza">Expiration Date</Label>
+                <Label htmlFor="date">Date</Label>
                 <Input
-                  id="scadenza"
+                  id="date"
                   type="date"
-                  value={form.scadenza}
+                  value={form.dateTime}
                   onChange={(e) =>
-                    setForm({ ...form, scadenza: e.target.value })
+                    setForm({ ...form, dateTime: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="importo">Groups </Label>
+                <Select
+                  label="Seleziona un gruppo"
+                  body={budgetGroups}
+                  form={form}
+                  setForm={setForm}
+                  fieldToMap="groupId"
+                  useCombobox={true}
+                />
+              </div>
+              <div>
+                <Label htmlFor="importo">Note </Label>
+                <Input
+                  id="note"
+                  type="text"
+                  value={form.note}
+                  onChange={(e) => setForm({ ...form, note: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="importo">Beneficiario</Label>
+                <Input
+                  id="note"
+                  type="text"
+                  value={form.beneficiary}
+                  onChange={(e) =>
+                    setForm({ ...form, beneficiary: e.target.value })
                   }
                   required
                 />
@@ -342,30 +257,57 @@ const WerehouseEntities: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-    );
-  };
-
-  return (
-    <div className="w-full max-w-4xl mx-auto">
-      {formGenerator()}
 
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Food</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Expiration Date</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Importo</TableHead>
+              <TableHead>Group</TableHead>
+              <TableHead>Date</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>{renderTableRows()}</TableBody>
+          <TableBody>
+            {budgets.map((budget) => (
+              <TableRow key={budget._id}>
+                <TableCell>{budget.name}</TableCell>
+                <TableCell>
+                  {budget.amountType}
+                  {budget.amount}
+                </TableCell>
+                <TableCell>{budget['Budget-Group'].name}</TableCell>
+                {/* <TableCell>{budget.beneficiario}</TableCell>
+                <TableCell>{budget.note}</TableCell> */}
+                <TableCell>
+                  {new Date(budget.dateTime).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => handleEdit(budget)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      onClick={() => handleDelete(budget._id)}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </div>
     </div>
   );
 };
 
-export default WerehouseEntities;
+export default BudgetComponent;
