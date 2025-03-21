@@ -1,11 +1,4 @@
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -45,33 +38,37 @@ export default function MyCombobox({
   fieldToMap,
   base,
 }: Props) {
-  const currentValue = form[fieldToMap];
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState<string>('');
 
   useEffect(() => {
-    if (body.length === 1 && base) {
+    if (body.length === 1) {
+      // Se c'è solo un elemento, impostalo automaticamente
+      const singleValue = body[0]._id;
+      setValue(singleValue);
       setForm((prevForm: any) => ({
         ...prevForm,
-        [fieldToMap]: body[0]._id,
+        [fieldToMap]: singleValue,
+      }));
+    } else {
+      // Se base è definito, usa il valore di default
+      const defaultValue =
+        base && typeof base === 'object' ? base._id : base || '';
+      setValue(defaultValue);
+      setForm((prevForm: any) => ({
+        ...prevForm,
+        [fieldToMap]: defaultValue,
       }));
     }
   }, [body, base, setForm, fieldToMap]);
 
-  const handleChange = (value: string) => {
+  const handleChange = (newValue: string) => {
+    setValue(newValue);
     setForm({
       ...form,
-      [fieldToMap]: value,
+      [fieldToMap]: newValue,
     });
   };
-
-  const isValidValue = body.some((item) => item._id === currentValue);
-  const selectedValue = isValidValue
-    ? currentValue
-    : base && typeof base === 'object'
-    ? base._id
-    : base || '';
-
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(selectedValue);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -82,7 +79,7 @@ export default function MyCombobox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value ? body.find((item) => item.name === value)?.name : label}
+          {body.find((item) => item._id === value)?.name || label}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -97,7 +94,6 @@ export default function MyCombobox({
                   key={_id}
                   value={name}
                   onSelect={() => {
-                    setValue(name);
                     handleChange(_id);
                     setOpen(false);
                   }}
@@ -105,7 +101,7 @@ export default function MyCombobox({
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      value === name ? 'opacity-100' : 'opacity-0'
+                      value === _id ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   {name}
