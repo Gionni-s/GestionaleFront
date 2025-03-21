@@ -82,7 +82,7 @@ export default function MyCombobox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value ? body.find((item) => item._id === value)?.name : label}
+          {value ? body.find((item) => item.name === value)?.name : label}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
