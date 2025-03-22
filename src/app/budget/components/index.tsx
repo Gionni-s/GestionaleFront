@@ -21,6 +21,15 @@ import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Select from '@/components/Select';
+import { Badge } from '@/components/ui/badge';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 
 interface User {
   _id: string;
@@ -61,8 +70,16 @@ interface FormData {
   userId: string;
 }
 
+interface BudgetGroupKpi {
+  _id: string;
+  name: string;
+  total: number;
+  max: number;
+}
+
 const BudgetComponent: React.FC = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [groupBudgetsKpi, setGroupBudgetsKpi] = useState<BudgetGroupKpi[]>([]);
   const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
   const [form, setForm] = useState<FormData>({
     name: '',
@@ -81,7 +98,18 @@ const BudgetComponent: React.FC = () => {
   useEffect(() => {
     fetchBudgets();
     fetchBudgetGroups();
+    fetchKpi();
   }, []);
+
+  const fetchKpi = async (): Promise<void> => {
+    try {
+      const response = await axios.get<BudgetGroupKpi[]>('/budget-groups/kpi');
+      setGroupBudgetsKpi(response.data || []);
+    } catch (err) {
+      console.error('Failed to fetch budgets:', err);
+      setError('Failed to fetch budgets');
+    }
+  };
 
   const fetchBudgets = async (): Promise<void> => {
     try {
@@ -257,7 +285,6 @@ const BudgetComponent: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-
       <div className="border rounded-lg overflow-hidden">
         <Table>
           <TableHeader>

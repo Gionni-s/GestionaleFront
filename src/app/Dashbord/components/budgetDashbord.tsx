@@ -60,7 +60,7 @@ const BudgetChart = () => {
       try {
         const today = new Date();
         let thisMonth = month[today.getMonth()];
-        const response = await axios.get('/budgets/chart');
+        const response = await axios.get('/budget-groups/chart');
 
         let dateKeys: string[] = [];
 
@@ -164,11 +164,8 @@ const BudgetChart = () => {
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={() =>
-              setCurrentDate(
-                (prev) =>
-                  timeRange === 'year'
-                    ? subYears(prev, 1) // Cambia l'anno se sei su 'mesi'
-                    : subMonths(prev, 1) // Cambia il mese se sei su 'giorni'
+              setCurrentDate((prev) =>
+                timeRange === 'year' ? subYears(prev, 1) : subMonths(prev, 1)
               )
             }
             className="px-4 py-2 bg-gray-200 rounded-md"
@@ -184,11 +181,8 @@ const BudgetChart = () => {
 
           <button
             onClick={() =>
-              setCurrentDate(
-                (prev) =>
-                  timeRange === 'year'
-                    ? addYears(prev, 1) // Cambia l'anno se sei su 'mesi'
-                    : addMonths(prev, 1) // Cambia il mese se sei su 'giorni'
+              setCurrentDate((prev) =>
+                timeRange === 'year' ? addYears(prev, 1) : addMonths(prev, 1)
               )
             }
             className="px-4 py-2 bg-gray-200 rounded-md"

@@ -43,7 +43,6 @@ export default function MyCombobox({
 
   useEffect(() => {
     if (body.length === 1) {
-      // Se c'è solo un elemento, impostalo automaticamente
       const singleValue = body[0]._id;
       setValue(singleValue);
       setForm((prevForm: any) => ({
@@ -51,7 +50,6 @@ export default function MyCombobox({
         [fieldToMap]: singleValue,
       }));
     } else {
-      // Se base è definito, usa il valore di default
       const defaultValue =
         base && typeof base === 'object' ? base._id : base || '';
       setValue(defaultValue);

@@ -33,6 +33,7 @@ export function NavBar() {
       roleRequired: 'user',
     },
     { href: '/budget', label: 'Budget', roleRequired: 'user' },
+    { href: '/budget-groups', label: 'Budget Group', roleRequired: 'user' },
     { href: '/Dashbord', label: 'Dashboard', roleRequired: 'user' },
   ];
 
