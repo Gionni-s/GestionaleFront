@@ -27,6 +27,7 @@ interface BudgetGroup {
   name: string;
   max: number;
   total: number;
+  remaining: number;
   userId: string;
 }
 
@@ -151,6 +152,7 @@ const BudgetGroupComponent: React.FC = () => {
               <TableHead>Name</TableHead>
               <TableHead>Max Budget</TableHead>
               <TableHead>Total Spent</TableHead>
+              <TableHead>Remaining Budget</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -163,6 +165,7 @@ const BudgetGroupComponent: React.FC = () => {
                 <TableCell>{budget.name}</TableCell>
                 <TableCell>€{budget.max}</TableCell>
                 <TableCell>€{budget.total}</TableCell>
+                <TableHead>€{budget.remaining}</TableHead>
                 <TableCell>
                   <div className="flex space-x-2">
                     <Button

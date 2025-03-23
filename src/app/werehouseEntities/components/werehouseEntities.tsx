@@ -3,15 +3,6 @@ import React, { useState, useEffect } from 'react';
 import axios from '@/services/axios/index';
 import { Button } from '@/components/ui/button';
 import Select from '@/components/Select';
-import Combobox from '@/components/Combobox';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +13,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import Table from '@/components/Table';
 
 // Define types for data
 interface WerehouseEntitie {
@@ -52,7 +44,7 @@ interface FormData {
 
 const WerehouseEntities: React.FC = () => {
   const [werehouseEntities, setWerehouseEntities] = useState<
-    WerehouseEntitie[] | AlthernativeWarehouse
+    WerehouseEntitie[]
   >([]);
   const [form, setForm] = useState<FormData>({
     foodId: '',
@@ -98,7 +90,7 @@ const WerehouseEntities: React.FC = () => {
   const fetchWerehouseEntities = async (): Promise<void> => {
     try {
       const response = await axios.get<WerehouseEntitie[]>(
-        '/werehouseEntities'
+        '/werehouseEntities?sort=scadenza'
       );
       setWerehouseEntities(response.data || []);
     } catch (err) {
@@ -189,69 +181,6 @@ const WerehouseEntities: React.FC = () => {
     });
     setEditingId(werehouseEntitie._id);
     setModalVisible(true);
-  };
-
-  const getExpirationColor = (expirationDate: string) => {
-    const daysUntilExpiration =
-      (new Date(expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-    if (daysUntilExpiration <= 0) return 'text-red-600';
-    if (daysUntilExpiration <= 7) return 'text-red-500';
-    if (daysUntilExpiration <= 30) return 'text-orange-400';
-    return 'text-gray-700';
-  };
-
-  const renderTableRows = () => {
-    if (!Array.isArray(werehouseEntities)) {
-      return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center">
-            No warehouseEntity found
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    if (werehouseEntities.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center">
-            Loading...
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return werehouseEntities.map((entity) => (
-      <TableRow key={entity._id}>
-        <TableCell>{entity.food?.name || 'N/A'}</TableCell>
-        <TableCell>{entity.quantita || 0}</TableCell>
-        <TableCell>{entity.location?.name || 'N/A'}</TableCell>
-        <TableCell>{entity.warehouse?.name || 'N/A'}</TableCell>
-        <TableCell className={getExpirationColor(entity.scadenza)}>
-          {new Date(entity.scadenza) < new Date()
-            ? `Scaduto (${new Date(entity.scadenza).toLocaleDateString()})`
-            : new Date(entity.scadenza).toLocaleDateString()}
-        </TableCell>
-        <TableCell>
-          <div className="flex space-x-2">
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => handleEdit(entity)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="destructive"
-              onClick={() => handleDelete(entity._id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        </TableCell>
-      </TableRow>
-    ));
   };
 
   if (error) {
@@ -354,24 +283,54 @@ const WerehouseEntities: React.FC = () => {
   return (
     <div className="w-full mx-auto">
       {formGenerator()}
-
       <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Food</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Warehouse</TableHead>
-              <TableHead>Expiration Date</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>{renderTableRows()}</TableBody>
-        </Table>
+        <Table
+          head={[
+            'Food',
+            'Quantity',
+            'Location',
+            'Warehouse',
+            'Expiration Date',
+            'Actions',
+          ]}
+          body={werehouseEntities}
+          bodyKeys={[
+            'food.name',
+            'quantita',
+            'location.name',
+            'warehouse.name',
+            'scadenza',
+          ]}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          columnConfig={{
+            scadenza: {
+              format: (value) => formatExpiration(value),
+              className: (value) => getExpirationColor(value),
+            },
+          }}
+        />
       </div>
     </div>
   );
 };
+
+const getExpirationColor = (expirationDate: string) => {
+  const daysUntilExpiration =
+    (new Date(expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+  if (daysUntilExpiration <= 0) return 'text-red-600';
+  if (daysUntilExpiration <= 7) return 'text-red-500';
+  if (daysUntilExpiration <= 30) return 'text-orange-400';
+  return 'text-gray-700';
+};
+
+function formatExpiration(scadenza?: string) {
+  console.log(scadenza);
+  if (!scadenza) return 'N/A';
+  const date = new Date(scadenza);
+  return date < new Date()
+    ? `Scaduto (${date.toLocaleDateString()})`
+    : date.toLocaleDateString();
+}
 
 export default WerehouseEntities;
