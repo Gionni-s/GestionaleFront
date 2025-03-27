@@ -68,9 +68,6 @@ const UserDashboard: React.FC = () => {
             'lastLogin',
           ]}
           disableActions={true}
-          enablePagination={true}
-          fetchData={fetchUsers}
-          labelPagination="User per pagina"
           columnConfig={{
             profileImage: {
               format: (_, entity) => (
