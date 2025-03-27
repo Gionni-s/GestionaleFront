@@ -13,15 +13,15 @@ export const fetchData = async (url: string): Promise<Item[]> => {
 
 export const loadData = async (setCategories: any) => {
   try {
-    const [foods, locations, warehouses, cookbook] = await Promise.all([
-      fetchData('/foods'),
+    const [foodGroups, locations, warehouses, cookbook] = await Promise.all([
+      fetchData('/food-groups'),
       fetchData('/locations'),
       fetchData('/warehouses'),
       fetchData('/cookBooks'),
     ]);
 
     setCategories({
-      foods,
+      foodGroups,
       locations,
       warehouses,
       cookbook,

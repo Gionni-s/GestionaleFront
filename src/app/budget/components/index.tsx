@@ -3,14 +3,6 @@ import React, { useState, useEffect } from 'react';
 import axios from '@/services/axios';
 import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -30,6 +22,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import Table from '@/components/Table';
 
 interface User {
   _id: string;
@@ -286,55 +279,36 @@ const BudgetComponent: React.FC = () => {
         </Dialog>
       </div>
       <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Importo</TableHead>
-              <TableHead>Group</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {budgets.map((budget) => (
-              <TableRow key={budget._id}>
-                <TableCell>{budget.name}</TableCell>
-                <TableCell>
-                  {budget.amountType}
-                  {budget.amount}
-                </TableCell>
-                <TableCell>{budget['Budget-Group'].name}</TableCell>
-                {/* <TableCell>{budget.beneficiario}</TableCell>
-                <TableCell>{budget.note}</TableCell> */}
-                <TableCell>
-                  {new Date(budget.dateTime).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => handleEdit(budget)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="destructive"
-                      onClick={() => handleDelete(budget._id)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <Table
+          head={[
+            'Name',
+            'Importo',
+            'Group',
+            'Date',
+            { label: 'Actions', className: 'w-[100px]' },
+          ]}
+          body={budgets}
+          bodyKeys={[
+            'name',
+            'amountType|amount',
+            'Budget-Group.name',
+            'dateTime',
+          ]}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          columnConfig={{
+            dateTime: {
+              format: (value) => formatDate(value),
+            },
+          }}
+        />
       </div>
     </div>
   );
 };
+
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString();
+}
 
 export default BudgetComponent;

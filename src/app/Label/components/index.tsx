@@ -19,7 +19,7 @@ import { Category, Item } from '../types';
 const Labels = () => {
   // Initialize categories with empty arrays
   const [categories, setCategories] = useState<Record<string, Item[]>>({
-    foods: [],
+    foodGroups: [],
     locations: [],
     warehouses: [],
     cookbook: [],
@@ -121,7 +121,11 @@ const Labels = () => {
   };
 
   const categoryConfigs: Category[] = [
-    { title: 'Foods', data: categories.foods || [], url: '/foods' },
+    {
+      title: 'Food Groups',
+      data: categories.foodGroups || [],
+      url: '/food-groups',
+    },
     { title: 'Locations', data: categories.locations || [], url: '/locations' },
     {
       title: 'Warehouses',

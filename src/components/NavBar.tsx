@@ -26,6 +26,7 @@ export function NavBar() {
   // Menu items with role-based access control
   const menuItems = [
     { href: '/Label', label: 'Labels', roleRequired: 'user' },
+    { href: '/Food', label: 'Foods', roleRequired: 'user' },
     { href: '/Recipe', label: 'Recipe', roleRequired: 'user' },
     {
       href: '/werehouseEntities',

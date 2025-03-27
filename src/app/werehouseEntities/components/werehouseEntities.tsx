@@ -18,10 +18,11 @@ import Table from '@/components/Table';
 // Define types for data
 interface WerehouseEntitie {
   _id: string;
+  name: string;
   quantita: number;
   scadenza: string;
-  foodId: string;
-  food: { name: string };
+  foodGroupId: string;
+  foodGroup: { name: string };
   locationId: string;
   location: { name: string };
   warehouseId: string;
@@ -34,7 +35,8 @@ interface AlthernativeWarehouse {
 }
 
 interface FormData {
-  foodId: string;
+  name: string;
+  foodGroupId: string;
   locationId: string;
   warehouseId: string;
   userId: string;
@@ -47,7 +49,8 @@ const WerehouseEntities: React.FC = () => {
     WerehouseEntitie[]
   >([]);
   const [form, setForm] = useState<FormData>({
-    foodId: '',
+    name: '',
+    foodGroupId: '',
     locationId: '',
     warehouseId: '',
     userId: '',
@@ -59,7 +62,9 @@ const WerehouseEntities: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [foods, setFoods] = useState<{ _id: string; name: string }[]>([]);
+  const [foodGroups, setFoodGroups] = useState<{ _id: string; name: string }[]>(
+    []
+  );
   const [locations, setLocations] = useState<{ _id: string; name: string }[]>(
     []
   );
@@ -72,7 +77,7 @@ const WerehouseEntities: React.FC = () => {
       try {
         await Promise.all([
           fetchWerehouseEntities(),
-          fetchFoods(),
+          fetchFoodGroups(),
           fetchLocations(),
           fetchWarehouses(),
         ]);
@@ -99,12 +104,12 @@ const WerehouseEntities: React.FC = () => {
     }
   };
 
-  const fetchFoods = async () => {
+  const fetchFoodGroups = async () => {
     try {
-      const response = await axios.get('/foods');
-      setFoods(response.data || []);
+      const response = await axios.get('/food-groups');
+      setFoodGroups(response.data || []);
     } catch (error) {
-      console.error('Failed to fetch foods:', error);
+      console.error('Failed to fetch food groups:', error);
     }
   };
 
@@ -161,7 +166,8 @@ const WerehouseEntities: React.FC = () => {
 
   const resetForm = () => {
     setForm({
-      foodId: '',
+      name: '',
+      foodGroupId: '',
       locationId: '',
       warehouseId: '',
       userId: '',
@@ -170,16 +176,17 @@ const WerehouseEntities: React.FC = () => {
     });
   };
 
-  const handleEdit = (werehouseEntitie: WerehouseEntitie) => {
+  const handleEdit = (warehouseEntitie: WerehouseEntitie) => {
     setForm({
-      foodId: werehouseEntitie.foodId,
-      locationId: werehouseEntitie.locationId,
-      warehouseId: werehouseEntitie.warehouseId,
-      userId: werehouseEntitie.userId,
-      quantita: werehouseEntitie.quantita,
-      scadenza: werehouseEntitie.scadenza.split('T')[0],
+      name: warehouseEntitie.name,
+      foodGroupId: warehouseEntitie.foodGroupId,
+      locationId: warehouseEntitie.locationId,
+      warehouseId: warehouseEntitie.warehouseId,
+      userId: warehouseEntitie.userId,
+      quantita: warehouseEntitie.quantita,
+      scadenza: warehouseEntitie.scadenza.split('T')[0],
     });
-    setEditingId(werehouseEntitie._id);
+    setEditingId(warehouseEntitie._id);
     setModalVisible(true);
   };
 
@@ -212,13 +219,23 @@ const WerehouseEntities: React.FC = () => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="food">Food</Label>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="food">FoodGroups</Label>
                 <Select
                   label="Seleziona un cibo"
-                  body={foods}
+                  body={foodGroups}
                   form={form}
                   setForm={setForm}
-                  fieldToMap="foodId"
+                  fieldToMap="foodGroupId"
                   useCombobox={true}
                 />
               </div>
@@ -286,16 +303,18 @@ const WerehouseEntities: React.FC = () => {
       <div className="border rounded-lg overflow-hidden">
         <Table
           head={[
-            'Food',
+            'name',
+            'Food Group',
             'Quantity',
             'Location',
             'Warehouse',
             'Expiration Date',
-            'Actions',
+            { label: 'Actions', className: 'w-[100px]' },
           ]}
           body={werehouseEntities}
           bodyKeys={[
-            'food.name',
+            'name',
+            'foodGroup.name',
             'quantita',
             'location.name',
             'warehouse.name',
@@ -325,7 +344,6 @@ const getExpirationColor = (expirationDate: string) => {
 };
 
 function formatExpiration(scadenza?: string) {
-  console.log(scadenza);
   if (!scadenza) return 'N/A';
   const date = new Date(scadenza);
   return date < new Date()

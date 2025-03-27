@@ -1,4 +1,4 @@
-import Screen from './components/werehouseEntities';
+import Screen from './components/foods';
 
 export default function Page() {
   return (
