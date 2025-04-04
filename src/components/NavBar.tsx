@@ -1,5 +1,11 @@
 import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import axios from '@/services/axios';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
@@ -15,13 +21,30 @@ interface UserProfile {
   phoneNumber: number;
   dateCreation: Date;
   lastLogin: Date;
-  role: string; // User role (e.g., "user" or "admin")
+  role: string;
   profileImage?: string;
+}
+
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
 }
 
 export function NavBar() {
   const { token } = useSelector((state: any) => state.auth);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>({
+    code: 'en',
+    name: 'English',
+    flag: '../img/flag/UK.png',
+  });
+
+  // Available languages
+  const languages: Language[] = [
+    { code: 'en', name: 'English', flag: 'img/flag/italian.avif' },
+    { code: 'it', name: 'Italiano', flag: '../img/flag/UK.png' },
+  ];
 
   // Menu items with role-based access control
   const menuItems = [
@@ -51,6 +74,13 @@ export function NavBar() {
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
     }
+  };
+
+  // Change language handler
+  const handleLanguageChange = (language: Language) => {
+    setCurrentLanguage(language);
+    // Add language change logic here (e.g., i18n implementation)
+    console.log(`Language changed to ${language.name}`);
   };
 
   // Check if the user has the necessary role for the menu item
@@ -86,7 +116,40 @@ export function NavBar() {
         </div>
       )}
 
-      <div className="flex items-center">
+      <div className="flex items-center space-x-4">
+        {/* Language Selector */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="outline-none">
+            <div className="flex items-center">
+              <Avatar className="w-8 h-8 cursor-pointer border border-gray-300 hover:border-blue-500 transition-colors">
+                <AvatarImage
+                  src={currentLanguage.flag}
+                  alt={currentLanguage.name}
+                />
+                <AvatarFallback>
+                  {currentLanguage.code.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {languages.map((language) => (
+              <DropdownMenuItem
+                key={language.code}
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => handleLanguageChange(language)}
+              >
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={language.flag} alt={language.name} />
+                  <AvatarFallback>{language.code.toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span>{language.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* User Profile */}
         <Link href="/Profile">
           <Avatar className="w-8 h-8 cursor-pointer border-2 border-gray-300 hover:border-blue-500 transition-colors">
             <AvatarImage src={userProfile?.profileImage} alt="Profile" />
