@@ -8,6 +8,7 @@ import { store, persistor } from '../services/store';
 import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { AuthCard } from './Auth/components/AuthCard';
+import '../services/i18n';
 
 const inter = Inter({ subsets: ['latin'] });
 

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Select from '@/components/Select';
+import { useTranslation } from 'react-i18next';
 
 const BudgetForm: React.FC<{
   isOpen: boolean;
@@ -29,6 +30,7 @@ const BudgetForm: React.FC<{
   budgetGroups,
   loading,
 }) => {
+  const { t, i18n } = useTranslation();
   const handleChange = (field: keyof FormData, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -37,11 +39,13 @@ const BudgetForm: React.FC<{
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{editingId ? 'Edit Budget' : 'Add Budget'}</DialogTitle>
+          <DialogTitle>
+            {editingId ? t('editBudgets') : t('addBudgets')}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t('names')}</Label>
             <Input
               id="name"
               value={form.name}
@@ -50,7 +54,7 @@ const BudgetForm: React.FC<{
             />
           </div>
           <div>
-            <Label htmlFor="importo">Amount</Label>
+            <Label htmlFor="importo">{t('amounts')}</Label>
             <Input
               id="importo"
               type="number"
@@ -60,7 +64,7 @@ const BudgetForm: React.FC<{
             />
           </div>
           <div>
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{t('dates')}</Label>
             <Input
               id="date"
               type="date"
@@ -70,9 +74,9 @@ const BudgetForm: React.FC<{
             />
           </div>
           <div>
-            <Label htmlFor="groupId">Groups</Label>
+            <Label htmlFor="groupId">{t('groups')}</Label>
             <Select
-              label="Select a group"
+              label={t('selectGroups')}
               body={budgetGroups}
               form={form}
               setForm={setForm}
@@ -81,7 +85,7 @@ const BudgetForm: React.FC<{
             />
           </div>
           <div>
-            <Label htmlFor="note">Note</Label>
+            <Label htmlFor="note">{t('notes')}</Label>
             <Input
               id="note"
               type="text"
@@ -90,7 +94,7 @@ const BudgetForm: React.FC<{
             />
           </div>
           <div>
-            <Label htmlFor="beneficiary">Beneficiary</Label>
+            <Label htmlFor="beneficiary">{t('beneficiaries')}</Label>
             <Input
               id="beneficiary"
               type="text"
@@ -100,7 +104,7 @@ const BudgetForm: React.FC<{
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {editingId ? 'Update' : 'Create'}
+            {editingId ? t('updates') : t('creates')}
           </Button>
         </form>
       </DialogContent>

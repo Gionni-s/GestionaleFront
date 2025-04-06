@@ -3,9 +3,9 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './auth';
 import kpiReducer from './kpi';
+import languageReducer from './language';
 import logger from 'redux-logger';
 
-// Configurazione di Redux Persist
 const persistConfig = {
   key: 'root',
   storage,
@@ -13,7 +13,8 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  kpi: kpiReducer, // Aggiungi il reducer per il KPI
+  kpi: kpiReducer,
+  language: languageReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

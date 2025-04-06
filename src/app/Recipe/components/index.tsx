@@ -30,8 +30,10 @@ import {
   Ingridient,
   Recipe,
 } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const Recipes: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const [recipes, setRecipes] = useState<Recipe[] | AlternativeRecipe>({
     message: '',
@@ -150,7 +152,7 @@ const Recipes: React.FC = () => {
       return (
         <TableRow>
           <TableCell colSpan={3} className="text-center">
-            No element found
+            {t('noElementFound')}
           </TableCell>
         </TableRow>
       );
@@ -159,7 +161,7 @@ const Recipes: React.FC = () => {
     if (recipes.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={3}>Loading...</TableCell>
+          <TableCell colSpan={3}>{t('loadings')}</TableCell>
         </TableRow>
       );
     }
@@ -228,12 +230,12 @@ const Recipes: React.FC = () => {
   return (
     <div className="w-full mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Recipe Management</h1>
+        <h1 className="text-3xl font-bold">{t('recipeManagements')}</h1>
         <Dialog open={modalVisible} onOpenChange={setModalVisible}>
           <DialogTrigger asChild>
             <Button onClick={resetForm}>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Recipe
+              {t('addRecipes')}
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -244,7 +246,7 @@ const Recipes: React.FC = () => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t('names')}</Label>
                 <Input
                   id="name"
                   value={form.name}
@@ -253,9 +255,9 @@ const Recipes: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="cookbook">CookBook</Label>
+                <Label htmlFor="cookbook">{t('cookBooks')}</Label>
                 <Select
-                  label="Seleziona un Libro di ricette"
+                  label={t('selectCookBooks')}
                   body={cookbookOptions}
                   form={form}
                   setForm={setForm}
@@ -266,9 +268,9 @@ const Recipes: React.FC = () => {
 
               {/* Ingridients */}
               <div className="space-y-4">
-                <Label>Ingridients </Label>
+                <Label>{t('ingredients')}</Label>
                 <Button type="button" onClick={addIngridientField}>
-                  Add Ingridient
+                  {t('addIngredients')}
                 </Button>
                 {form.ingridients.map((ingridient, index) => (
                   <div key={index} className="flex items-center space-x-2">
@@ -280,7 +282,7 @@ const Recipes: React.FC = () => {
                       className="border p-2 rounded"
                       required
                     >
-                      <option value="">Select Ingridient</option>
+                      <option value="">{t('selectIngredients')}</option>
                       {(Array.isArray(ingridientOptions) &&
                         ingridientOptions.map((option) => (
                           <option key={option._id} value={option._id}>
@@ -309,7 +311,7 @@ const Recipes: React.FC = () => {
                         variant="outline"
                         onClick={() => removeIngridientField(index)}
                       >
-                        Remove
+                        {t('removes')}
                       </Button>
                     )}
                   </div>
@@ -319,7 +321,7 @@ const Recipes: React.FC = () => {
                 </Button> */}
               </div>
               <div className="space-y-4">
-                <Label>Note:</Label>
+                <Label>{t('notes')}</Label>
                 <Textarea
                   value={form.note}
                   onChange={(e) => handleFieldChange('note', e.target.value)}
@@ -337,10 +339,10 @@ const Recipes: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>CookBook</TableHead>
-              <TableHead>Ingridients</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead>{t('names')}</TableHead>
+              <TableHead>{t('cookBooks')}</TableHead>
+              <TableHead>{t('ingredients')}</TableHead>
+              <TableHead className="w-[100px]">{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>{renderTableRows()}</TableBody>

@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
+import { useTranslation } from 'react-i18next';
 
 // Define types for data
 interface Food {
@@ -35,6 +36,7 @@ interface FormData {
 }
 
 const Foods: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [Foods, setFoods] = useState<Food[]>([]);
   const [form, setForm] = useState<FormData>({
     name: '',
@@ -140,7 +142,7 @@ const Foods: React.FC = () => {
   const formGenerator = () => {
     return (
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Foods Management</h1>
+        <h1 className="text-3xl font-bold">{t('foodManagements')}</h1>
         <Dialog open={modalVisible} onOpenChange={setModalVisible}>
           <DialogTrigger asChild>
             <Button
@@ -151,18 +153,18 @@ const Foods: React.FC = () => {
               }}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Food Entity
+              {t('addFoods')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingId ? 'Edit Food Entity' : 'Add Foods Entity'}
+                {editingId ? t('editFoods') : t('addFoods')}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t('names')}</Label>
                 <Input
                   id="name"
                   type="text"
@@ -172,9 +174,9 @@ const Foods: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="food">FoodGroups</Label>
+                <Label htmlFor="food">{t('foodGroups')}</Label>
                 <Select
-                  label="Seleziona un cibo"
+                  label={t('selectFoods')}
                   body={foodGroups}
                   form={form}
                   setForm={setForm}
@@ -198,9 +200,9 @@ const Foods: React.FC = () => {
       <div className="border rounded-lg overflow-hidden">
         <Table
           head={[
-            'name',
-            'Food Group',
-            { label: 'Actions', className: 'w-[100px]' },
+            t('names'),
+            t('foodGroups'),
+            { label: t('Actions'), className: 'w-[100px]' },
           ]}
           body={Foods}
           bodyKeys={['name', 'foodGroup.name']}

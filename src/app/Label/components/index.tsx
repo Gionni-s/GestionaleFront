@@ -15,9 +15,10 @@ import axios from '@/services/axios';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
 import { loadData } from '../utils';
 import { Category, Item } from '../types';
+import { useTranslation } from 'react-i18next';
 
 const Labels = () => {
-  // Initialize categories with empty arrays
+  const { t, i18n } = useTranslation();
   const [categories, setCategories] = useState<Record<string, Item[]>>({
     foodGroups: [],
     locations: [],
@@ -122,17 +123,25 @@ const Labels = () => {
 
   const categoryConfigs: Category[] = [
     {
-      title: 'Food Groups',
+      title: t('foodGroups'),
       data: categories.foodGroups || [],
       url: '/food-groups',
     },
-    { title: 'Locations', data: categories.locations || [], url: '/locations' },
     {
-      title: 'Warehouses',
+      title: t('locations'),
+      data: categories.locations || [],
+      url: '/locations',
+    },
+    {
+      title: t('warehouses'),
       data: categories.warehouses || [],
       url: '/warehouses',
     },
-    { title: 'Cookbook', data: categories.cookbook || [], url: '/cookBooks' },
+    {
+      title: t('cookBooks'),
+      data: categories.cookbook || [],
+      url: '/cookBooks',
+    },
   ];
 
   return (
