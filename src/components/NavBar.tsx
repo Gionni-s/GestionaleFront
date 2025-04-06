@@ -62,17 +62,17 @@ export function NavBar() {
 
   // Menu items with role-based access control
   const menuItems = [
-    { href: '/Label', label: 'Labels', roleRequired: 'user' },
-    { href: '/Food', label: 'Foods', roleRequired: 'user' },
-    { href: '/Recipe', label: 'Recipe', roleRequired: 'user' },
+    { href: '/Label', label: t('labels'), roleRequired: 'user' },
+    { href: '/Food', label: t('foods'), roleRequired: 'user' },
+    { href: '/Recipe', label: t('recipes'), roleRequired: 'user' },
     {
       href: '/werehouseEntities',
-      label: 'Warehouse Entities',
+      label: t('warehouseEntities'),
       roleRequired: 'user',
     },
-    { href: '/budget', label: 'Budget', roleRequired: 'user' },
-    { href: '/budget-groups', label: 'Budget Group', roleRequired: 'user' },
-    { href: '/Dashbord', label: 'Dashboard', roleRequired: 'user' },
+    { href: '/budget', label: t('budgets'), roleRequired: 'user' },
+    { href: '/budget-groups', label: t('budgetGroups'), roleRequired: 'user' },
+    { href: '/Dashbord', label: t('Dashboards'), roleRequired: 'user' },
   ];
 
   useEffect(() => {

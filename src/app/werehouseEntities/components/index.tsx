@@ -11,42 +11,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Pencil, Trash } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
+import { useTranslation } from 'react-i18next';
+import { FormData, WarehouseEntitiesType } from '../types';
 
-// Define types for data
-interface WerehouseEntitie {
-  _id: string;
-  name: string;
-  quantita: number;
-  scadenza: string;
-  foodGroupId: string;
-  foodGroup: { name: string };
-  locationId: string;
-  location: { name: string };
-  warehouseId: string;
-  warehouse: { name: string };
-  userId: string;
-}
-
-interface AlthernativeWarehouse {
-  message: string;
-}
-
-interface FormData {
-  name: string;
-  foodGroupId: string;
-  locationId: string;
-  warehouseId: string;
-  userId: string;
-  quantita: number;
-  scadenza: string;
-}
-
-const WerehouseEntities: React.FC = () => {
-  const [werehouseEntities, setWerehouseEntities] = useState<
-    WerehouseEntitie[]
+const WarehouseEntities: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const [warehouseEntities, setWarehouseEntities] = useState<
+    WarehouseEntitiesType[]
   >([]);
   const [form, setForm] = useState<FormData>({
     name: '',
@@ -76,7 +50,7 @@ const WerehouseEntities: React.FC = () => {
     const fetchData = async () => {
       try {
         await Promise.all([
-          fetchWerehouseEntities(),
+          fetchWarehouseEntities(),
           fetchFoodGroups(),
           fetchLocations(),
           fetchWarehouses(),
@@ -92,12 +66,12 @@ const WerehouseEntities: React.FC = () => {
     fetchData();
   }, []);
 
-  const fetchWerehouseEntities = async (): Promise<void> => {
+  const fetchWarehouseEntities = async (): Promise<void> => {
     try {
-      const response = await axios.get<WerehouseEntitie[]>(
+      const response = await axios.get<WarehouseEntitiesType[]>(
         '/werehouseEntities?sort=scadenza'
       );
-      setWerehouseEntities(response.data || []);
+      setWarehouseEntities(response.data || []);
     } catch (err) {
       // setError('Failed to fetch warehouse entities.');
       console.error(err);
@@ -147,7 +121,7 @@ const WerehouseEntities: React.FC = () => {
       setModalVisible(false);
       resetForm();
       setEditingId(null);
-      await fetchWerehouseEntities();
+      await fetchWarehouseEntities();
     } catch (error) {
       console.error('Failed to save warehouse entity:', error);
       setError('Failed to save warehouse entity');
@@ -157,7 +131,7 @@ const WerehouseEntities: React.FC = () => {
   const handleDelete = async (id: string): Promise<void> => {
     try {
       await axios.delete(`/werehouseEntities/${id}`);
-      await fetchWerehouseEntities();
+      await fetchWarehouseEntities();
     } catch (error) {
       console.error('Failed to delete warehouse entity:', error);
       setError('Failed to delete warehouse entity');
@@ -176,17 +150,17 @@ const WerehouseEntities: React.FC = () => {
     });
   };
 
-  const handleEdit = (warehouseEntitie: WerehouseEntitie) => {
+  const handleEdit = (warehouseEntities: WarehouseEntitiesType) => {
     setForm({
-      name: warehouseEntitie.name,
-      foodGroupId: warehouseEntitie.foodGroupId,
-      locationId: warehouseEntitie.locationId,
-      warehouseId: warehouseEntitie.warehouseId,
-      userId: warehouseEntitie.userId,
-      quantita: warehouseEntitie.quantita,
-      scadenza: warehouseEntitie.scadenza.split('T')[0],
+      name: warehouseEntities.name,
+      foodGroupId: warehouseEntities.foodGroupId,
+      locationId: warehouseEntities.locationId,
+      warehouseId: warehouseEntities.warehouseId,
+      userId: warehouseEntities.userId,
+      quantita: warehouseEntities.quantita,
+      scadenza: warehouseEntities.scadenza.split('T')[0],
     });
-    setEditingId(warehouseEntitie._id);
+    setEditingId(warehouseEntities._id);
     setModalVisible(true);
   };
 
@@ -197,7 +171,9 @@ const WerehouseEntities: React.FC = () => {
   const formGenerator = () => {
     return (
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Warehouse Entity Management</h1>
+        <h1 className="text-3xl font-bold">
+          {t('warehouseEntityManagements')}
+        </h1>
         <Dialog open={modalVisible} onOpenChange={setModalVisible}>
           <DialogTrigger asChild>
             <Button
@@ -208,18 +184,20 @@ const WerehouseEntities: React.FC = () => {
               }}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Warehouse Entity
+              {t('addWarehouseEntities')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingId ? 'Edit Warehouse Entity' : 'Add Warehouse Entity'}
+                {editingId
+                  ? t('editWarehouseEntities')
+                  : t('addWarehouseEntities')}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t('names')}</Label>
                 <Input
                   id="name"
                   type="text"
@@ -229,9 +207,9 @@ const WerehouseEntities: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="food">FoodGroups</Label>
+                <Label htmlFor="food">{t('foodGroups')}</Label>
                 <Select
-                  label="Seleziona un cibo"
+                  label={t('foodGroupSelectLabel')}
                   body={foodGroups}
                   form={form}
                   setForm={setForm}
@@ -240,9 +218,9 @@ const WerehouseEntities: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{t('locations')}</Label>
                 <Select
-                  label="Seleziona un Luogo"
+                  label={t('locationSelectLabel')}
                   base={locations.length == 1 ? locations[0] : ''}
                   body={locations}
                   form={form}
@@ -252,9 +230,9 @@ const WerehouseEntities: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="warehouse">Warehouse</Label>
+                <Label htmlFor="warehouse">{t('warehouses')}</Label>
                 <Select
-                  label="Seleziona una Warehouse"
+                  label={t('warehouseSelectLabel')}
                   base={warehouses.length == 1 ? warehouses[0] : ''}
                   body={warehouses}
                   form={form}
@@ -264,7 +242,7 @@ const WerehouseEntities: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="quantita">Quantity</Label>
+                <Label htmlFor="quantita">{t('quantities')}</Label>
                 <Input
                   id="quantita"
                   type="number"
@@ -276,7 +254,7 @@ const WerehouseEntities: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="scadenza">Expiration Date</Label>
+                <Label htmlFor="scadenza">{t('expirationDates')}</Label>
                 <Input
                   id="scadenza"
                   type="date"
@@ -288,7 +266,7 @@ const WerehouseEntities: React.FC = () => {
                 />
               </div>
               <Button type="submit" className="w-full">
-                {editingId ? 'Update' : 'Create'}
+                {editingId ? t('updates') : t('creates')}
               </Button>
             </form>
           </DialogContent>
@@ -303,15 +281,15 @@ const WerehouseEntities: React.FC = () => {
       <div className="border rounded-lg overflow-hidden">
         <Table
           head={[
-            'name',
-            'Food Group',
-            'Quantity',
-            'Location',
-            'Warehouse',
-            'Expiration Date',
-            { label: 'Actions', className: 'w-[100px]' },
+            t('names'),
+            t('foodGroups'),
+            t('quantities'),
+            t('locations'),
+            t('warehouses'),
+            t('expirationDates'),
+            { label: t('actions'), className: 'w-[100px]' },
           ]}
-          body={werehouseEntities}
+          body={warehouseEntities}
           bodyKeys={[
             'name',
             'foodGroup.name',
@@ -351,4 +329,4 @@ function formatExpiration(scadenza?: string) {
     : date.toLocaleDateString();
 }
 
-export default WerehouseEntities;
+export default WarehouseEntities;

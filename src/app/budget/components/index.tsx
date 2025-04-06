@@ -15,6 +15,7 @@ import { store } from '@/services/store';
 import SelectKpiDialog from './selectKpi';
 import BudgetForm from './budgetForm';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import { useTranslation } from 'react-i18next';
 
 const KpiCard = React.memo(({ item }: { item: Kpi }) => {
   const progress = item.max > 0 ? (item.total / item.max) * 100 : 0;
@@ -56,11 +57,10 @@ const KpiCard = React.memo(({ item }: { item: Kpi }) => {
 KpiCard.displayName = 'KpiCard';
 
 const KpiBar = React.memo(({ kpi }: { kpi: Kpi[] }) => {
+  const { t, i18n } = useTranslation();
   if (kpi.length === 0) {
     return (
-      <div className="p-4 mb-4 text-gray-500 italic">
-        Nessun KPI selezionato. Seleziona un gruppo per visualizzare i KPI.
-      </div>
+      <div className="p-4 mb-4 text-gray-500 italic">{t('noKpiSelected')}</div>
     );
   }
 
@@ -82,6 +82,7 @@ const formatDate = (date: string) => {
 };
 
 const BudgetComponent: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
   const [groupBudgetsTemplate, setGroupBudgetsTemplate] = useState<
@@ -377,7 +378,7 @@ const BudgetComponent: React.FC = () => {
       />
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Budget Management</h1>
+        <h1 className="text-3xl font-bold">{t('budgetManagements')}</h1>
         <div className="flex space-x-2">
           <SelectKpiDialog
             isOpen={modalVisibleSelectKpi}
@@ -398,7 +399,7 @@ const BudgetComponent: React.FC = () => {
                 }}
                 disabled={loading}
               >
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Budget
+                <PlusCircle className="mr-2 h-4 w-4" /> {t('addBudgets')}
               </Button>
             </DialogTrigger>
           </Dialog>
@@ -409,7 +410,7 @@ const BudgetComponent: React.FC = () => {
         <div className="w-full flex justify-center my-4">
           <div className="text-center">
             <div className="w-8 h-8 border-4 border-t-blue-500 border-blue-200 rounded-full animate-spin mx-auto"></div>
-            <p className="mt-2 text-gray-500">Loading...</p>
+            <p className="mt-2 text-gray-500">{t('loading')}</p>
           </div>
         </div>
       )}
@@ -432,12 +433,12 @@ const BudgetComponent: React.FC = () => {
       <div className="border rounded-lg overflow-hidden">
         <Table
           head={[
-            'Name',
-            'Amount',
-            'Group',
-            'Date',
-            'Beneficiary',
-            { label: 'Actions', className: 'w-[100px]' },
+            t('names'),
+            t('amounts'),
+            t('groups'),
+            t('dates'),
+            t('beneficiaries'),
+            { label: t('actions'), className: 'w-[100px]' },
           ]}
           body={filteredBudgets}
           bodyKeys={[

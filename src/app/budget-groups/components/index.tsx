@@ -18,7 +18,7 @@ import Table from '@/components/Table';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useToast } from '@/hooks/use-toast';
 import { BudgetGroup, FormData } from '../types';
-
+import { useTranslation } from 'react-i18next';
 
 const intervalPeriods = [
   { _id: 'day', name: 'day' },
@@ -36,6 +36,7 @@ const initialFormState: FormData = {
 };
 
 const BudgetGroupComponent: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
   const [form, setForm] = useState<FormData>(initialFormState);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -167,11 +168,11 @@ const BudgetGroupComponent: React.FC = () => {
   return (
     <div className="w-full flex flex-col p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Budget Management</h1>
+        <h1 className="text-3xl font-bold">{t('budgetManagements')}</h1>
         <Dialog open={modalVisible} onOpenChange={setModalVisible}>
           <DialogTrigger asChild>
             <Button onClick={openAddModal}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Budget
+              <PlusCircle className="mr-2 h-4 w-4" /> {t('addBudgets')}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
@@ -182,7 +183,7 @@ const BudgetGroupComponent: React.FC = () => {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t('names')}</Label>
                 <Input
                   id="name"
                   value={form.name}
@@ -192,7 +193,7 @@ const BudgetGroupComponent: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="max">Max Budget (€)</Label>
+                <Label htmlFor="max">{t('maxBudgets')} (€)</Label>
                 <Input
                   id="max"
                   type="number"
@@ -205,7 +206,7 @@ const BudgetGroupComponent: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="resetPeriod">Reset interval</Label>
+                <Label htmlFor="resetPeriod">{t('resetIntervals')}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="resetPeriod"
@@ -243,7 +244,11 @@ const BudgetGroupComponent: React.FC = () => {
                   Cancel
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? 'Processing...' : editingId ? 'Update' : 'Create'}
+                  {loading
+                    ? 'Processing...'
+                    : editingId
+                    ? t('updates')
+                    : t('creates')}
                 </Button>
               </div>
             </form>
@@ -254,19 +259,19 @@ const BudgetGroupComponent: React.FC = () => {
       <div className="border rounded-lg overflow-hidden shadow-sm">
         {loading && budgetGroups.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Loading budgets...
+            {t('loadings')}
           </div>
         ) : budgetGroups.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            No budgets found.
+            {t('noElementFounds')}
           </div>
         ) : (
           <Table
             head={[
-              'Name',
-              'Max Budget',
-              'Reset period',
-              { label: 'Actions', className: 'w-[100px]' },
+              t('names'),
+              t('maxBudgets'),
+              t('resetPeriods'),
+              { label: t('actions'), className: 'w-[100px]' },
             ]}
             body={budgetGroups}
             bodyKeys={[
