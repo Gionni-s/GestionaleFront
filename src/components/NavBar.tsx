@@ -8,15 +8,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import axios from '@/services/axios';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { languageSave } from '@/services/store/language';
+import { changeLanguage } from '@/services/i18n';
 
 interface UserProfile {
   _id: string;
   name: string;
   surname: string;
   email: string;
-  isConfimer: boolean;
+  isConfirm: boolean;
   password: string;
   phoneNumber: number;
   dateCreation: Date;
@@ -31,20 +34,31 @@ interface Language {
   flag: string;
 }
 
-export function NavBar() {
-  const { token } = useSelector((state: any) => state.auth);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState<Language>({
-    code: 'en',
-    name: 'English',
-    flag: '../img/flag/UK.png',
-  });
+// Available languages
+const languages: Language[] = [
+  { code: 'en', name: 'English', flag: 'img/flag/UK.png' },
+  { code: 'it', name: 'Italiano', flag: 'img/flag/italian.avif' },
+];
 
-  // Available languages
-  const languages: Language[] = [
-    { code: 'en', name: 'English', flag: 'img/flag/italian.avif' },
-    { code: 'it', name: 'Italiano', flag: '../img/flag/UK.png' },
-  ];
+function getLanguageByCode(code: string): Language {
+  return (
+    languages.find((lang) => lang.code === code) || {
+      code: 'en',
+      name: 'English',
+      flag: 'img/flag/UK.png',
+    }
+  );
+}
+
+export function NavBar() {
+  const { t, i18n } = useTranslation();
+  const dispatch = useDispatch();
+  const { token } = useSelector((state: any) => state.auth);
+  const language = useSelector((state: any) => state.language);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(
+    getLanguageByCode(language?.code || 'en')
+  );
 
   // Menu items with role-based access control
   const menuItems = [
@@ -67,6 +81,16 @@ export function NavBar() {
     }
   }, [token]);
 
+  // Effect to sync i18n with persisted language from Redux
+  useEffect(() => {
+    if (language?.code) {
+      // Imposta la lingua quando lo stato di Redux è caricato/rehydrated
+      i18n.changeLanguage(language.code);
+      setCurrentLanguage(getLanguageByCode(language.code));
+      console.log(`Language set to ${language.code} from Redux store`);
+    }
+  }, [language, i18n]);
+
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get<UserProfile>('/users/me');
@@ -77,10 +101,12 @@ export function NavBar() {
   };
 
   // Change language handler
-  const handleLanguageChange = (language: Language) => {
-    setCurrentLanguage(language);
-    // Add language change logic here (e.g., i18n implementation)
-    console.log(`Language changed to ${language.name}`);
+  const handleLanguageChange = async (selectedLanguage: Language) => {
+    await changeLanguage(selectedLanguage.code);
+    dispatch(languageSave(selectedLanguage));
+    setCurrentLanguage(selectedLanguage);
+
+    console.log(`Language changed to ${selectedLanguage.name}`);
   };
 
   // Check if the user has the necessary role for the menu item
@@ -105,7 +131,7 @@ export function NavBar() {
                       href={item.href}
                       className="hover:text-blue-600 transition-colors"
                     >
-                      {item.label}
+                      {t(item.label)}
                     </Link>
                   </MenubarTrigger>
                 </MenubarMenu>
@@ -133,17 +159,17 @@ export function NavBar() {
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {languages.map((language) => (
+            {languages.map((lang) => (
               <DropdownMenuItem
-                key={language.code}
+                key={lang.code}
                 className="flex items-center gap-2 cursor-pointer"
-                onClick={() => handleLanguageChange(language)}
+                onClick={() => handleLanguageChange(lang)}
               >
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={language.flag} alt={language.name} />
-                  <AvatarFallback>{language.code.toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={lang.flag} alt={lang.name} />
+                  <AvatarFallback>{lang.code.toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span>{language.name}</span>
+                <span>{lang.name}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
