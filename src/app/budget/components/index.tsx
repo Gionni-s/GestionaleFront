@@ -57,8 +57,9 @@ const KpiCard = React.memo(({ item }: { item: Kpi }) => {
 KpiCard.displayName = 'KpiCard';
 
 const KpiBar = React.memo(({ kpi }: { kpi: Kpi[] }) => {
-  const { t, i18n } = useTranslation();
-  if (kpi.length === 0) {
+  const { t } = useTranslation();
+
+  if (!kpi?.length) {
     return (
       <div className="p-4 mb-4 text-gray-500 italic">{t('noKpiSelected')}</div>
     );
@@ -75,14 +76,20 @@ const KpiBar = React.memo(({ kpi }: { kpi: Kpi[] }) => {
 
 KpiBar.displayName = 'KpiBar';
 
-const formatDate = (date: string) => {
-  if (!date) return '';
-  const dateObj = new Date(date);
-  return isNaN(dateObj.getTime()) ? '' : dateObj.toLocaleDateString();
+const formattedDate = (date?: string) => {
+  const today = date ? new Date(date) : new Date();
+  const day = String(today.getDate()).padStart(2, '0');
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const year = today.getFullYear();
+  return `${year}-${month}-${day}`;
 };
 
 const BudgetComponent: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const kpiIds = useSelector(selectKpiIds);
+
+  // State management
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
   const [groupBudgetsTemplate, setGroupBudgetsTemplate] = useState<
@@ -94,6 +101,19 @@ const BudgetComponent: React.FC = () => {
   const [visualizeGroupBudgetsKpi, setVisualizeGroupBudgetsKpi] = useState<
     Kpi[]
   >([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // Modal states
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [modalVisibleSelectKpi, setModalVisibleSelectKpi] =
+    useState<boolean>(false);
+  const [deleteModalData, setDeleteModalData] = useState<{
+    isOpen: boolean;
+    budgetId: string | null;
+  }>({ isOpen: false, budgetId: null });
+
+  // Form state
   const [form, setForm] = useState<FormData>({
     name: '',
     amount: 0,
@@ -101,38 +121,10 @@ const BudgetComponent: React.FC = () => {
     groupId: '',
     amountType: '€',
     note: '',
-    dateTime: '',
+    dateTime: formattedDate(),
     userId: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [modalVisibleSelectKpi, setModalVisibleSelectKpi] =
-    useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [deleteModalData, setDeleteModalData] = useState<{
-    isOpen: boolean;
-    budgetId: string | null;
-  }>({
-    isOpen: false,
-    budgetId: null,
-  });
-
-  const kpiIds = useSelector(selectKpiIds);
-  const { toast } = useToast();
-
-  // Filtered budgets using memoization
-  const filteredBudgets = useMemo(() => {
-    if (!searchTerm.trim()) return budgets;
-
-    const lowerSearchTerm = searchTerm.toLowerCase();
-    return budgets.filter(
-      (budget) =>
-        budget.name.toLowerCase().includes(lowerSearchTerm) ||
-        budget.beneficiary.toLowerCase().includes(lowerSearchTerm) ||
-        budget['Budget-Group']?.name.toLowerCase().includes(lowerSearchTerm)
-    );
-  }, [searchTerm, budgets]);
 
   // Error handling
   const showError = useCallback(
@@ -158,7 +150,6 @@ const BudgetComponent: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch budgets:', err);
       showError('Failed to fetch budgets');
-      throw err;
     }
   }, [showError]);
 
@@ -171,7 +162,6 @@ const BudgetComponent: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch budget groups:', err);
       showError('Failed to fetch budget groups');
-      throw err;
     }
   }, [showError]);
 
@@ -184,13 +174,12 @@ const BudgetComponent: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch KPIs:', err);
       showError('Failed to fetch KPIs');
-      throw err;
     }
   }, [showError]);
 
   const loadKpiData = useCallback(
     async (ids: string[]): Promise<void> => {
-      if (!ids || ids.length === 0) return;
+      if (!ids?.length) return;
 
       try {
         setLoading(true);
@@ -201,13 +190,25 @@ const BudgetComponent: React.FC = () => {
       } catch (err) {
         console.error('Failed to load stored KPI data:', err);
         showError('Failed to load KPI data from store');
-        throw err;
       } finally {
         setLoading(false);
       }
     },
     [showError]
   );
+
+  // Filtered budgets using memoization
+  const filteredBudgets = useMemo(() => {
+    if (!searchTerm.trim()) return budgets;
+
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    return budgets.filter(
+      (budget) =>
+        budget.name.toLowerCase().includes(lowerSearchTerm) ||
+        budget.beneficiary.toLowerCase().includes(lowerSearchTerm) ||
+        budget['Budget-Group']?.name.toLowerCase().includes(lowerSearchTerm)
+    );
+  }, [searchTerm, budgets]);
 
   // Load initial data
   useEffect(() => {
@@ -246,7 +247,7 @@ const BudgetComponent: React.FC = () => {
       amountType: '€',
       groupId: '',
       note: '',
-      dateTime: '',
+      dateTime: formattedDate(),
       userId: '',
     });
   }, []);
@@ -272,6 +273,10 @@ const BudgetComponent: React.FC = () => {
     });
     setEditingId(budget._id);
     setModalVisible(true);
+  }, []);
+
+  const handleDelete = useCallback((id: string): void => {
+    setDeleteModalData({ isOpen: true, budgetId: id });
   }, []);
 
   // API interaction functions
@@ -311,10 +316,6 @@ const BudgetComponent: React.FC = () => {
     }
   };
 
-  const handleDelete = useCallback((id: string): void => {
-    setDeleteModalData({ isOpen: true, budgetId: id });
-  }, []);
-
   const confirmDelete = async (): Promise<void> => {
     if (!deleteModalData.budgetId) return;
 
@@ -348,6 +349,7 @@ const BudgetComponent: React.FC = () => {
     try {
       setLoading(true);
       store.dispatch(budgetSave({ ids: selectedGroupBudgetsKpi }));
+
       if (selectedGroupBudgetsKpi.length > 0) {
         const response = await axios.get<Kpi[]>(
           `/budgets/kpi?kpi=${selectedGroupBudgetsKpi.join(',')}`
@@ -361,13 +363,19 @@ const BudgetComponent: React.FC = () => {
         setVisualizeGroupBudgetsKpi([]);
       }
     } catch (err) {
-      console.error('Failed to fetch budget groups:', err);
-      showError('Failed to fetch budget groups');
+      console.error('Failed to update KPIs:', err);
+      showError('Failed to update KPIs');
     } finally {
       setLoading(false);
       setModalVisibleSelectKpi(false);
     }
   };
+
+  const handleAddNewBudget = useCallback(() => {
+    resetForm();
+    setEditingId(null);
+    setModalVisible(true);
+  }, [resetForm]);
 
   return (
     <div className="w-full flex flex-col p-2">
@@ -391,14 +399,7 @@ const BudgetComponent: React.FC = () => {
           />
           <Dialog>
             <DialogTrigger asChild>
-              <Button
-                onClick={() => {
-                  resetForm();
-                  setEditingId(null);
-                  setModalVisible(true);
-                }}
-                disabled={loading}
-              >
+              <Button onClick={handleAddNewBudget} disabled={loading}>
                 <PlusCircle className="mr-2 h-4 w-4" /> {t('addBudgets')}
               </Button>
             </DialogTrigger>
@@ -421,7 +422,10 @@ const BudgetComponent: React.FC = () => {
         <div className="relative">
           <Input
             type="text"
-            placeholder="Search by name, beneficiary or group..."
+            placeholder={
+              t('searchPlaceholder') ||
+              'Search by name, beneficiary or group...'
+            }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -452,7 +456,7 @@ const BudgetComponent: React.FC = () => {
           onDelete={handleDelete}
           columnConfig={{
             dateTime: {
-              format: formatDate,
+              format: formattedDate,
             },
           }}
         />

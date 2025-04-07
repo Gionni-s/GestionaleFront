@@ -75,7 +75,6 @@ export default function MySelect({
 }: Props) {
   const [selectedValue, setSelectedValue] = useState<string>('');
 
-  // Imposta il valore iniziale quando body o base cambiano
   useEffect(() => {
     if (body.length === 1) {
       setSelectedValue(body[0]._id);
@@ -87,6 +86,13 @@ export default function MySelect({
     ) {
       setSelectedValue(base._id);
       setForm((prevForm: any) => ({ ...prevForm, [fieldToMap]: base._id }));
+    } else if (
+      base &&
+      typeof base === 'string' &&
+      body.some((item) => item._id === base)
+    ) {
+      setSelectedValue(base);
+      setForm((prevForm: any) => ({ ...prevForm, [fieldToMap]: base }));
     } else {
       setSelectedValue('');
       setForm((prevForm: any) => ({ ...prevForm, [fieldToMap]: '' }));

@@ -17,7 +17,7 @@ import Select from '@/components/Select';
 import Table from '@/components/Table';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useToast } from '@/hooks/use-toast';
-import { BudgetGroup, FormData } from '../types';
+import { BudgetGroup, BudgetType, FormData } from '../types';
 import { useTranslation } from 'react-i18next';
 
 const intervalPeriods = [
@@ -33,7 +33,13 @@ const initialFormState: FormData = {
   number: 1,
   interval: 'month',
   userId: '',
+  type: { _id: 'expense', name: 'expense' },
 };
+
+const types: BudgetType[] = [
+  { _id: 'expense', name: 'expense' },
+  { _id: 'saving', name: 'saving' },
+];
 
 const BudgetGroupComponent: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -155,6 +161,7 @@ const BudgetGroupComponent: React.FC = () => {
       number: budget.resetPeriod.number,
       interval: budget.resetPeriod.interval,
       userId: budget.userId,
+      type: budget.type,
     });
     setEditingId(budget._id);
     setModalVisible(true);
@@ -206,6 +213,17 @@ const BudgetGroupComponent: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label>{t('types')}</Label>
+                <Select
+                  label={t('selectTypes')}
+                  body={types}
+                  form={form}
+                  setForm={setForm}
+                  fieldToMap="type"
+                  base={form.type}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="resetPeriod">{t('resetIntervals')}</Label>
                 <div className="flex gap-2">
                   <Input
@@ -230,6 +248,7 @@ const BudgetGroupComponent: React.FC = () => {
                       form={form}
                       setForm={setForm}
                       fieldToMap="interval"
+                      base={form.interval}
                     />
                   </div>
                 </div>
