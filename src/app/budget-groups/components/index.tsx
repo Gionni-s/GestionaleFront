@@ -2,14 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from '@/services/axios';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { PlusCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -19,6 +11,7 @@ import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useToast } from '@/hooks/use-toast';
 import { BudgetGroup, BudgetType, FormData } from '../types';
 import { useTranslation } from 'react-i18next';
+import Modal from '@/components/Modal';
 
 const intervalPeriods = [
   { _id: 'day', name: 'day' },
@@ -75,8 +68,7 @@ const BudgetGroupComponent: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setLoading(true);
 
     try {
@@ -176,103 +168,83 @@ const BudgetGroupComponent: React.FC = () => {
     <div className="w-full flex flex-col p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{t('budgetManagements')}</h1>
-        <Dialog open={modalVisible} onOpenChange={setModalVisible}>
-          <DialogTrigger asChild>
-            <Button onClick={openAddModal}>
-              <PlusCircle className="mr-2 h-4 w-4" /> {t('addBudgets')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {editingId ? 'Edit Budget' : 'Add Budget'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">{t('names')}</Label>
+        <Modal
+          onOpen={() => {
+            resetForm();
+            setEditingId(null);
+          }}
+          onSave={handleSubmit}
+          title={editingId ? t('editFoods') : t('addFoods')}
+          triggerText={t('addFoods')}
+          icon={<PlusCircle className="mr-2 h-4 w-4" />}
+        >
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">{t('names')}</Label>
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                disabled={loading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="max">{t('maxBudgets')} (€)</Label>
+              <Input
+                id="max"
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.max}
+                onChange={(e) => setForm({ ...form, max: +e.target.value })}
+                disabled={loading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('types')}</Label>
+              <Select
+                label={t('selectTypes')}
+                body={types}
+                form={form}
+                setForm={setForm}
+                fieldToMap="type"
+                base={form.type}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="resetPeriod">{t('resetIntervals')}</Label>
+              <div className="flex gap-2">
                 <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  disabled={loading}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="max">{t('maxBudgets')} (€)</Label>
-                <Input
-                  id="max"
+                  id="resetPeriod"
                   type="number"
-                  min="0"
-                  step="0.01"
-                  value={form.max}
-                  onChange={(e) => setForm({ ...form, max: +e.target.value })}
+                  min="1"
+                  value={form.number}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      number: +e.target.value,
+                    })
+                  }
                   disabled={loading}
+                  className="w-24"
                   required
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>{t('types')}</Label>
-                <Select
-                  label={t('selectTypes')}
-                  body={types}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="type"
-                  base={form.type}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="resetPeriod">{t('resetIntervals')}</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="resetPeriod"
-                    type="number"
-                    min="1"
-                    value={form.number}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        number: +e.target.value,
-                      })
-                    }
-                    disabled={loading}
-                    className="w-24"
-                    required
+                <div className="flex-1">
+                  <Select
+                    label="Select an interval"
+                    body={intervalPeriods}
+                    form={form}
+                    setForm={setForm}
+                    fieldToMap="interval"
+                    base={form.interval}
                   />
-                  <div className="flex-1">
-                    <Select
-                      label="Select an interval"
-                      body={intervalPeriods}
-                      form={form}
-                      setForm={setForm}
-                      fieldToMap="interval"
-                      base={form.interval}
-                    />
-                  </div>
                 </div>
               </div>
-              <div className="flex gap-2 justify-end pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setModalVisible(false)}
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading
-                    ? 'Processing...'
-                    : editingId
-                    ? t('updates')
-                    : t('creates')}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </div>
+          </div>
+        </Modal>
       </div>
 
       <div className="border rounded-lg overflow-hidden shadow-sm">

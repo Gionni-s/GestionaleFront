@@ -1,20 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import axios from '@/services/axios/index';
-import { Button } from '@/components/ui/button';
 import Select from '@/components/Select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
+import Modal from '@/components/Modal';
 
 // Define types for data
 interface Food {
@@ -44,7 +37,6 @@ const Foods: React.FC = () => {
     userId: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,11 +76,8 @@ const Foods: React.FC = () => {
       console.error('Failed to fetch food groups:', error);
     }
   };
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
-    e.preventDefault();
 
+  const handleSubmit = async (): Promise<void> => {
     const submissionForm = { ...form };
 
     try {
@@ -97,7 +86,6 @@ const Foods: React.FC = () => {
       } else {
         await axios.post('/foods', submissionForm);
       }
-      setModalVisible(false);
       resetForm();
       setEditingId(null);
       await fetchFoods();
@@ -109,7 +97,7 @@ const Foods: React.FC = () => {
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await axios.delete(`/werehouseEntities/${id}`);
+      await axios.delete(`/foods/${id}`);
       await fetchFoods();
     } catch (error) {
       console.error('Failed to delete warehouse entity:', error);
@@ -132,7 +120,6 @@ const Foods: React.FC = () => {
       userId: foods.userId,
     });
     setEditingId(foods._id);
-    setModalVisible(true);
   };
 
   if (error) {
@@ -143,53 +130,40 @@ const Foods: React.FC = () => {
     return (
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{t('foodManagements')}</h1>
-        <Dialog open={modalVisible} onOpenChange={setModalVisible}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                resetForm();
-                setEditingId(null);
-                setModalVisible(true);
-              }}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t('addFoods')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingId ? t('editFoods') : t('addFoods')}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">{t('names')}</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="food">{t('foodGroups')}</Label>
-                <Select
-                  label={t('selectFoods')}
-                  body={foodGroups}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="foodGroupId"
-                  useCombobox={true}
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                {editingId ? 'Update' : 'Create'}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Modal
+          onOpen={() => {
+            resetForm();
+            setEditingId(null);
+          }}
+          onSave={handleSubmit}
+          title={editingId ? t('editFoods') : t('addFoods')}
+          triggerText={t('addFoods')}
+          icon={<PlusCircle className="mr-2 h-4 w-4" />}
+        >
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">{t('names')}</Label>
+              <Input
+                id="name"
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="food">{t('foodGroups')}</Label>
+              <Select
+                label={t('selectFoods')}
+                body={foodGroups}
+                form={form}
+                setForm={setForm}
+                fieldToMap="foodGroupId"
+                useCombobox={true}
+              />
+            </div>
+          </div>
+        </Modal>
       </div>
     );
   };

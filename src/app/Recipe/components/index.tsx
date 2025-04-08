@@ -12,13 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash, ExternalLink } from 'lucide-react';
@@ -31,6 +24,7 @@ import {
   Recipe,
 } from '../types';
 import { useTranslation } from 'react-i18next';
+import Modal from '@/components/Modal';
 
 const Recipes: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -82,8 +76,7 @@ const Recipes: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     try {
       setModalVisible(false);
       if (editingId) {
@@ -114,7 +107,7 @@ const Recipes: React.FC = () => {
     });
   };
 
-  const removeIngridientField = (index: number) => {
+  const removeIngredientField = (index: number) => {
     const updatedIngridients = form.ingridients.filter((_, i) => i !== index);
     setForm({ ...form, ingridients: updatedIngridients });
   };
@@ -231,108 +224,97 @@ const Recipes: React.FC = () => {
     <div className="w-full mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{t('recipeManagements')}</h1>
-        <Dialog open={modalVisible} onOpenChange={setModalVisible}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t('addRecipes')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingId ? 'Edit Recipe' : 'Add Recipe'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">{t('names')}</Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => handleFieldChange('name', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="cookbook">{t('cookBooks')}</Label>
-                <Select
-                  label={t('selectCookBooks')}
-                  body={cookbookOptions}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="cookbookId"
-                  useCombobox={true}
-                />
-              </div>
+        <Modal
+          onOpen={() => {
+            resetForm();
+            setEditingId(null);
+          }}
+          onSave={handleSubmit}
+          title={editingId ? t('editRecipes') : t('addRecipes')}
+          triggerText={t('addRecipes')}
+          icon={<PlusCircle className="mr-2 h-4 w-4" />}
+        >
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">{t('names')}</Label>
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) => handleFieldChange('name', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="cookbook">{t('cookBooks')}</Label>
+              <Select
+                label={t('selectCookBooks')}
+                body={cookbookOptions}
+                form={form}
+                setForm={setForm}
+                fieldToMap="cookbookId"
+                useCombobox={true}
+              />
+            </div>
 
-              {/* Ingridients */}
-              <div className="space-y-4">
-                <Label>{t('ingredients')}</Label>
-                <Button type="button" onClick={addIngridientField}>
-                  {t('addIngredients')}
-                </Button>
-                {form.ingridients.map((ingridient, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <select
-                      value={ingridient.foodId}
-                      onChange={(e) =>
-                        handleFieldChange('foodId', e.target.value, index)
-                      }
-                      className="border p-2 rounded"
-                      required
-                    >
-                      <option value="">{t('selectIngredients')}</option>
-                      {(Array.isArray(ingridientOptions) &&
-                        ingridientOptions.map((option) => (
-                          <option key={option._id} value={option._id}>
-                            {option.name}
-                          </option>
-                        ))) ||
-                        'N/A'}
-                    </select>
-                    <Input
-                      type="number"
-                      value={ingridient.quantity}
-                      onChange={(e) =>
-                        handleFieldChange(
-                          'quantity',
-                          Number(e.target.value),
-                          index
-                        )
-                      }
-                      min="1"
-                      className="w-20"
-                      required
-                    />
-                    {form.ingridients.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => removeIngridientField(index)}
-                      >
-                        {t('removes')}
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                {/* <Button type="button" onClick={addIngridientField}>
-                  Add Ingridient
-                </Button> */}
-              </div>
-              <div className="space-y-4">
-                <Label>{t('notes')}</Label>
-                <Textarea
-                  value={form.note}
-                  onChange={(e) => handleFieldChange('note', e.target.value)}
-                ></Textarea>
-              </div>
-              <Button type="submit" className="w-full">
-                {editingId ? 'Update' : 'Create'}
+            <div className="space-y-4">
+              <Label>{t('ingredients')}</Label>
+              <Button type="button" onClick={addIngridientField}>
+                {t('addIngredients')}
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+              {form.ingridients.map((ingridient, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <select
+                    value={ingridient.foodId}
+                    onChange={(e) =>
+                      handleFieldChange('foodId', e.target.value, index)
+                    }
+                    className="border p-2 rounded"
+                    required
+                  >
+                    <option value="">{t('selectIngredients')}</option>
+                    {(Array.isArray(ingridientOptions) &&
+                      ingridientOptions.map((option) => (
+                        <option key={option._id} value={option._id}>
+                          {option.name}
+                        </option>
+                      ))) ||
+                      'N/A'}
+                  </select>
+                  <Input
+                    type="number"
+                    value={ingridient.quantity}
+                    onChange={(e) =>
+                      handleFieldChange(
+                        'quantity',
+                        Number(e.target.value),
+                        index
+                      )
+                    }
+                    min="1"
+                    className="w-20"
+                    required
+                  />
+                  {form.ingridients.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => removeIngredientField(index)}
+                    >
+                      {t('removes')}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="space-y-4">
+              <Label>{t('notes')}</Label>
+              <Textarea
+                value={form.note}
+                onChange={(e) => handleFieldChange('note', e.target.value)}
+              ></Textarea>
+            </div>
+          </div>
+        </Modal>
       </div>
 
       <div className="border rounded-lg overflow-hidden">

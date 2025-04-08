@@ -78,9 +78,9 @@ const Modal: React.FC<ModalProps> = ({
   onOpen = () => {},
   onSave,
   onCancel,
-  title = t('settings'),
-  triggerText = t('settings'),
-  saveText = t('saveSettings'),
+  title = t('?'),
+  triggerText = t('?'),
+  saveText = t('save'),
   cancelText = t('cancel'),
   showCancelButton = true,
   icon = <CircleHelp className="mr-2 h-4 w-4" />,
@@ -89,11 +89,11 @@ const Modal: React.FC<ModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
 
   // Esegui onOpen quando il modal si apre
-  useEffect(() => {
-    if (modalVisible) {
-      onOpen();
-    }
-  }, [modalVisible, onOpen]);
+  // useEffect(() => {
+  //   if (modalVisible) {
+  //     onOpen();
+  //   }
+  // }, [modalVisible, onOpen]);
 
   /**
    * Gestisce l'azione di annullamento e chiude il modal.

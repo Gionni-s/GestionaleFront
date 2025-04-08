@@ -7,15 +7,16 @@ import axios from '@/services/axios';
 import { budgetSave, selectKpiIds } from '@/services/store/kpi';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
 import { Card } from '@/components/ui/card';
 import { store } from '@/services/store';
 import SelectKpiDialog from './selectKpi';
-import BudgetForm from './budgetForm';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useTranslation } from 'react-i18next';
+import Modal from '@/components/Modal';
+import { Label } from '@/components/ui/label';
+import Select from '@/components/Select';
 
 const KpiCard = React.memo(({ item }: { item: Kpi }) => {
   const progress = item.max > 0 ? (item.total / item.max) * 100 : 0;
@@ -279,11 +280,12 @@ const BudgetComponent: React.FC = () => {
     setDeleteModalData({ isOpen: true, budgetId: id });
   }, []);
 
+  const handleChange = (field: keyof FormData, value: string | number) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
   // API interaction functions
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
-    e.preventDefault();
+  const handleSubmit = async (): Promise<void> => {
     try {
       setLoading(true);
       if (editingId) {
@@ -397,13 +399,79 @@ const BudgetComponent: React.FC = () => {
             onToggleGroup={handleCheckboxChange}
             isLoading={loading}
           />
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button onClick={handleAddNewBudget} disabled={loading}>
-                <PlusCircle className="mr-2 h-4 w-4" /> {t('addBudgets')}
-              </Button>
-            </DialogTrigger>
-          </Dialog>
+
+          <Modal
+            onOpen={() => {
+              resetForm();
+              setEditingId(null);
+            }}
+            onSave={handleSubmit}
+            title={editingId ? t('editFoods') : t('addFoods')}
+            triggerText={t('addFoods')}
+            icon={<PlusCircle className="mr-2 h-4 w-4" />}
+          >
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">{t('names')}</Label>
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="importo">{t('amounts')}</Label>
+                <Input
+                  id="importo"
+                  type="number"
+                  value={form.amount}
+                  onChange={(e) => handleChange('amount', +e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="date">{t('dates')}</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={form.dateTime}
+                  onChange={(e) => handleChange('dateTime', e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="groupId">{t('groups')}</Label>
+                <Select
+                  label={t('selectGroups')}
+                  body={budgetGroups}
+                  form={form}
+                  setForm={setForm}
+                  fieldToMap="groupId"
+                  useCombobox={true}
+                />
+              </div>
+              <div>
+                <Label htmlFor="note">{t('notes')}</Label>
+                <Input
+                  id="note"
+                  type="text"
+                  value={form.note}
+                  onChange={(e) => handleChange('note', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="beneficiary">{t('beneficiaries')}</Label>
+                <Input
+                  id="beneficiary"
+                  type="text"
+                  value={form.beneficiary}
+                  onChange={(e) => handleChange('beneficiary', e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </Modal>
         </div>
       </div>
 
@@ -461,17 +529,6 @@ const BudgetComponent: React.FC = () => {
           }}
         />
       </div>
-
-      <BudgetForm
-        isOpen={modalVisible}
-        onOpenChange={setModalVisible}
-        form={form}
-        setForm={setForm}
-        editingId={editingId}
-        onSubmit={handleSubmit}
-        budgetGroups={budgetGroups}
-        loading={loading}
-      />
     </div>
   );
 };

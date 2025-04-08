@@ -1,4 +1,4 @@
-import Screen from './components/foods';
+import Screen from './components';
 
 export default function Page() {
   return (

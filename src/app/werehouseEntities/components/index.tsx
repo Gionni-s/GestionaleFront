@@ -1,21 +1,14 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import axios from '@/services/axios/index';
-import { Button } from '@/components/ui/button';
 import Select from '@/components/Select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { PlusCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
 import { FormData, WarehouseEntitiesType } from '../types';
+import Modal from '@/components/Modal';
 
 const WarehouseEntities: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -32,7 +25,6 @@ const WarehouseEntities: React.FC = () => {
     scadenza: '',
   });
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,11 +97,7 @@ const WarehouseEntities: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
-    e.preventDefault();
-
+  const handleSubmit = async (): Promise<void> => {
     const submissionForm = { ...form };
 
     try {
@@ -118,7 +106,6 @@ const WarehouseEntities: React.FC = () => {
       } else {
         await axios.post('/werehouseEntities', submissionForm);
       }
-      setModalVisible(false);
       resetForm();
       setEditingId(null);
       await fetchWarehouseEntities();
@@ -161,7 +148,6 @@ const WarehouseEntities: React.FC = () => {
       scadenza: warehouseEntities.scadenza.split('T')[0],
     });
     setEditingId(warehouseEntities._id);
-    setModalVisible(true);
   };
 
   if (error) {
@@ -174,7 +160,7 @@ const WarehouseEntities: React.FC = () => {
         <h1 className="text-3xl font-bold">
           {t('warehouseEntityManagements')}
         </h1>
-        <Dialog open={modalVisible} onOpenChange={setModalVisible}>
+        {/* <Dialog open={modalVisible} onOpenChange={setModalVisible}>
           <DialogTrigger asChild>
             <Button
               onClick={() => {
@@ -270,7 +256,87 @@ const WarehouseEntities: React.FC = () => {
               </Button>
             </form>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
+        <Modal
+          onOpen={() => {
+            resetForm();
+            setEditingId(null);
+          }}
+          onSave={handleSubmit}
+          title={editingId ? t('editFoods') : t('addFoods')}
+          triggerText={t('addFoods')}
+          icon={<PlusCircle className="mr-2 h-4 w-4" />}
+        >
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">{t('names')}</Label>
+              <Input
+                id="name"
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="food">{t('foodGroups')}</Label>
+              <Select
+                label={t('foodGroupSelectLabel')}
+                body={foodGroups}
+                form={form}
+                setForm={setForm}
+                fieldToMap="foodGroupId"
+                useCombobox={true}
+              />
+            </div>
+            <div>
+              <Label htmlFor="location">{t('locations')}</Label>
+              <Select
+                label={t('locationSelectLabel')}
+                base={locations.length == 1 ? locations[0] : ''}
+                body={locations}
+                form={form}
+                setForm={setForm}
+                fieldToMap="locationId"
+                useCombobox={true}
+              />
+            </div>
+            <div>
+              <Label htmlFor="warehouse">{t('warehouses')}</Label>
+              <Select
+                label={t('warehouseSelectLabel')}
+                base={warehouses.length == 1 ? warehouses[0] : ''}
+                body={warehouses}
+                form={form}
+                setForm={setForm}
+                fieldToMap="warehouseId"
+                useCombobox={true}
+              />
+            </div>
+            <div>
+              <Label htmlFor="quantita">{t('quantities')}</Label>
+              <Input
+                id="quantita"
+                type="number"
+                value={form.quantita}
+                onChange={(e) =>
+                  setForm({ ...form, quantita: +e.target.value })
+                }
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="scadenza">{t('expirationDates')}</Label>
+              <Input
+                id="scadenza"
+                type="date"
+                value={form.scadenza}
+                onChange={(e) => setForm({ ...form, scadenza: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+        </Modal>
       </div>
     );
   };
