@@ -8,9 +8,21 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert } from '@/components/ui/alert';
 import { logout } from '@/services/store/auth';
-import { LogOut, Camera, UserCircle } from 'lucide-react';
+import { LogOut, Camera, UserCircle, Settings } from 'lucide-react';
 import { store } from '@/services/store';
 import { useRouter } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { t } from 'i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { settingsSave } from '@/services/store/setting';
+import { Switch } from '@/components/ui/switch';
+import Modal from '@/components/Modal';
 
 export interface UserProfile {
   _id: string;
@@ -34,7 +46,16 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const router = useRouter();
+
+  const dispatch = useDispatch();
+  const settings = useSelector((state: any) => state.settings);
+
+  const handleDarkModeToggle = (value: boolean) => {
+    dispatch(settingsSave({ darkMode: value }));
+    document.documentElement.classList.toggle('dark', value);
+  };
 
   useEffect(() => {
     fetchUserProfile();
@@ -112,6 +133,45 @@ const Profile: React.FC = () => {
     <Card className="p-8 h-full w-full shadow-xl rounded-xl">
       <div className="relative">
         <div className="absolute right-0 top-0">
+          <Dialog open={modalVisible} onOpenChange={setModalVisible}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => {
+                  setModalVisible(true);
+                }}
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                {t('settings')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t('settings')}</DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="darkMode">{t('darkMode')}</Label>
+                  <Switch
+                    id="darkMode"
+                    checked={settings.darkMode}
+                    onCheckedChange={handleDarkModeToggle}
+                  />
+                </div>
+
+                {/* <Button
+                  className="w-full"
+                  onClick={() => {
+                    applySettings(settings);
+                    setModalVisible(false);
+                  }}
+                >
+                  {t('saveSettings')}
+                </Button> */}
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <Button
             variant="ghost"
             className="text-red-500 hover:text-red-700 hover:bg-red-100 transition-colors"
