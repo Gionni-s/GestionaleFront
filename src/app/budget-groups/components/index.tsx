@@ -39,7 +39,6 @@ const BudgetGroupComponent: React.FC = () => {
   const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
   const [form, setForm] = useState<FormData>(initialFormState);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [budgetToDelete, setBudgetToDelete] = useState<string | null>(null);
@@ -79,6 +78,7 @@ const BudgetGroupComponent: React.FC = () => {
           number: form.number,
           interval: form.interval,
         },
+        type: form.type,
         userId: form.userId,
       };
 
@@ -96,7 +96,6 @@ const BudgetGroupComponent: React.FC = () => {
         });
       }
 
-      setModalVisible(false);
       resetForm();
       fetchBudgetGroups();
     } catch (error) {
@@ -156,12 +155,6 @@ const BudgetGroupComponent: React.FC = () => {
       type: budget.type,
     });
     setEditingId(budget._id);
-    setModalVisible(true);
-  };
-
-  const openAddModal = () => {
-    resetForm();
-    setModalVisible(true);
   };
 
   return (
@@ -174,8 +167,8 @@ const BudgetGroupComponent: React.FC = () => {
             setEditingId(null);
           }}
           onSave={handleSubmit}
-          title={editingId ? t('editFoods') : t('addFoods')}
-          triggerText={t('addFoods')}
+          title={editingId ? t('editNewItem') : t('addNewItem')}
+          triggerText={t('addNewItem')}
           icon={<PlusCircle className="mr-2 h-4 w-4" />}
         >
           <div className="space-y-4">
@@ -261,6 +254,7 @@ const BudgetGroupComponent: React.FC = () => {
             head={[
               t('names'),
               t('maxBudgets'),
+              t('type'),
               t('resetPeriods'),
               { label: t('actions'), className: 'w-[100px]' },
             ]}
@@ -268,6 +262,7 @@ const BudgetGroupComponent: React.FC = () => {
             bodyKeys={[
               'name',
               'max',
+              'type',
               'resetPeriod.number|resetPeriod.interval',
             ]}
             onEdit={handleEdit}
