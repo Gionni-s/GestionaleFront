@@ -36,7 +36,7 @@ const Foods: React.FC = () => {
     foodGroupId: '',
     userId: '',
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,7 +87,7 @@ const Foods: React.FC = () => {
         await axios.post('/foods', submissionForm);
       }
       resetForm();
-      setEditingId(null);
+      setEditingId(undefined);
       await fetchFoods();
     } catch (error) {
       console.error('Failed to save warehouse entity:', error);
@@ -131,14 +131,16 @@ const Foods: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{t('foodManagements')}</h1>
         <Modal
-          onOpen={() => {
-            resetForm();
-            setEditingId(null);
-          }}
           onSave={handleSubmit}
+          onCancel={() => {
+            resetForm();
+            setEditingId(undefined);
+          }}
           title={editingId ? t('editFoods') : t('addFoods')}
           triggerText={t('addFoods')}
           icon={<PlusCircle className="mr-2 h-4 w-4" />}
+          isEdit={editingId}
+          editText={t('edit')}
         >
           <div className="space-y-4">
             <div>

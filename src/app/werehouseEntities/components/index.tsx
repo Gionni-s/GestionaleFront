@@ -24,7 +24,7 @@ const WarehouseEntities: React.FC = () => {
     quantita: 1,
     scadenza: '',
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -107,7 +107,7 @@ const WarehouseEntities: React.FC = () => {
         await axios.post('/werehouseEntities', submissionForm);
       }
       resetForm();
-      setEditingId(null);
+      setEditingId(undefined);
       await fetchWarehouseEntities();
     } catch (error) {
       console.error('Failed to save warehouse entity:', error);
@@ -160,111 +160,15 @@ const WarehouseEntities: React.FC = () => {
         <h1 className="text-3xl font-bold">
           {t('warehouseEntityManagements')}
         </h1>
-        {/* <Dialog open={modalVisible} onOpenChange={setModalVisible}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                resetForm();
-                setEditingId(null);
-                setModalVisible(true);
-              }}
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t('addWarehouseEntities')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingId
-                  ? t('editWarehouseEntities')
-                  : t('addWarehouseEntities')}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="name">{t('names')}</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="food">{t('foodGroups')}</Label>
-                <Select
-                  label={t('foodGroupSelectLabel')}
-                  body={foodGroups}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="foodGroupId"
-                  useCombobox={true}
-                />
-              </div>
-              <div>
-                <Label htmlFor="location">{t('locations')}</Label>
-                <Select
-                  label={t('locationSelectLabel')}
-                  base={locations.length == 1 ? locations[0] : ''}
-                  body={locations}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="locationId"
-                  useCombobox={true}
-                />
-              </div>
-              <div>
-                <Label htmlFor="warehouse">{t('warehouses')}</Label>
-                <Select
-                  label={t('warehouseSelectLabel')}
-                  base={warehouses.length == 1 ? warehouses[0] : ''}
-                  body={warehouses}
-                  form={form}
-                  setForm={setForm}
-                  fieldToMap="warehouseId"
-                  useCombobox={true}
-                />
-              </div>
-              <div>
-                <Label htmlFor="quantita">{t('quantities')}</Label>
-                <Input
-                  id="quantita"
-                  type="number"
-                  value={form.quantita}
-                  onChange={(e) =>
-                    setForm({ ...form, quantita: +e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="scadenza">{t('expirationDates')}</Label>
-                <Input
-                  id="scadenza"
-                  type="date"
-                  value={form.scadenza}
-                  onChange={(e) =>
-                    setForm({ ...form, scadenza: e.target.value })
-                  }
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                {editingId ? t('updates') : t('creates')}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog> */}
         <Modal
-          onOpen={() => {
+          onCancel={() => {
             resetForm();
-            setEditingId(null);
+            setEditingId(undefined);
           }}
           onSave={handleSubmit}
           title={editingId ? t('editFoods') : t('addFoods')}
           triggerText={t('addFoods')}
+          isEdit={editingId}
           icon={<PlusCircle className="mr-2 h-4 w-4" />}
         >
           <div className="space-y-4">

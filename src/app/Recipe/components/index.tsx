@@ -41,7 +41,7 @@ const Recipes: React.FC = () => {
       { foodId: '', quantity: 1, name: '' },
     ],
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [ingridientOptions, setIngridientOptions] = useState<Ingridient[]>([]);
   const [cookbookOptions, setCookbookOptions] = useState<CookBook[]>([]);
 
@@ -137,7 +137,7 @@ const Recipes: React.FC = () => {
       ],
       note: '',
     });
-    setEditingId(null);
+    setEditingId(undefined);
   };
 
   const renderTableRows = () => {
@@ -225,13 +225,14 @@ const Recipes: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{t('recipeManagements')}</h1>
         <Modal
-          onOpen={() => {
+          onCancel={() => {
             resetForm();
-            setEditingId(null);
+            setEditingId(undefined);
           }}
           onSave={handleSubmit}
           title={editingId ? t('editRecipes') : t('addRecipes')}
           triggerText={t('addRecipes')}
+          isEdit={editingId}
           icon={<PlusCircle className="mr-2 h-4 w-4" />}
         >
           <div className="space-y-4">

@@ -38,7 +38,7 @@ const BudgetGroupComponent: React.FC = () => {
   const { t, i18n } = useTranslation();
   const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
   const [form, setForm] = useState<FormData>(initialFormState);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   const [budgetToDelete, setBudgetToDelete] = useState<string | null>(null);
@@ -142,7 +142,7 @@ const BudgetGroupComponent: React.FC = () => {
 
   const resetForm = () => {
     setForm(initialFormState);
-    setEditingId(null);
+    setEditingId(undefined);
   };
 
   const handleEdit = (budget: BudgetGroup) => {
@@ -162,13 +162,14 @@ const BudgetGroupComponent: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{t('budgetManagements')}</h1>
         <Modal
-          onOpen={() => {
+          onCancel={() => {
             resetForm();
-            setEditingId(null);
+            setEditingId(undefined);
           }}
           onSave={handleSubmit}
           title={editingId ? t('editNewItem') : t('addNewItem')}
           triggerText={t('addNewItem')}
+          isEdit={editingId}
           icon={<PlusCircle className="mr-2 h-4 w-4" />}
         >
           <div className="space-y-4">

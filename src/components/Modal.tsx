@@ -36,6 +36,8 @@ type ModalProps = {
   triggerText?: string;
   saveText?: string;
   cancelText?: string;
+  isEdit?: string;
+  editText?: string;
   showCancelButton?: boolean;
   icon?: React.ReactNode;
 };
@@ -78,22 +80,23 @@ const Modal: React.FC<ModalProps> = ({
   onOpen = () => {},
   onSave,
   onCancel,
-  title = t('?'),
-  triggerText = t('?'),
+  title = t('add'),
+  triggerText = t('add'),
   saveText = t('save'),
   cancelText = t('cancel'),
   showCancelButton = true,
+  isEdit = '',
+  editText = t('edit'),
   icon = <CircleHelp className="mr-2 h-4 w-4" />,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Esegui onOpen quando il modal si apre
-  // useEffect(() => {
-  //   if (modalVisible) {
-  //     onOpen();
-  //   }
-  // }, [modalVisible, onOpen]);
+  useEffect(() => {
+    if (isEdit) {
+      setModalVisible(true);
+    }
+  }, [isEdit]);
 
   /**
    * Gestisce l'azione di annullamento e chiude il modal.
@@ -162,7 +165,13 @@ const Modal: React.FC<ModalProps> = ({
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? t('saving', 'Salvataggio in corso...') : saveText}
+            {isEdit
+              ? isSaving
+                ? t('saving', 'Salvataggio in corso...')
+                : editText
+              : isSaving
+              ? t('saving', 'Salvataggio in corso...')
+              : saveText}
           </Button>
         </DialogFooter>
       </DialogContent>

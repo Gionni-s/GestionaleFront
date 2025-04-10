@@ -1,21 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import axios from '@/services/axios';
 import { PlusCircle, Pencil, Trash, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import Table from '@/components/Table';
+import Modal from '@/components/Modal';
 
 // Definizione più chiara dei tipi
 interface Item {
@@ -63,8 +57,12 @@ const Labels = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
 
+  // Riferimento al bottone del modale
+  const modalButtonRef = useRef(null);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<CategoryKey>('foodGroups');
   const [categories, setCategories] = useState<Categories>({
     foodGroups: [],
     locations: [],
@@ -73,11 +71,11 @@ const Labels = () => {
   });
 
   const [modalState, setModalState] = useState({
-    isOpen: false,
     itemName: '',
     currentCategory: '' as CategoryKey,
     currentUrl: '',
     editingId: '',
+    isEdit: false,
   });
 
   // Category configuration maps
@@ -145,21 +143,26 @@ const Labels = () => {
   const handleModalOpen = (url: string, item?: Item) => {
     const categoryKey = urlToCategoryKey[url];
     setModalState({
-      isOpen: true,
       itemName: item?.name || '',
       currentCategory: categoryKey,
       currentUrl: url,
       editingId: item?._id || '',
+      isEdit: !!item,
     });
+
+    if (modalButtonRef.current) {
+      // @ts-ignore: Object is possibly 'null'.
+      modalButtonRef.current.click();
+    }
   };
 
   const handleModalClose = () => {
     setModalState({
-      isOpen: false,
       itemName: '',
       currentCategory: '' as CategoryKey,
       currentUrl: '',
       editingId: '',
+      isEdit: false,
     });
   };
 
@@ -246,6 +249,16 @@ const Labels = () => {
     }
   };
 
+  const handleEdit = (item: Item) => {
+    const activeConfig = categoryConfigs.find(
+      (config) => config.key === activeTab
+    );
+    if (activeConfig) {
+      console.log(item);
+      handleModalOpen(activeConfig.url, item);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -255,122 +268,84 @@ const Labels = () => {
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-      {categoryConfigs.map(({ title, key, url }) => (
-        <Card
-          key={url}
-          className="bg-white shadow-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl border border-gray-200"
-        >
-          <CardHeader className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-500 text-white py-4 px-6 flex justify-between items-center">
-            <CardTitle className="text-lg font-semibold flex items-center">
-              <span>{title}</span>
-              <span className="ml-2 bg-white bg-opacity-20 text-xs px-2 py-1 rounded-full">
-                {categories[key]?.length || 0}
-              </span>
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white hover:bg-opacity-20 rounded-full"
-              onClick={() => handleModalOpen(url)}
-              disabled={actionLoading}
-            >
-              <PlusCircle className="w-5 h-5" />
-            </Button>
-          </CardHeader>
-          <CardContent className="p-4 max-h-64 overflow-y-auto">
-            {categories[key]?.length > 0 ? (
-              <ul className="space-y-2">
-                {categories[key].map((element) => (
-                  <li
-                    key={element._id}
-                    className="flex justify-between items-center bg-gray-50 p-3 rounded-lg transition-all hover:bg-gray-100 border border-gray-100"
-                  >
-                    <span className="text-gray-800 text-base font-medium truncate max-w-[150px]">
-                      {element.name}
-                    </span>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-gray-600 hover:text-indigo-600"
-                        onClick={() => handleModalOpen(url, element)}
-                        disabled={actionLoading}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-red-500 hover:bg-red-50 hover:border-red-300"
-                        onClick={() => handleDelete(element, url)}
-                        disabled={actionLoading}
-                      >
-                        <Trash className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="flex justify-center items-center h-32 text-gray-400">
-                <span className="text-sm italic">{t('noElementFounds')}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+  const activeConfig = categoryConfigs.find(
+    (config) => config.key === activeTab
+  );
 
-      <Dialog
-        open={modalState.isOpen}
-        onOpenChange={(open) => !open && handleModalClose()}
+  return (
+    <div className="w-full mx-auto">
+      <Tabs
+        defaultValue="foodGroups"
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as CategoryKey)}
+        className="w-full"
       >
-        <DialogContent className="p-6 rounded-lg max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-gray-800">
-              {modalState.editingId ? t('updateItem') : t('addNewItem')}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <Input
-              type="text"
-              placeholder={t('enterName')}
-              value={modalState.itemName}
-              onChange={(e) =>
-                setModalState((prev) => ({ ...prev, itemName: e.target.value }))
-              }
-              className="p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-              autoFocus
-            />
-          </div>
-          <DialogFooter className="mt-6 flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={handleModalClose}
-              disabled={actionLoading}
+        <TabsList className="mb-6 flex space-x-2 border-b border-gray-200 w-full">
+          {categoryConfigs.map((config) => (
+            <TabsTrigger
+              key={config.key}
+              value={config.key}
+              className="px-4 py-2"
             >
-              {t('cancel')}
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!modalState.itemName.trim() || actionLoading}
-              className="bg-indigo-600 hover:bg-indigo-700"
-            >
-              {actionLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {modalState.editingId ? t('updating') : t('saving')}
-                </>
-              ) : modalState.editingId ? (
-                t('update')
-              ) : (
-                t('save')
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              {config.title}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {categoryConfigs.map((config) => (
+          <TabsContent key={config.key} value={config.key} className="mt-0">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">{config.title}</h1>
+
+              <Modal
+                onSave={handleSave}
+                onCancel={handleModalClose}
+                title={modalState.editingId ? t('edit') : t('add')}
+                triggerText={t('add')}
+                icon={<PlusCircle className="mr-2 h-4 w-4" />}
+                onOpen={() => {
+                  handleModalOpen(config.url);
+                }}
+                isEdit={modalState.editingId}
+                editText={t('edit')}
+              >
+                <div className="space-y-4">
+                  <Label htmlFor="itemName">{t('names')}</Label>
+                  <Input
+                    id="itemName"
+                    type="text"
+                    placeholder={t('enterName')}
+                    value={modalState.itemName}
+                    onChange={(e) =>
+                      setModalState((prev) => ({
+                        ...prev,
+                        itemName: e.target.value,
+                      }))
+                    }
+                    className="p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                    autoFocus
+                  />
+                </div>
+              </Modal>
+            </div>
+
+            <div className="border rounded-lg overflow-hidden">
+              <Table
+                head={[
+                  t('names'),
+                  { label: t('Actions'), className: 'w-[100px]' },
+                ]}
+                body={categories[config.key]}
+                bodyKeys={['name']}
+                onEdit={handleEdit}
+                onDelete={(item) =>
+                  handleDelete({ _id: item, name: item }, config.url)
+                }
+              />
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 };

@@ -77,6 +77,7 @@ const resources = {
       enterName: 'Enter name',
       cancel: 'Cancel',
       darkMode: 'Dark Mode',
+      add: 'Add Element',
     },
   },
   it: {
@@ -153,6 +154,7 @@ const resources = {
       enterName: 'Inserisci il nome',
       cancel: 'Cancella',
       darkMode: 'Modalità scura',
+      add: 'Aggiungi Elemento',
     },
   },
 };

@@ -125,7 +125,7 @@ const BudgetComponent: React.FC = () => {
     dateTime: formattedDate(),
     userId: '',
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | undefined>(undefined);
 
   // Error handling
   const showError = useCallback(
@@ -303,7 +303,7 @@ const BudgetComponent: React.FC = () => {
       }
       setModalVisible(false);
       resetForm();
-      setEditingId(null);
+      setEditingId(undefined);
       await fetchBudgets();
 
       // Reload KPI data after adding/updating budget
@@ -375,7 +375,7 @@ const BudgetComponent: React.FC = () => {
 
   const handleAddNewBudget = useCallback(() => {
     resetForm();
-    setEditingId(null);
+    setEditingId(undefined);
     setModalVisible(true);
   }, [resetForm]);
 
@@ -401,14 +401,15 @@ const BudgetComponent: React.FC = () => {
           />
 
           <Modal
-            onOpen={() => {
+            onCancel={() => {
               resetForm();
-              setEditingId(null);
+              setEditingId(undefined);
             }}
             onSave={handleSubmit}
             title={editingId ? t('editFoods') : t('addFoods')}
             triggerText={t('addFoods')}
             icon={<PlusCircle className="mr-2 h-4 w-4" />}
+            isEdit={editingId}
           >
             <div className="space-y-4">
               <div>
