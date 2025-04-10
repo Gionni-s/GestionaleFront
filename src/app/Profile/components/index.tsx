@@ -435,7 +435,7 @@ const Profile: React.FC = () => {
                       className="bg-muted"
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      L'indirizzo email non può essere modificato.
+                      Indirizzo email non modificabile.
                     </p>
                   </div>
 
