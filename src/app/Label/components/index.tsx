@@ -254,7 +254,6 @@ const Labels = () => {
       (config) => config.key === activeTab
     );
     if (activeConfig) {
-      console.log(item);
       handleModalOpen(activeConfig.url, item);
     }
   };
