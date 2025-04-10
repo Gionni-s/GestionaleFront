@@ -138,7 +138,18 @@ function GenerateBody({
   disableActions,
   columnConfig,
 }: BodyProps) {
-  if (!Array.isArray(body) || body.length === 0) {
+  if (!Array.isArray(body)) {
+    console.log(body);
+    return (
+      <TableRow>
+        <TableCell colSpan={bodyKeys.length + 1} className="text-center">
+          No Element Found
+        </TableCell>
+      </TableRow>
+    );
+  }
+
+  if (body.length === 0) {
     return (
       <TableRow>
         <TableCell colSpan={bodyKeys.length + 1} className="text-center">

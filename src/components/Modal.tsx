@@ -98,6 +98,10 @@ const Modal: React.FC<ModalProps> = ({
     }
   }, [isEdit]);
 
+  const handleOpen = () => {
+    if (onOpen) onOpen();
+  };
+
   /**
    * Gestisce l'azione di annullamento e chiude il modal.
    */
@@ -137,7 +141,7 @@ const Modal: React.FC<ModalProps> = ({
       }}
     >
       <DialogTrigger asChild>
-        <Button onClick={() => setModalVisible(true)} className={className}>
+        <Button onClick={handleOpen} className={className}>
           {icon}
           {triggerText}
         </Button>
