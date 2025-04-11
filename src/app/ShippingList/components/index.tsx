@@ -204,7 +204,7 @@ const ShoppingLists: React.FC = () => {
               { label: t('actions'), className: 'w-[100px]' },
             ]}
             body={shoppingLists}
-            bodyKeys={['name', 'quantity']}
+            bodyKeys={['food.name', 'quantity']}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

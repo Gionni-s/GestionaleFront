@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import axios from '@/services/axios';
 import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
@@ -13,7 +14,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languageSave } from '@/services/store/language';
 import { changeLanguage } from '@/services/i18n';
-import { ShoppingBasket } from 'lucide-react';
+import { ShoppingBasket, LogOut } from 'lucide-react';
+import ShoppingListApi from '@/services/axios/ShoppingList';
 
 interface UserProfile {
   _id: string;
@@ -60,35 +62,42 @@ export function NavBar() {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(
     getLanguageByCode(language?.code || 'en')
   );
+  const [shoppingItemsCount, setShoppingItemsCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Menu items with role-based access control
   const menuItems = [
-    { href: '/Label', label: t('labels'), roleRequired: 'user' },
-    { href: '/Food', label: t('foods'), roleRequired: 'user' },
-    { href: '/Recipe', label: t('recipes'), roleRequired: 'user' },
+    { href: '/Label', label: 'labels', roleRequired: 'user' },
+    { href: '/Food', label: 'foods', roleRequired: 'user' },
+    { href: '/Recipe', label: 'recipes', roleRequired: 'user' },
     {
       href: '/warehouseEntities',
-      label: t('warehouseEntities'),
+      label: 'warehouseEntities',
       roleRequired: 'user',
     },
-    { href: '/budget', label: t('budgets'), roleRequired: 'user' },
-    { href: '/budget-groups', label: t('budgetGroups'), roleRequired: 'user' },
-    { href: '/Dashbord', label: t('Dashboards'), roleRequired: 'user' },
+    { href: '/budget', label: 'budgets', roleRequired: 'user' },
+    { href: '/budget-groups', label: 'budgetGroups', roleRequired: 'user' },
+    { href: '/Dashbord', label: 'Dashboards', roleRequired: 'user' },
   ];
 
   useEffect(() => {
-    if (token) {
-      fetchUserProfile();
-    }
+    const initializeApp = async () => {
+      setLoading(true);
+      if (token) {
+        await Promise.all([fetchUserProfile(), fetchShoppingItemsCount()]);
+      }
+      setLoading(false);
+    };
+
+    initializeApp();
   }, [token]);
 
   // Effect to sync i18n with persisted language from Redux
   useEffect(() => {
     if (language?.code) {
-      // Imposta la lingua quando lo stato di Redux è caricato/rehydrated
+      // Set language when Redux state is loaded/rehydrated
       i18n.changeLanguage(language.code);
       setCurrentLanguage(getLanguageByCode(language.code));
-      console.log(`Language set to ${language.code} from Redux store`);
     }
   }, [language, i18n]);
 
@@ -101,13 +110,33 @@ export function NavBar() {
     }
   };
 
+  const fetchShoppingItemsCount = async () => {
+    try {
+      // Assuming there's an endpoint that returns the shopping list items count
+      const response = await ShoppingListApi.getShoppingLists();
+      setShoppingItemsCount(Array.isArray(response) ? response.length : 0);
+    } catch (error) {
+      console.error('Failed to fetch shopping items count:', error);
+      setShoppingItemsCount(0);
+    }
+  };
+
   // Change language handler
   const handleLanguageChange = async (selectedLanguage: Language) => {
     await changeLanguage(selectedLanguage.code);
     dispatch(languageSave(selectedLanguage));
     setCurrentLanguage(selectedLanguage);
+  };
 
-    console.log(`Language changed to ${selectedLanguage.name}`);
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await axios.post('/auth/logout');
+      // Redirect to login page or clear auth state
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
   };
 
   // Check if the user has the necessary role for the menu item
@@ -118,16 +147,20 @@ export function NavBar() {
     return false; // If role does not match, deny access
   };
 
+  if (loading) {
+    return <div className="p-2 bg-gray-100">Loading...</div>;
+  }
+
   return (
     <Menubar className="flex justify-between items-center p-2 bg-gray-100">
       {token && (
-        <div className="flex items-center">
+        <div className="flex items-center space-x-1">
           {menuItems.map((item) => {
             // Check role-based access
             if (hasPermission(item.roleRequired)) {
               return (
                 <MenubarMenu key={item.href}>
-                  <MenubarTrigger>
+                  <MenubarTrigger className="px-3 py-2">
                     <Link
                       href={item.href}
                       className="hover:text-blue-600 transition-colors"
@@ -144,9 +177,21 @@ export function NavBar() {
       )}
 
       <div className="flex items-center space-x-4">
-        <Link href={'/ShippingList'}>
-          <ShoppingBasket className="mr-2 h-4 w-4" />
-        </Link>
+        {/* Shopping List with Badge */}
+        <div className="relative">
+          <Link href="/ShippingList" className="flex items-center">
+            <ShoppingBasket className="h-5 w-5 text-gray-700 hover:text-blue-600 transition-colors" />
+            {shoppingItemsCount > 0 && (
+              <Badge
+                variant="outline"
+                className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
+                {shoppingItemsCount}
+              </Badge>
+            )}
+          </Link>
+        </div>
+
         {/* Language Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
@@ -179,16 +224,34 @@ export function NavBar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User Profile */}
-        <Link href="/Profile">
-          <Avatar className="w-8 h-8 cursor-pointer border-2 border-gray-300 hover:border-blue-500 transition-colors">
-            <AvatarImage src={userProfile?.profileImage} alt="Profile" />
-            <AvatarFallback>
-              {userProfile?.name?.[0]}
-              {userProfile?.surname?.[0]}
-            </AvatarFallback>
-          </Avatar>
-        </Link>
+        {/* User Profile Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="outline-none">
+            <Avatar className="w-8 h-8 cursor-pointer border-2 border-gray-300 hover:border-blue-500 transition-colors">
+              <AvatarImage src={userProfile?.profileImage} alt="Profile" />
+              <AvatarFallback>
+                {userProfile?.name?.[0]}
+                {userProfile?.surname?.[0]}
+              </AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Link href="/Profile" className="flex items-center w-full">
+                {t('profile')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/settings" className="flex items-center w-full">
+                {t('settings')}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} className="text-red-500">
+              <LogOut className="mr-2 h-4 w-4" />
+              {t('logout')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </Menubar>
   );
