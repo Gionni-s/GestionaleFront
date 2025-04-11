@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import axios from '@/services/axios/index';
+import FoodApi from '@/services/axios/Food';
 import Select from '@/components/Select';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash } from 'lucide-react';
@@ -8,30 +8,13 @@ import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
-
-// Define types for data
-interface Food {
-  _id: string;
-  name: string;
-  foodGroupId: string;
-  foodGroup: { name: string };
-  userId: string;
-}
-
-interface AlthernativeFood {
-  message: string;
-}
-
-interface FormData {
-  name: string;
-  foodGroupId: string;
-  userId: string;
-}
+import axios from '@/services/axios/index';
+import { Food, FoodFormData, FoodGroup } from '@/app/Food/types';
 
 const Foods: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  const [Foods, setFoods] = useState<Food[]>([]);
-  const [form, setForm] = useState<FormData>({
+  const { t } = useTranslation();
+  const [foods, setFoods] = useState<Food[]>([]);
+  const [form, setForm] = useState<FoodFormData>({
     name: '',
     foodGroupId: '',
     userId: '',
@@ -39,10 +22,8 @@ const Foods: React.FC = () => {
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [foodGroups, setFoodGroups] = useState<FoodGroup[]>([]);
 
-  const [foodGroups, setFoodGroups] = useState<{ _id: string; name: string }[]>(
-    []
-  );
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,17 +41,16 @@ const Foods: React.FC = () => {
 
   const fetchFoods = async (): Promise<void> => {
     try {
-      const response = await axios.get<Food[]>('/foods?sort=scadenza');
-      setFoods(response.data || []);
+      const response = await FoodApi.getFoods('sort=scadenza');
+      setFoods(response || []);
     } catch (err) {
-      // setError('Failed to fetch warehouse entities.');
-      console.error(err);
+      console.error('Failed to fetch foods:', err);
     }
   };
 
-  const fetchFoodGroups = async () => {
+  const fetchFoodGroups = async (): Promise<void> => {
     try {
-      const response = await axios.get('/food-groups');
+      const response = await axios.get<FoodGroup[]>('/food-groups');
       setFoodGroups(response.data || []);
     } catch (error) {
       console.error('Failed to fetch food groups:', error);
@@ -82,26 +62,26 @@ const Foods: React.FC = () => {
 
     try {
       if (editingId) {
-        await axios.put(`/foods/${editingId}`, submissionForm);
+        await FoodApi.updateFood(editingId, submissionForm);
       } else {
-        await axios.post('/foods', submissionForm);
+        await FoodApi.createFood(submissionForm);
       }
       resetForm();
       setEditingId(undefined);
-      await fetchFoods();
+      await fetchFoods(); // Call fetchFoods instead of FoodApi.getFoods directly
     } catch (error) {
-      console.error('Failed to save warehouse entity:', error);
-      setError('Failed to save warehouse entity');
+      console.error('Failed to save food:', error);
+      setError('Failed to save food');
     }
   };
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await axios.delete(`/foods/${id}`);
-      await fetchFoods();
+      await FoodApi.deleteFood(id);
+      await fetchFoods(); // Call fetchFoods to update the state
     } catch (error) {
-      console.error('Failed to delete warehouse entity:', error);
-      setError('Failed to delete warehouse entity');
+      console.error('Failed to delete food:', error);
+      setError('Failed to delete food');
     }
   };
 
@@ -113,14 +93,18 @@ const Foods: React.FC = () => {
     });
   };
 
-  const handleEdit = (foods: Food) => {
+  const handleEdit = (food: Food) => {
     setForm({
-      name: foods.name,
-      foodGroupId: foods.foodGroupId,
-      userId: foods.userId,
+      name: food.name,
+      foodGroupId: food.foodGroupId, // Use _id from foodGroup
+      userId: food.userId || '', // Add userId or empty string if not provided
     });
-    setEditingId(foods._id);
+    setEditingId(food._id);
   };
+
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
@@ -180,7 +164,7 @@ const Foods: React.FC = () => {
             t('foodGroups'),
             { label: t('Actions'), className: 'w-[100px]' },
           ]}
-          body={Foods}
+          body={foods}
           bodyKeys={['name', 'foodGroup.name']}
           onEdit={handleEdit}
           onDelete={handleDelete}
