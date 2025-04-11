@@ -1,7 +1,7 @@
 import { Cookbook, CookbookFormData } from '@/app/Label/types';
 import axios from './index';
 
-class CookbookApiClass {
+class CookbookApi {
   private url = 'cookBooks';
 
   /**
@@ -85,5 +85,5 @@ class CookbookApiClass {
   }
 }
 
-const CookbookApi = new CookbookApiClass();
+const cookbookApi = new CookbookApi();
 export default CookbookApi;

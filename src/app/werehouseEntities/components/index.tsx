@@ -7,22 +7,22 @@ import { PlusCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
-import { FormData, WarehouseEntitiesType } from '../types';
 import Modal from '@/components/Modal';
+import { WarehouseEntity, WarehouseEntityFormData } from '../types';
 
 const WarehouseEntities: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const [warehouseEntities, setWarehouseEntities] = useState<
-    WarehouseEntitiesType[]
-  >([]);
-  const [form, setForm] = useState<FormData>({
+  const [warehouseEntities, setWarehouseEntities] = useState<WarehouseEntity[]>(
+    []
+  );
+  const [form, setForm] = useState<WarehouseEntityFormData>({
     name: '',
-    foodGroupId: '',
+    foodId: '',
     locationId: '',
     warehouseId: '',
     userId: '',
-    quantita: 1,
-    scadenza: '',
+    quantity: 1,
+    expirationDate: '',
   });
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
@@ -43,7 +43,7 @@ const WarehouseEntities: React.FC = () => {
       try {
         await Promise.all([
           fetchWarehouseEntities(),
-          fetchFoodGroups(),
+          fetchFoods(),
           fetchLocations(),
           fetchWarehouses(),
         ]);
@@ -60,7 +60,7 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchWarehouseEntities = async (): Promise<void> => {
     try {
-      const response = await axios.get<WarehouseEntitiesType[]>(
+      const response = await axios.get<WarehouseEntity[]>(
         '/werehouseEntities?sort=scadenza'
       );
       setWarehouseEntities(response.data || []);
@@ -70,9 +70,9 @@ const WarehouseEntities: React.FC = () => {
     }
   };
 
-  const fetchFoodGroups = async () => {
+  const fetchFoods = async () => {
     try {
-      const response = await axios.get('/food-groups');
+      const response = await axios.get('/foods');
       setFoodGroups(response.data || []);
     } catch (error) {
       console.error('Failed to fetch food groups:', error);
@@ -128,24 +128,24 @@ const WarehouseEntities: React.FC = () => {
   const resetForm = () => {
     setForm({
       name: '',
-      foodGroupId: '',
+      foodId: '',
       locationId: '',
       warehouseId: '',
       userId: '',
-      quantita: 1,
-      scadenza: '',
+      quantity: 1,
+      expirationDate: '',
     });
   };
 
-  const handleEdit = (warehouseEntities: WarehouseEntitiesType) => {
+  const handleEdit = (warehouseEntities: WarehouseEntity) => {
     setForm({
       name: warehouseEntities.name,
-      foodGroupId: warehouseEntities.foodGroupId,
+      foodId: warehouseEntities.foodId,
       locationId: warehouseEntities.locationId,
       warehouseId: warehouseEntities.warehouseId,
       userId: warehouseEntities.userId,
-      quantita: warehouseEntities.quantita,
-      scadenza: warehouseEntities.scadenza.split('T')[0],
+      quantity: warehouseEntities.quantity,
+      expirationDate: warehouseEntities.expirationDate.split('T')[0],
     });
     setEditingId(warehouseEntities._id);
   };
@@ -189,7 +189,7 @@ const WarehouseEntities: React.FC = () => {
                 body={foodGroups}
                 form={form}
                 setForm={setForm}
-                fieldToMap="foodGroupId"
+                fieldToMap="foodId"
                 useCombobox={true}
               />
             </div>
@@ -222,9 +222,9 @@ const WarehouseEntities: React.FC = () => {
               <Input
                 id="quantita"
                 type="number"
-                value={form.quantita}
+                value={form.quantity}
                 onChange={(e) =>
-                  setForm({ ...form, quantita: +e.target.value })
+                  setForm({ ...form, quantity: +e.target.value })
                 }
                 required
               />
@@ -234,8 +234,10 @@ const WarehouseEntities: React.FC = () => {
               <Input
                 id="scadenza"
                 type="date"
-                value={form.scadenza}
-                onChange={(e) => setForm({ ...form, scadenza: e.target.value })}
+                value={form.expirationDate}
+                onChange={(e) =>
+                  setForm({ ...form, expirationDate: e.target.value })
+                }
                 required
               />
             </div>
@@ -252,7 +254,7 @@ const WarehouseEntities: React.FC = () => {
         <Table
           head={[
             t('names'),
-            t('foodGroups'),
+            t('foods'),
             t('quantities'),
             t('locations'),
             t('warehouses'),
@@ -262,16 +264,16 @@ const WarehouseEntities: React.FC = () => {
           body={warehouseEntities}
           bodyKeys={[
             'name',
-            'foodGroup.name',
-            'quantita',
+            'food.name',
+            'quantity',
             'location.name',
             'warehouse.name',
-            'scadenza',
+            'expirationDate',
           ]}
           onEdit={handleEdit}
           onDelete={handleDelete}
           columnConfig={{
-            scadenza: {
+            expirationDate: {
               format: (value) => formatExpiration(value),
               className: (value) => getExpirationColor(value),
             },

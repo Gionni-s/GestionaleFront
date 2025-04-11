@@ -1,7 +1,7 @@
 import { Warehouse, WarehouseFormData } from '@/app/Label/types';
 import axios from './index';
 
-class WarehouseApiClass {
+class WarehouseApi {
   private url = 'warehouses';
 
   /**
@@ -88,5 +88,5 @@ class WarehouseApiClass {
   }
 }
 
-const WarehouseApi = new WarehouseApiClass();
-export default WarehouseApi;
+const warehouseApi = new WarehouseApi();
+export default warehouseApi;

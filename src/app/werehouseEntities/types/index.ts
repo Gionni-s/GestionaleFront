@@ -1,10 +1,10 @@
-export interface WarehouseEntitiesType {
+export interface WarehouseEntity {
   _id: string;
   name: string;
-  quantita: number;
-  scadenza: string;
-  foodGroupId: string;
-  foodGroup: { name: string };
+  quantity: number;
+  expirationDate: string;
+  foodId: string;
+  food: { name: string };
   locationId: string;
   location: { name: string };
   warehouseId: string;
@@ -12,12 +12,12 @@ export interface WarehouseEntitiesType {
   userId: string;
 }
 
-export interface FormData {
+export interface WarehouseEntityFormData {
   name: string;
-  foodGroupId: string;
+  foodId: string;
   locationId: string;
   warehouseId: string;
   userId: string;
-  quantita: number;
-  scadenza: string;
+  quantity: number;
+  expirationDate: string;
 }
