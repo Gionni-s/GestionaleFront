@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { languageSave } from '@/services/store/language';
 import { changeLanguage } from '@/services/i18n';
+import { ShoppingBasket } from 'lucide-react';
 
 interface UserProfile {
   _id: string;
@@ -143,6 +144,9 @@ export function NavBar() {
       )}
 
       <div className="flex items-center space-x-4">
+        <Link href={'/ShippingList'}>
+          <ShoppingBasket className="mr-2 h-4 w-4" />
+        </Link>
         {/* Language Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">

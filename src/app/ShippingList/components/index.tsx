@@ -1,50 +1,44 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
-import axios from '@/services/axios/index';
-import Select from '@/components/Select';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Pencil, Trash } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
+import { ShoppingList, ShoppingListFormData } from '../types';
+import ShoppingListApi from '@/services/axios/ShoppingList';
+import FoodApi from '@/services/axios/Food';
+import { useToast } from '@/hooks/use-toast';
+import Select from '@/components/Select';
 
-// Define types for data
-interface ShippingList {
-  _id: string;
-  name: string;
-  foodGroupId: string;
-  foodGroup: { name: string };
-  userId: string;
-}
+const ShoppingLists: React.FC = () => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
 
-interface FormData {
-  name: string;
-  foodGroupId: string;
-  userId: string;
-}
-
-const ShippingList: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  const [Foods, setFoods] = useState<ShippingList[]>([]);
-  const [form, setForm] = useState<FormData>({
-    name: '',
-    foodGroupId: '',
-    userId: '',
+  const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
+  const [form, setForm] = useState<ShoppingListFormData>({
+    foodId: '',
+    quantity: 0,
   });
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const [foodGroups, setFoodGroups] = useState<{ _id: string; name: string }[]>(
+  const [foodItems, setFoodItems] = useState<{ _id: string; name: string }[]>(
     []
   );
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await Promise.all([fetchFoods(), fetchFoodGroups()]);
+        await Promise.all([fetchShoppingLists(), fetchFoodItems()]);
       } catch (err) {
-        setError('Failed to fetch initial data');
+        toast({
+          title: t('error'),
+          description: t('failedToFetchInitialData'),
+          variant: 'destructive',
+        });
         console.error(err);
       } finally {
         setLoading(false);
@@ -54,136 +48,170 @@ const ShippingList: React.FC = () => {
     fetchData();
   }, []);
 
-  const fetchFoods = async (): Promise<void> => {
+  const fetchShoppingLists = async (): Promise<void> => {
     try {
-      const response = await axios.get<ShippingList[]>('/foods?sort=scadenza');
-      setFoods(response.data || []);
+      const response = await ShoppingListApi.getShoppingLists();
+      setShoppingLists(response || []);
     } catch (err) {
-      // setError('Failed to fetch warehouse entities.');
-      console.error(err);
+      console.error('Failed to fetch shopping lists:', err);
+      toast({
+        title: t('error'),
+        description: t('failedToFetchShoppingLists'),
+        variant: 'destructive',
+      });
     }
   };
 
-  const fetchFoodGroups = async () => {
+  const fetchFoodItems = async () => {
     try {
-      const response = await axios.get('/food-groups');
-      setFoodGroups(response.data || []);
+      const response = await FoodApi.getFoods();
+      setFoodItems(response || []);
     } catch (error) {
-      console.error('Failed to fetch food groups:', error);
+      console.error('Failed to fetch foods:', error);
+      toast({
+        title: t('error'),
+        description: t('failedToFetchFoods'),
+        variant: 'destructive',
+      });
     }
   };
 
   const handleSubmit = async (): Promise<void> => {
-    const submissionForm = { ...form };
+    if (!form.foodId) {
+      toast({
+        title: t('error'),
+        description: t('pleaseSelectFood'),
+        variant: 'destructive',
+      });
+      return;
+    }
 
     try {
       if (editingId) {
-        await axios.put(`/foods/${editingId}`, submissionForm);
+        await ShoppingListApi.updateShoppingList(editingId, form);
+        toast({
+          title: t('success'),
+          description: t('shoppingListUpdated'),
+          variant: 'default',
+        });
       } else {
-        await axios.post('/foods', submissionForm);
+        await ShoppingListApi.createShoppingList(form);
+        toast({
+          title: t('success'),
+          description: t('shoppingListCreated'),
+          variant: 'default',
+        });
       }
       resetForm();
-      setEditingId(undefined);
-      await fetchFoods();
+      await fetchShoppingLists();
     } catch (error) {
-      console.error('Failed to save warehouse entity:', error);
-      setError('Failed to save warehouse entity');
+      console.error('Failed to save shopping list:', error);
+      toast({
+        title: t('error'),
+        description: t('failedToSaveShoppingList'),
+        variant: 'destructive',
+      });
     }
   };
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await axios.delete(`/foods/${id}`);
-      await fetchFoods();
+      await ShoppingListApi.deleteShoppingList(id);
+      toast({
+        title: t('success'),
+        description: t('shoppingListDeleted'),
+        variant: 'default',
+      });
+      await fetchShoppingLists();
     } catch (error) {
-      console.error('Failed to delete warehouse entity:', error);
-      setError('Failed to delete warehouse entity');
+      console.error('Failed to delete shopping list:', error);
+      toast({
+        title: t('error'),
+        description: t('failedToDeleteShoppingList'),
+        variant: 'destructive',
+      });
     }
   };
 
   const resetForm = () => {
     setForm({
-      name: '',
-      foodGroupId: '',
-      userId: '',
+      foodId: '',
+      quantity: 0,
     });
+    setEditingId(undefined);
   };
 
-  const handleEdit = (foods: ShippingList) => {
+  const handleEdit = (item: ShoppingList) => {
     setForm({
-      name: foods.name,
-      foodGroupId: foods.foodGroupId,
-      userId: foods.userId,
+      foodId: item.foodId,
+      quantity: item.quantity,
     });
-    setEditingId(foods._id);
+    setEditingId(item._id);
   };
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
-
-  const formGenerator = () => {
-    return (
+  return (
+    <div className="w-full mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t('foodManagements')}</h1>
+        <h1 className="text-3xl font-bold">{t('shoppingLists')}</h1>
         <Modal
           onSave={handleSubmit}
-          onCancel={() => {
-            resetForm();
-            setEditingId(undefined);
-          }}
-          title={editingId ? t('editFoods') : t('addFoods')}
-          triggerText={t('addFoods')}
+          onCancel={resetForm}
+          title={editingId ? t('editShoppingList') : t('addShoppingList')}
+          triggerText={t('addShoppingList')}
           icon={<PlusCircle className="mr-2 h-4 w-4" />}
           isEdit={editingId}
           editText={t('edit')}
         >
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">{t('names')}</Label>
-              <Input
-                id="name"
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="food">{t('foodGroups')}</Label>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="food">{t('selectFood')}</Label>
               <Select
-                label={t('selectFoods')}
-                body={foodGroups}
+                label={t('selectFood')}
+                body={foodItems}
                 form={form}
                 setForm={setForm}
-                fieldToMap="foodGroupId"
+                fieldToMap="foodId"
                 useCombobox={true}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="quantity">{t('quantity')}</Label>
+              <Input
+                id="quantity"
+                type="number"
+                value={form.quantity}
+                onChange={(e) =>
+                  setForm({ ...form, quantity: parseInt(e.target.value) || 0 })
+                }
+                min={0}
+                required
               />
             </div>
           </div>
         </Modal>
       </div>
-    );
-  };
 
-  return (
-    <div className="w-full mx-auto">
-      {formGenerator()}
-      <div className="border rounded-lg overflow-hidden">
-        <Table
-          head={[
-            t('names'),
-            t('foodGroups'),
-            { label: t('Actions'), className: 'w-[100px]' },
-          ]}
-          body={Foods}
-          bodyKeys={['name', 'foodGroup.name']}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-32">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      ) : (
+        <div className="border rounded-lg overflow-hidden">
+          <Table
+            head={[
+              t('name'),
+              t('quantity'),
+              { label: t('actions'), className: 'w-[100px]' },
+            ]}
+            body={shoppingLists}
+            bodyKeys={['name', 'quantity']}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
-export default ShippingList;
+export default ShoppingLists;
