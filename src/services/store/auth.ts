@@ -1,4 +1,4 @@
-import { UserProfile } from '@/app/Profile/components';
+import { UserProfile } from '@/app/Profile/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Types

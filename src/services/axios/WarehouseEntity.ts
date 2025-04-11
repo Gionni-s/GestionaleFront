@@ -1,8 +1,8 @@
-import { WarehouseEntity, WarehouseEntityFormData } from '@/app/werehouseEntities/types';
+import { WarehouseEntity, WarehouseEntityFormData } from '@/app/warehouseEntities/types';
 import axios from './index';
 
 class WarehouseEntityEntityApi {
-  private url = 'warehouseEntity-entities';
+  private url = 'warehouse-entities';
 
   /**
    * Get all warehouseEntityEntities with optional query parameters

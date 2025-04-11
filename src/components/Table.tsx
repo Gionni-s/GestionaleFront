@@ -139,7 +139,6 @@ function GenerateBody({
   columnConfig,
 }: BodyProps) {
   if (!Array.isArray(body)) {
-    console.log(body);
     return (
       <TableRow>
         <TableCell colSpan={bodyKeys.length + 1} className="text-center">

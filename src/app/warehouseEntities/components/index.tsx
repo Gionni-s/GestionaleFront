@@ -9,6 +9,10 @@ import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
 import { WarehouseEntity, WarehouseEntityFormData } from '../types';
+import WarehouseEntityEntityApi from '@/services/axios/WarehouseEntity';
+import FoodApi from '@/services/axios/Food';
+import LocationApi from '@/services/axios/Location';
+import WarehouseApi from '@/services/axios/Warehouse';
 
 const WarehouseEntities: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -60,10 +64,9 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchWarehouseEntities = async (): Promise<void> => {
     try {
-      const response = await axios.get<WarehouseEntity[]>(
-        '/werehouseEntities?sort=scadenza'
-      );
-      setWarehouseEntities(response.data || []);
+      const response =
+        await WarehouseEntityEntityApi.getWarehouseEntityEntities();
+      setWarehouseEntities(response || []);
     } catch (err) {
       // setError('Failed to fetch warehouse entities.');
       console.error(err);
@@ -72,8 +75,8 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchFoods = async () => {
     try {
-      const response = await axios.get('/foods');
-      setFoodGroups(response.data || []);
+      const response = await FoodApi.getFoods();
+      setFoodGroups(response || []);
     } catch (error) {
       console.error('Failed to fetch food groups:', error);
     }
@@ -81,8 +84,8 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await axios.get('/locations');
-      setLocations(response.data || []);
+      const response = await LocationApi.getLocations();
+      setLocations(response || []);
     } catch (error) {
       console.error('Failed to fetch locations:', error);
     }
@@ -90,8 +93,8 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchWarehouses = async () => {
     try {
-      const response = await axios.get('/warehouses');
-      setWarehouses(response.data || []);
+      const response = await WarehouseApi.getWarehouses();
+      setWarehouses(response || []);
     } catch (error) {
       console.error('Failed to fetch warehouses:', error);
     }
@@ -102,9 +105,12 @@ const WarehouseEntities: React.FC = () => {
 
     try {
       if (editingId) {
-        await axios.put(`/werehouseEntities/${editingId}`, submissionForm);
+        await WarehouseEntityEntityApi.updateWarehouseEntity(
+          editingId,
+          submissionForm
+        );
       } else {
-        await axios.post('/werehouseEntities', submissionForm);
+        await WarehouseEntityEntityApi.createWarehouseEntity(submissionForm);
       }
       resetForm();
       setEditingId(undefined);
@@ -117,7 +123,7 @@ const WarehouseEntities: React.FC = () => {
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await axios.delete(`/werehouseEntities/${id}`);
+      await WarehouseEntityEntityApi.deleteWarehouseEntity(id);
       await fetchWarehouseEntities();
     } catch (error) {
       console.error('Failed to delete warehouse entity:', error);
@@ -186,6 +192,7 @@ const WarehouseEntities: React.FC = () => {
               <Label htmlFor="food">{t('foodGroups')}</Label>
               <Select
                 label={t('foodGroupSelectLabel')}
+                base={editingId ? form.foodId : ''}
                 body={foodGroups}
                 form={form}
                 setForm={setForm}
@@ -197,7 +204,7 @@ const WarehouseEntities: React.FC = () => {
               <Label htmlFor="location">{t('locations')}</Label>
               <Select
                 label={t('locationSelectLabel')}
-                base={locations.length == 1 ? locations[0] : ''}
+                base={editingId ? form.locationId : ''}
                 body={locations}
                 form={form}
                 setForm={setForm}
@@ -209,7 +216,7 @@ const WarehouseEntities: React.FC = () => {
               <Label htmlFor="warehouse">{t('warehouses')}</Label>
               <Select
                 label={t('warehouseSelectLabel')}
-                base={warehouses.length == 1 ? warehouses[0] : ''}
+                base={editingId ? form.warehouseId : ''}
                 body={warehouses}
                 form={form}
                 setForm={setForm}

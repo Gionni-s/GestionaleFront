@@ -88,5 +88,5 @@ class FoodGroupApi {
   }
 }
 
-const foodApi = new FoodGroupApi();
-export default foodApi;
+const foodGroupApi = new FoodGroupApi();
+export default foodGroupApi;

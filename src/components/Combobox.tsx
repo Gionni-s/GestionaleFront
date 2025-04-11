@@ -77,7 +77,9 @@ export default function MyCombobox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {body.find((item) => item._id === value)?.name || label}
+          {body.length > 0
+            ? body.find((item) => item._id === value)?.name || label
+            : label}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -87,24 +89,25 @@ export default function MyCombobox({
           <CommandList>
             <CommandEmpty>Nessuna opzione trovata.</CommandEmpty>
             <CommandGroup>
-              {body.map(({ _id, name }) => (
-                <CommandItem
-                  key={_id}
-                  value={name}
-                  onSelect={() => {
-                    handleChange(_id);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      value === _id ? 'opacity-100' : 'opacity-0'
-                    )}
-                  />
-                  {name}
-                </CommandItem>
-              ))}
+              {body.length > 0 &&
+                body.map(({ _id, name }) => (
+                  <CommandItem
+                    key={_id}
+                    value={name}
+                    onSelect={() => {
+                      handleChange(_id);
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        value === _id ? 'opacity-100' : 'opacity-0'
+                      )}
+                    />
+                    {name}
+                  </CommandItem>
+                ))}
             </CommandGroup>
           </CommandList>
         </Command>

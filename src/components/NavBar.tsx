@@ -66,7 +66,7 @@ export function NavBar() {
     { href: '/Food', label: t('foods'), roleRequired: 'user' },
     { href: '/Recipe', label: t('recipes'), roleRequired: 'user' },
     {
-      href: '/werehouseEntities',
+      href: '/warehouseEntities',
       label: t('warehouseEntities'),
       roleRequired: 'user',
     },
