@@ -2,63 +2,43 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import axios from '@/services/axios';
-import { PlusCircle, Pencil, Trash, Loader2 } from 'lucide-react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import Table from '@/components/Table';
 import Modal from '@/components/Modal';
-
-// Definizione più chiara dei tipi
-interface Item {
-  _id: string;
-  name: string;
-}
+import FoodGroupApi from '@/services/axios/FoodGroup';
+import LocationApi from '@/services/axios/Location';
+import WarehouseApi from '@/services/axios/Warehouse';
+import CookbookApi from '@/services/axios/Cookbook';
+import {
+  FoodGroup,
+  Location,
+  Warehouse,
+  Cookbook,
+  FoodGroupFormData,
+  LocationFormData,
+  WarehouseFormData,
+  CookbookFormData,
+} from '@/app/Label/types';
 
 type CategoryKey = 'foodGroups' | 'locations' | 'warehouses' | 'cookbook';
-type Categories = Record<CategoryKey, Item[]>;
+type Categories = Record<
+  CategoryKey,
+  (FoodGroup | Location | Warehouse | Cookbook)[]
+>;
 
 interface CategoryConfig {
   title: string;
   key: CategoryKey;
-  url: string;
+  api: any;
 }
-
-// Service functions optimized
-const api = {
-  async fetchData(url: string): Promise<Item[]> {
-    try {
-      const response = await axios.get<Item[]>(url);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching data from ${url}:`, error);
-      throw error;
-    }
-  },
-
-  async createItem(url: string, name: string): Promise<Item> {
-    const response = await axios.post(url, { name });
-    return response.data;
-  },
-
-  async updateItem(url: string, id: string, name: string): Promise<Item> {
-    const response = await axios.put(`${url}/${id}`, { name });
-    return response.data;
-  },
-
-  async deleteItem(url: string, id: string): Promise<void> {
-    await axios.delete(`${url}/${id}`);
-  },
-};
 
 const Labels = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
-
-  // Riferimento al bottone del modale
-  const modalButtonRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
@@ -73,7 +53,6 @@ const Labels = () => {
   const [modalState, setModalState] = useState({
     itemName: '',
     currentCategory: '' as CategoryKey,
-    currentUrl: '',
     editingId: '',
     isEdit: false,
   });
@@ -83,32 +62,24 @@ const Labels = () => {
     {
       title: t('foodGroups'),
       key: 'foodGroups',
-      url: '/food-groups',
+      api: FoodGroupApi,
     },
     {
       title: t('locations'),
       key: 'locations',
-      url: '/locations',
+      api: LocationApi,
     },
     {
       title: t('warehouses'),
       key: 'warehouses',
-      url: '/warehouses',
+      api: WarehouseApi,
     },
     {
       title: t('cookBooks'),
       key: 'cookbook',
-      url: '/cookBooks',
+      api: CookbookApi,
     },
   ];
-
-  // URL to key mapping for easier reference
-  const urlToCategoryKey: Record<string, CategoryKey> = {
-    '/food-groups': 'foodGroups',
-    '/locations': 'locations',
-    '/warehouses': 'warehouses',
-    '/cookBooks': 'cookbook',
-  };
 
   useEffect(() => {
     loadData();
@@ -117,13 +88,28 @@ const Labels = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const results = await Promise.all(
-        categoryConfigs.map((config) =>
-          api.fetchData(config.url).then((data) => ({ key: config.key, data }))
-        )
-      );
+      const promises = categoryConfigs.map(async (config) => {
+        let data;
+        switch (config.key) {
+          case 'foodGroups':
+            data = await FoodGroupApi.getFoodGroups();
+            break;
+          case 'locations':
+            data = await LocationApi.getLocations();
+            break;
+          case 'warehouses':
+            data = await WarehouseApi.getWarehouses();
+            break;
+          case 'cookbook':
+            data = await CookbookApi.getCookbooks();
+            break;
+        }
+        return { key: config.key, data };
+      });
 
+      const results = await Promise.all(promises);
       const newCategories = { ...categories };
+
       results.forEach(({ key, data }) => {
         newCategories[key] = data;
       });
@@ -140,49 +126,102 @@ const Labels = () => {
     }
   };
 
-  const handleModalOpen = (url: string, item?: Item) => {
-    const categoryKey = urlToCategoryKey[url];
+  const handleModalOpen = (
+    category: CategoryKey,
+    item?: FoodGroup | Location | Warehouse | Cookbook
+  ) => {
     setModalState({
       itemName: item?.name || '',
-      currentCategory: categoryKey,
-      currentUrl: url,
+      currentCategory: category,
       editingId: item?._id || '',
       isEdit: !!item,
     });
-
-    if (modalButtonRef.current) {
-      // @ts-ignore: Object is possibly 'null'.
-      modalButtonRef.current.click();
-    }
   };
 
   const handleModalClose = () => {
     setModalState({
       itemName: '',
       currentCategory: '' as CategoryKey,
-      currentUrl: '',
       editingId: '',
       isEdit: false,
     });
   };
 
   const handleSave = async () => {
-    const { itemName, currentUrl, currentCategory, editingId } = modalState;
+    const { itemName, currentCategory, editingId } = modalState;
 
     if (!itemName.trim()) return;
 
     setActionLoading(true);
     try {
-      let updatedItem: Item;
+      let updatedItem;
+      const formData = {
+        _id: editingId,
+        name: itemName,
+      };
 
       if (editingId) {
-        updatedItem = await api.updateItem(currentUrl, editingId, itemName);
+        // Update existing item using the appropriate API
+        switch (currentCategory) {
+          case 'foodGroups':
+            updatedItem = await FoodGroupApi.updateFoodGroup(
+              editingId,
+              formData as FoodGroupFormData
+            );
+            break;
+          case 'locations':
+            updatedItem = await LocationApi.updateLocation(
+              editingId,
+              formData as LocationFormData
+            );
+            break;
+          case 'warehouses':
+            updatedItem = await WarehouseApi.updateWarehouse(
+              editingId,
+              formData as WarehouseFormData
+            );
+            break;
+          case 'cookbook':
+            updatedItem = await CookbookApi.updateCookbook(
+              editingId,
+              formData as CookbookFormData
+            );
+            break;
+          default:
+            throw new Error('Invalid category');
+        }
+
         toast({
           title: 'Success',
           description: 'Item updated successfully',
         });
       } else {
-        updatedItem = await api.createItem(currentUrl, itemName);
+        // Create new item using the appropriate API
+        switch (currentCategory) {
+          case 'foodGroups':
+            updatedItem = await FoodGroupApi.createFoodGroup({
+              name: itemName,
+            } as FoodGroupFormData);
+            break;
+          case 'locations':
+            updatedItem = await LocationApi.createLocation({
+              name: itemName,
+            } as LocationFormData);
+            break;
+          case 'warehouses':
+            updatedItem = await WarehouseApi.createWarehouse({
+              name: itemName,
+            } as WarehouseFormData);
+            break;
+          case 'cookbook':
+            updatedItem = await CookbookApi.createCookbook({
+              name: itemName,
+            } as CookbookFormData);
+            break;
+          default:
+            throw new Error('Invalid category');
+        }
+
         toast({
           title: 'Success',
           description: 'Item created successfully',
@@ -221,16 +260,35 @@ const Labels = () => {
     }
   };
 
-  const handleDelete = async (item: Item, url: string) => {
-    const categoryKey = urlToCategoryKey[url];
+  const handleDelete = async (
+    item: FoodGroup | Location | Warehouse | Cookbook | string
+  ) => {
+    const id = typeof item === 'string' ? item : item._id;
 
     try {
       setActionLoading(true);
-      await api.deleteItem(url, item._id);
+
+      // Delete item using the appropriate API
+      switch (activeTab) {
+        case 'foodGroups':
+          await FoodGroupApi.deleteFoodGroup(id);
+          break;
+        case 'locations':
+          await LocationApi.deleteLocation(id);
+          break;
+        case 'warehouses':
+          await WarehouseApi.deleteWarehouse(id);
+          break;
+        case 'cookbook':
+          await CookbookApi.deleteCookbook(id);
+          break;
+        default:
+          throw new Error('Invalid category');
+      }
 
       setCategories((prev) => ({
         ...prev,
-        [categoryKey]: prev[categoryKey].filter((el) => el._id !== item._id),
+        [activeTab]: prev[activeTab].filter((el) => el._id !== id),
       }));
 
       toast({
@@ -249,13 +307,8 @@ const Labels = () => {
     }
   };
 
-  const handleEdit = (item: Item) => {
-    const activeConfig = categoryConfigs.find(
-      (config) => config.key === activeTab
-    );
-    if (activeConfig) {
-      handleModalOpen(activeConfig.url, item);
-    }
+  const handleEdit = (item: FoodGroup | Location | Warehouse | Cookbook) => {
+    handleModalOpen(activeTab, item);
   };
 
   if (isLoading) {
@@ -266,10 +319,6 @@ const Labels = () => {
       </div>
     );
   }
-
-  const activeConfig = categoryConfigs.find(
-    (config) => config.key === activeTab
-  );
 
   return (
     <div className="w-full mx-auto">
@@ -303,7 +352,7 @@ const Labels = () => {
                 triggerText={t('add')}
                 icon={<PlusCircle className="mr-2 h-4 w-4" />}
                 onOpen={() => {
-                  handleModalOpen(config.url);
+                  handleModalOpen(config.key);
                 }}
                 isEdit={modalState.editingId}
                 editText={t('edit')}
@@ -337,9 +386,7 @@ const Labels = () => {
                 body={categories[config.key]}
                 bodyKeys={['name']}
                 onEdit={handleEdit}
-                onDelete={(item) =>
-                  handleDelete({ _id: item, name: item }, config.url)
-                }
+                onDelete={handleDelete}
               />
             </div>
           </TabsContent>
