@@ -86,4 +86,4 @@ class CookbookApi {
 }
 
 const cookbookApi = new CookbookApi();
-export default CookbookApi;
+export default cookbookApi;
