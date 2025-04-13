@@ -113,7 +113,7 @@ export function NavBar() {
   const fetchShoppingItemsCount = async () => {
     try {
       // Assuming there's an endpoint that returns the shopping list items count
-      const response = await ShoppingListApi.getShoppingLists();
+      const response = await ShoppingListApi.getShoppingLists('status=toBuy');
       setShoppingItemsCount(Array.isArray(response) ? response.length : 0);
     } catch (error) {
       console.error('Failed to fetch shopping items count:', error);
@@ -179,7 +179,7 @@ export function NavBar() {
       <div className="flex items-center space-x-4">
         {/* Shopping List with Badge */}
         <div className="relative">
-          <Link href="/ShippingList" className="flex items-center">
+          <Link href="/ShoppingList" className="flex items-center">
             <ShoppingBasket className="h-5 w-5 text-gray-700 hover:text-blue-600 transition-colors" />
             {shoppingItemsCount > 0 && (
               <Badge

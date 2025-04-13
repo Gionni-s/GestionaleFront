@@ -1,4 +1,4 @@
-import { ShoppingList, ShoppingListFormData } from '@/app/ShippingList/types';
+import { ShoppingList, ShoppingListFormData } from '@/app/ShoppingList/types';
 import axios from './index';
 
 class ShoppingListApi {
