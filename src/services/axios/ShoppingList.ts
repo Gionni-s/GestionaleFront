@@ -79,6 +79,25 @@ class ShoppingListApi {
   }
 
   /**
+   * Update an existing ShoppingList
+   * @param id ShoppingList ID
+   * @param body ShoppingList form data
+   * @returns Promise with updated ShoppingList
+   */
+  async updateShoppingListStatus(
+    id: string,
+    body: { status: string }
+  ): Promise<ShoppingList> {
+    try {
+      const result = await axios.put<ShoppingList>(`${this.url}/${id}`, body);
+      return result.data;
+    } catch (error) {
+      console.error(`Error updating ShoppingList with ID ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Delete a ShoppingList
    * @param id ShoppingList ID
    * @returns Promise
