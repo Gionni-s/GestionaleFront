@@ -92,16 +92,16 @@ const Labels = () => {
         let data;
         switch (config.key) {
           case 'foodGroups':
-            data = await FoodGroupApi.getFoodGroups();
+            data = await FoodGroupApi.get();
             break;
           case 'locations':
-            data = await LocationApi.getLocations();
+            data = await LocationApi.get();
             break;
           case 'warehouses':
-            data = await WarehouseApi.getWarehouses();
+            data = await WarehouseApi.get();
             break;
           case 'cookbook':
-            data = await CookbookApi.getCookbooks();
+            data = await CookbookApi.get();
             break;
         }
         return { key: config.key, data };
@@ -164,25 +164,25 @@ const Labels = () => {
         // Update existing item using the appropriate API
         switch (currentCategory) {
           case 'foodGroups':
-            updatedItem = await FoodGroupApi.updateFoodGroup(
+            updatedItem = await FoodGroupApi.put(
               editingId,
               formData as FoodGroupFormData
             );
             break;
           case 'locations':
-            updatedItem = await LocationApi.updateLocation(
+            updatedItem = await LocationApi.put(
               editingId,
               formData as LocationFormData
             );
             break;
           case 'warehouses':
-            updatedItem = await WarehouseApi.updateWarehouse(
+            updatedItem = await WarehouseApi.put(
               editingId,
               formData as WarehouseFormData
             );
             break;
           case 'cookbook':
-            updatedItem = await CookbookApi.updateCookbook(
+            updatedItem = await CookbookApi.put(
               editingId,
               formData as CookbookFormData
             );
@@ -199,22 +199,22 @@ const Labels = () => {
         // Create new item using the appropriate API
         switch (currentCategory) {
           case 'foodGroups':
-            updatedItem = await FoodGroupApi.createFoodGroup({
+            updatedItem = await FoodGroupApi.post({
               name: itemName,
             } as FoodGroupFormData);
             break;
           case 'locations':
-            updatedItem = await LocationApi.createLocation({
+            updatedItem = await LocationApi.post({
               name: itemName,
             } as LocationFormData);
             break;
           case 'warehouses':
-            updatedItem = await WarehouseApi.createWarehouse({
+            updatedItem = await WarehouseApi.post({
               name: itemName,
             } as WarehouseFormData);
             break;
           case 'cookbook':
-            updatedItem = await CookbookApi.createCookbook({
+            updatedItem = await CookbookApi.post({
               name: itemName,
             } as CookbookFormData);
             break;
@@ -271,16 +271,16 @@ const Labels = () => {
       // Delete item using the appropriate API
       switch (activeTab) {
         case 'foodGroups':
-          await FoodGroupApi.deleteFoodGroup(id);
+          await FoodGroupApi.delete(id);
           break;
         case 'locations':
-          await LocationApi.deleteLocation(id);
+          await LocationApi.delete(id);
           break;
         case 'warehouses':
-          await WarehouseApi.deleteWarehouse(id);
+          await WarehouseApi.delete(id);
           break;
         case 'cookbook':
-          await CookbookApi.deleteCookbook(id);
+          await CookbookApi.delete(id);
           break;
         default:
           throw new Error('Invalid category');

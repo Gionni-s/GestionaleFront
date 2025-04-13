@@ -11,7 +11,7 @@ export type BudgetTypeSelect = 'expense' | 'saving';
 
 export type BudgetType = { _id: BudgetTypeSelect; name: BudgetTypeSelect };
 
-export interface FormData {
+export interface BudgetGroupFormData {
   name: string;
   max: number;
   number: number;

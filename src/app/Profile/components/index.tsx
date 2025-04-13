@@ -96,7 +96,7 @@ const Profile: React.FC = () => {
   const fetchUserProfile = useCallback(async () => {
     try {
       // Use userApi instead of direct axios call
-      const data = await UserApi.getUserById('me');
+      const data = await UserApi.getById('me');
       setUserProfile(data);
       setForm(data);
     } catch (error) {
@@ -193,7 +193,7 @@ const Profile: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Use userApi instead of direct axios call
-      await UserApi.updateMe(form);
+      await UserApi.putMe(form);
       setUserProfile(form);
       setIsEditing(false);
       toast({

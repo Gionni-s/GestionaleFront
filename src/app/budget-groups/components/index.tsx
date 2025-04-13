@@ -9,7 +9,7 @@ import Select from '@/components/Select';
 import Table from '@/components/Table';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useToast } from '@/hooks/use-toast';
-import { BudgetGroup, BudgetType, FormData } from '../types';
+import { BudgetGroup, BudgetType, BudgetGroupFormData } from '../types';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
 
@@ -20,7 +20,7 @@ const intervalPeriods = [
   { _id: 'year', name: 'year' },
 ];
 
-const initialFormState: FormData = {
+const initialFormState: BudgetGroupFormData = {
   name: '',
   max: 0,
   number: 1,
@@ -37,7 +37,7 @@ const types: BudgetType[] = [
 const BudgetGroupComponent: React.FC = () => {
   const { t, i18n } = useTranslation();
   const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
-  const [form, setForm] = useState<FormData>(initialFormState);
+  const [form, setForm] = useState<BudgetGroupFormData>(initialFormState);
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);

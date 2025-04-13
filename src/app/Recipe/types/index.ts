@@ -1,11 +1,13 @@
+import { Cookbook } from '@/app/Label/types';
+
 export interface Recipe {
   _id: string;
   name: string;
   userId: string;
-  ingridients: RecipeIngridient[];
+  ingredients: RecipeIngredient[];
   cookbookId: string;
-  cookBook: CookBook;
-  food: Ingridient;
+  cookBook: Cookbook;
+  food: Ingredient;
   note?: string;
 }
 
@@ -13,26 +15,21 @@ export interface AlternativeRecipe {
   message: string;
 }
 
-export interface Ingridient {
+export interface Ingredient {
   _id: string;
   name: string;
 }
 
-export interface CookBook {
-  _id: string;
-  name: string;
-}
-
-export interface RecipeIngridient {
+export interface RecipeIngredient {
   foodId: string;
   name: string;
   quantity: number;
   food?: { _id: string; name: string };
 }
 
-export interface FormData {
+export interface IngredientFormData {
   name: string;
   cookbookId: string;
-  ingridients: RecipeIngridient[];
+  ingredients: RecipeIngredient[];
   note?: string;
 }

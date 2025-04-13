@@ -11,8 +11,3 @@ export interface FoodFormData {
   foodGroupId: string;
   userId: string;
 }
-
-export interface FoodGroup {
-  _id: string;
-  name: string;
-}

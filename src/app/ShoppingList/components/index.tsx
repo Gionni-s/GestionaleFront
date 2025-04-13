@@ -61,7 +61,7 @@ const ShoppingLists: React.FC = () => {
     params: string = 'status=toBuy'
   ): Promise<void> => {
     try {
-      const response = await ShoppingListApi.getShoppingLists(params);
+      const response = await ShoppingListApi.get(params);
       setShoppingLists(response || []);
 
       // Inizializza gli elementi completati basandosi sullo status
@@ -84,7 +84,7 @@ const ShoppingLists: React.FC = () => {
 
   const fetchFoodItems = async () => {
     try {
-      const response = await FoodApi.getFoods();
+      const response = await FoodApi.get();
       setFoodItems(response || []);
     } catch (error) {
       console.error('Failed to fetch foods:', error);
@@ -108,14 +108,14 @@ const ShoppingLists: React.FC = () => {
 
     try {
       if (editingId) {
-        await ShoppingListApi.updateShoppingList(editingId, form);
+        await ShoppingListApi.put(editingId, form);
         toast({
           title: t('success'),
           description: t('shoppingListUpdated'),
           variant: 'default',
         });
       } else {
-        await ShoppingListApi.createShoppingList(form);
+        await ShoppingListApi.post(form);
         toast({
           title: t('success'),
           description: t('shoppingListCreated'),
@@ -136,7 +136,7 @@ const ShoppingLists: React.FC = () => {
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await ShoppingListApi.deleteShoppingList(id);
+      await ShoppingListApi.delete(id);
       toast({
         title: t('success'),
         description: t('shoppingListDeleted'),
@@ -209,7 +209,7 @@ const ShoppingLists: React.FC = () => {
     }
 
     try {
-      await ShoppingListApi.createShoppingList({
+      await ShoppingListApi.post({
         foodId,
         quantity: 1,
       });
@@ -245,7 +245,7 @@ const ShoppingLists: React.FC = () => {
       setLoading(true);
 
       const promises = Array.from(completedItems).map((id) =>
-        ShoppingListApi.updateShoppingListStatus(id, { status: 'bought' })
+        ShoppingListApi.putStatus(id, { status: 'bought' })
       );
 
       await Promise.all(promises);

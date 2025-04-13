@@ -1,16 +1,5 @@
-export interface User {
-  _id: string;
-  email: string;
-  name: string;
-  surname: string;
-}
-
-export interface BudgetGroup {
-  _id: string;
-  name: string;
-  max: number;
-  userId: string;
-}
+import { BudgetGroup } from '@/app/budget-groups/types';
+import { User } from '@/app/Profile/types';
 
 export interface Budget {
   _id: string;
@@ -26,7 +15,7 @@ export interface Budget {
   User: User;
 }
 
-export interface FormData {
+export interface BudgetFormData {
   name: string;
   amount: number;
   amountType: string;

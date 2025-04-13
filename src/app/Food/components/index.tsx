@@ -9,7 +9,8 @@ import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
 import axios from '@/services/axios/index';
-import { Food, FoodFormData, FoodGroup } from '@/app/Food/types';
+import { Food, FoodFormData } from '@/app/Food/types';
+import { FoodGroup } from '@/app/Label/types';
 
 const Foods: React.FC = () => {
   const { t } = useTranslation();
@@ -41,7 +42,7 @@ const Foods: React.FC = () => {
 
   const fetchFoods = async (): Promise<void> => {
     try {
-      const response = await FoodApi.getFoods('sort=scadenza');
+      const response = await FoodApi.get('sort=scadenza');
       setFoods(response || []);
     } catch (err) {
       console.error('Failed to fetch foods:', err);
@@ -62,9 +63,9 @@ const Foods: React.FC = () => {
 
     try {
       if (editingId) {
-        await FoodApi.updateFood(editingId, submissionForm);
+        await FoodApi.put(editingId, submissionForm);
       } else {
-        await FoodApi.createFood(submissionForm);
+        await FoodApi.post(submissionForm);
       }
       resetForm();
       setEditingId(undefined);
@@ -77,7 +78,7 @@ const Foods: React.FC = () => {
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await FoodApi.deleteFood(id);
+      await FoodApi.delete(id);
       await fetchFoods(); // Call fetchFoods to update the state
     } catch (error) {
       console.error('Failed to delete food:', error);

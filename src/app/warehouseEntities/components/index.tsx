@@ -65,7 +65,7 @@ const WarehouseEntities: React.FC = () => {
   const fetchWarehouseEntities = async (): Promise<void> => {
     try {
       const response =
-        await WarehouseEntityEntityApi.getWarehouseEntityEntities();
+        await WarehouseEntityEntityApi.get();
       setWarehouseEntities(response || []);
     } catch (err) {
       // setError('Failed to fetch warehouse entities.');
@@ -75,7 +75,7 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchFoods = async () => {
     try {
-      const response = await FoodApi.getFoods();
+      const response = await FoodApi.get();
       setFoodGroups(response || []);
     } catch (error) {
       console.error('Failed to fetch food groups:', error);
@@ -84,7 +84,7 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await LocationApi.getLocations();
+      const response = await LocationApi.get();
       setLocations(response || []);
     } catch (error) {
       console.error('Failed to fetch locations:', error);
@@ -93,7 +93,7 @@ const WarehouseEntities: React.FC = () => {
 
   const fetchWarehouses = async () => {
     try {
-      const response = await WarehouseApi.getWarehouses();
+      const response = await WarehouseApi.get();
       setWarehouses(response || []);
     } catch (error) {
       console.error('Failed to fetch warehouses:', error);
@@ -105,12 +105,12 @@ const WarehouseEntities: React.FC = () => {
 
     try {
       if (editingId) {
-        await WarehouseEntityEntityApi.updateWarehouseEntity(
+        await WarehouseEntityEntityApi.put(
           editingId,
           submissionForm
         );
       } else {
-        await WarehouseEntityEntityApi.createWarehouseEntity(submissionForm);
+        await WarehouseEntityEntityApi.post(submissionForm);
       }
       resetForm();
       setEditingId(undefined);
@@ -123,7 +123,7 @@ const WarehouseEntities: React.FC = () => {
 
   const handleDelete = async (id: string): Promise<void> => {
     try {
-      await WarehouseEntityEntityApi.deleteWarehouseEntity(id);
+      await WarehouseEntityEntityApi.delete(id);
       await fetchWarehouseEntities();
     } catch (error) {
       console.error('Failed to delete warehouse entity:', error);
