@@ -8,18 +8,26 @@ import axios, {
 import { store } from '../store';
 import { logout, updateToken } from '../store/auth';
 
+export interface ApiCall<T, TFormData> {
+  get(params?: string): Promise<T[]>;
+  getById(id: string, params?: string): Promise<T>;
+  post(body: TFormData): Promise<T>;
+  put(id: string, body: TFormData): Promise<T>;
+  delete(id: string): Promise<void>;
+}
+
 // Define interfaces for API responses
-interface AuthResponse {
+type AuthResponse = {
   token: string;
   refreshToken: string;
   user: User;
-}
+};
 
-interface User {
+type User = {
   // Define your user properties here
   id: string;
   [key: string]: any;
-}
+};
 
 // HTTP request timeout in milliseconds
 const REQUEST_TIMEOUT = 5000;

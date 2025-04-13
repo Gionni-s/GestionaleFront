@@ -1,7 +1,7 @@
 import { Cookbook, CookbookFormData } from '@/app/Label/types';
-import axios from './index';
+import axios, { ApiCall } from './index';
 
-class CookbookApi {
+class CookbookApi implements ApiCall<Cookbook, CookbookFormData> {
   private url = 'cookBooks';
 
   /**
@@ -9,7 +9,7 @@ class CookbookApi {
    * @param params Query parameters as string
    * @returns Promise with Cookbooks array
    */
-  async getCookbooks(params?: string): Promise<Cookbook[]> {
+  async get(params?: string): Promise<Cookbook[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Cookbook[]>(`${this.url}${queryString}`);
@@ -26,7 +26,7 @@ class CookbookApi {
    * @param params Query parameters as string
    * @returns Promise with cookbook data
    */
-  async getCookbookById(id: string, params?: string): Promise<Cookbook> {
+  async getById(id: string, params?: string): Promise<Cookbook> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Cookbook>(
@@ -44,7 +44,7 @@ class CookbookApi {
    * @param body Cookbook form data
    * @returns Promise with created cookbook
    */
-  async createCookbook(body: CookbookFormData): Promise<Cookbook> {
+  async post(body: CookbookFormData): Promise<Cookbook> {
     try {
       const result = await axios.post<Cookbook>(`${this.url}`, body);
       return result.data;
@@ -60,7 +60,7 @@ class CookbookApi {
    * @param body Cookbook form data
    * @returns Promise with updated cookbook
    */
-  async updateCookbook(id: string, body: CookbookFormData): Promise<Cookbook> {
+  async put(id: string, body: CookbookFormData): Promise<Cookbook> {
     try {
       const result = await axios.put<Cookbook>(`${this.url}/${id}`, body);
       return result.data;
@@ -75,7 +75,7 @@ class CookbookApi {
    * @param id Cookbook ID
    * @returns Promise
    */
-  async deleteCookbook(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {

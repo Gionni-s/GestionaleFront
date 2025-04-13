@@ -1,7 +1,7 @@
-import axios from './index';
+import axios, { ApiCall } from './index';
 import { Food, FoodFormData } from '@/app/Food/types';
 
-class FoodApi {
+class FoodApi implements ApiCall<Food, FoodFormData> {
   private url = 'foods';
 
   /**
@@ -9,7 +9,7 @@ class FoodApi {
    * @param params Query parameters as string
    * @returns Promise with foods array
    */
-  async getFoods(params?: string): Promise<Food[]> {
+  async get(params?: string): Promise<Food[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Food[]>(`${this.url}${queryString}`);
@@ -26,7 +26,7 @@ class FoodApi {
    * @param params Query parameters as string
    * @returns Promise with food data
    */
-  async getFoodById(id: string, params?: string): Promise<Food> {
+  async getById(id: string, params?: string): Promise<Food> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Food>(`${this.url}/${id}${queryString}`);
@@ -42,7 +42,7 @@ class FoodApi {
    * @param body Food form data
    * @returns Promise with created food
    */
-  async createFood(body: FoodFormData): Promise<Food> {
+  async post(body: FoodFormData): Promise<Food> {
     try {
       const result = await axios.post<Food>(`${this.url}`, body);
       return result.data;
@@ -58,7 +58,7 @@ class FoodApi {
    * @param body Food form data
    * @returns Promise with updated food
    */
-  async updateFood(id: string, body: FoodFormData): Promise<Food> {
+  async put(id: string, body: FoodFormData): Promise<Food> {
     try {
       const result = await axios.put<Food>(`${this.url}/${id}`, body);
       return result.data;
@@ -73,7 +73,7 @@ class FoodApi {
    * @param id Food ID
    * @returns Promise
    */
-  async deleteFood(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {

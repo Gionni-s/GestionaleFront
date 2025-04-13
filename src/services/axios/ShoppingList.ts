@@ -1,7 +1,7 @@
 import { ShoppingList, ShoppingListFormData } from '@/app/ShoppingList/types';
-import axios from './index';
+import axios, { ApiCall } from './index';
 
-class ShoppingListApi {
+class ShoppingListApi implements ApiCall<ShoppingList, ShoppingListFormData> {
   private url = 'shopping-lists';
 
   /**
@@ -9,7 +9,7 @@ class ShoppingListApi {
    * @param params Query parameters as string
    * @returns Promise with ShoppingLists array
    */
-  async getShoppingLists(params?: string): Promise<ShoppingList[]> {
+  async get(params?: string): Promise<ShoppingList[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<ShoppingList[]>(
@@ -28,10 +28,7 @@ class ShoppingListApi {
    * @param params Query parameters as string
    * @returns Promise with ShoppingList data
    */
-  async getShoppingListById(
-    id: string,
-    params?: string
-  ): Promise<ShoppingList> {
+  async getById(id: string, params?: string): Promise<ShoppingList> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<ShoppingList>(
@@ -49,7 +46,7 @@ class ShoppingListApi {
    * @param body ShoppingList form data
    * @returns Promise with created ShoppingList
    */
-  async createShoppingList(body: ShoppingListFormData): Promise<ShoppingList> {
+  async post(body: ShoppingListFormData): Promise<ShoppingList> {
     try {
       const result = await axios.post<ShoppingList>(`${this.url}`, body);
       return result.data;
@@ -65,10 +62,7 @@ class ShoppingListApi {
    * @param body ShoppingList form data
    * @returns Promise with updated ShoppingList
    */
-  async updateShoppingList(
-    id: string,
-    body: ShoppingListFormData
-  ): Promise<ShoppingList> {
+  async put(id: string, body: ShoppingListFormData): Promise<ShoppingList> {
     try {
       const result = await axios.put<ShoppingList>(`${this.url}/${id}`, body);
       return result.data;
@@ -84,10 +78,7 @@ class ShoppingListApi {
    * @param body ShoppingList form data
    * @returns Promise with updated ShoppingList
    */
-  async updateShoppingListStatus(
-    id: string,
-    body: { status: string }
-  ): Promise<ShoppingList> {
+  async putStatus(id: string, body: { status: string }): Promise<ShoppingList> {
     try {
       const result = await axios.put<ShoppingList>(`${this.url}/${id}`, body);
       return result.data;
@@ -102,7 +93,7 @@ class ShoppingListApi {
    * @param id ShoppingList ID
    * @returns Promise
    */
-  async deleteShoppingList(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {

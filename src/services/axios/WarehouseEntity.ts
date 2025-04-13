@@ -1,7 +1,12 @@
-import { WarehouseEntity, WarehouseEntityFormData } from '@/app/warehouseEntities/types';
-import axios from './index';
+import {
+  WarehouseEntity,
+  WarehouseEntityFormData,
+} from '@/app/warehouseEntities/types';
+import axios, { ApiCall } from './index';
 
-class WarehouseEntityEntityApi {
+class WarehouseEntityEntityApi
+  implements ApiCall<WarehouseEntity, WarehouseEntityFormData>
+{
   private url = 'warehouse-entities';
 
   /**
@@ -9,9 +14,7 @@ class WarehouseEntityEntityApi {
    * @param params Query parameters as string
    * @returns Promise with WarehouseEntityEntities array
    */
-  async getWarehouseEntityEntities(
-    params?: string
-  ): Promise<WarehouseEntity[]> {
+  async get(params?: string): Promise<WarehouseEntity[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<WarehouseEntity[]>(
@@ -30,10 +33,7 @@ class WarehouseEntityEntityApi {
    * @param params Query parameters as string
    * @returns Promise with warehouseEntity data
    */
-  async getWarehouseEntityById(
-    id: string,
-    params?: string
-  ): Promise<WarehouseEntity> {
+  async getById(id: string, params?: string): Promise<WarehouseEntity> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<WarehouseEntity>(
@@ -51,9 +51,7 @@ class WarehouseEntityEntityApi {
    * @param body WarehouseEntity form data
    * @returns Promise with created warehouseEntity
    */
-  async createWarehouseEntity(
-    body: WarehouseEntityFormData
-  ): Promise<WarehouseEntity> {
+  async post(body: WarehouseEntityFormData): Promise<WarehouseEntity> {
     try {
       const result = await axios.post<WarehouseEntity>(`${this.url}`, body);
       return result.data;
@@ -69,7 +67,7 @@ class WarehouseEntityEntityApi {
    * @param body WarehouseEntity form data
    * @returns Promise with updated warehouseEntity
    */
-  async updateWarehouseEntity(
+  async put(
     id: string,
     body: WarehouseEntityFormData
   ): Promise<WarehouseEntity> {
@@ -90,7 +88,7 @@ class WarehouseEntityEntityApi {
    * @param id WarehouseEntity ID
    * @returns Promise
    */
-  async deleteWarehouseEntity(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {

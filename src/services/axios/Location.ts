@@ -1,7 +1,7 @@
 import { Location, LocationFormData } from '@/app/Label/types';
-import axios from './index';
+import axios, { ApiCall } from './index';
 
-class LocationApi {
+class LocationApi implements ApiCall<Location, LocationFormData> {
   private url = 'locations';
 
   /**
@@ -9,7 +9,7 @@ class LocationApi {
    * @param params Query parameters as string
    * @returns Promise with Locations array
    */
-  async getLocations(params?: string): Promise<Location[]> {
+  async get(params?: string): Promise<Location[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Location[]>(`${this.url}${queryString}`);
@@ -26,7 +26,7 @@ class LocationApi {
    * @param params Query parameters as string
    * @returns Promise with location data
    */
-  async getLocationById(id: string, params?: string): Promise<Location> {
+  async getById(id: string, params?: string): Promise<Location> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Location>(
@@ -44,7 +44,7 @@ class LocationApi {
    * @param body Location form data
    * @returns Promise with created location
    */
-  async createLocation(body: LocationFormData): Promise<Location> {
+  async post(body: LocationFormData): Promise<Location> {
     try {
       const result = await axios.post<Location>(`${this.url}`, body);
       return result.data;
@@ -60,7 +60,7 @@ class LocationApi {
    * @param body Location form data
    * @returns Promise with updated location
    */
-  async updateLocation(id: string, body: LocationFormData): Promise<Location> {
+  async put(id: string, body: LocationFormData): Promise<Location> {
     try {
       const result = await axios.put<Location>(`${this.url}/${id}`, body);
       return result.data;
@@ -75,7 +75,7 @@ class LocationApi {
    * @param id Location ID
    * @returns Promise
    */
-  async deleteLocation(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {
