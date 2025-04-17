@@ -1,12 +1,11 @@
 'use client';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Budget, BudgetGroup, BudgetGroupKpi, FormData, Kpi } from '../types';
+import { Budget, BudgetFormData, BudgetGroupKpi, Kpi } from '../types';
 import { PlusCircle, Filter } from 'lucide-react';
 import axios from '@/services/axios';
 import { budgetSave, selectKpiIds } from '@/services/store/kpi';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Table from '@/components/Table';
 import { Card } from '@/components/ui/card';
@@ -17,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
 import { Label } from '@/components/ui/label';
 import Select from '@/components/Select';
+import { BudgetGroup } from '@/app/budget-groups/types';
 
 const KpiCard = React.memo(({ item }: { item: Kpi }) => {
   const progress = item.max > 0 ? (item.total / item.max) * 100 : 0;
@@ -115,7 +115,7 @@ const BudgetComponent: React.FC = () => {
   }>({ isOpen: false, budgetId: null });
 
   // Form state
-  const [form, setForm] = useState<FormData>({
+  const [form, setForm] = useState<BudgetFormData>({
     name: '',
     amount: 0,
     beneficiary: '',
@@ -280,7 +280,7 @@ const BudgetComponent: React.FC = () => {
     setDeleteModalData({ isOpen: true, budgetId: id });
   }, []);
 
-  const handleChange = (field: keyof FormData, value: string | number) => {
+  const handleChange = (field: keyof BudgetFormData, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 

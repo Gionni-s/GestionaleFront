@@ -1,5 +1,5 @@
 import { User } from '@/app/Profile/types';
-import axios from './index';
+import axios, { ApiCall } from './index';
 import { UserFormData } from '@/app/Auth/types';
 
 class UserApi {
@@ -10,7 +10,7 @@ class UserApi {
    * @param params Query parameters as string
    * @returns Promise with users array
    */
-  async getUsers(params?: string): Promise<User[]> {
+  async get(params?: string): Promise<User[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<User[]>(`${this.url}${queryString}`);
@@ -27,7 +27,7 @@ class UserApi {
    * @param params Query parameters as string
    * @returns Promise with user data
    */
-  async getUserById(id: string, params?: string): Promise<User> {
+  async getById(id: string, params?: string): Promise<User> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<User>(`${this.url}/${id}${queryString}`);
@@ -43,7 +43,7 @@ class UserApi {
    * @param body User form data
    * @returns Promise with created user
    */
-  async createUser(body: UserFormData): Promise<User> {
+  async post(body: UserFormData): Promise<User> {
     try {
       const result = await axios.post<User>(`${this.url}`, body);
       return result.data;
@@ -60,7 +60,7 @@ class UserApi {
    * @param body User form data
    * @returns Promise with updated user
    */
-  async updateUser(id: string, body: User): Promise<User> {
+  async put(id: string, body: User): Promise<User> {
     try {
       const result = await axios.put<User>(`${this.url}/${id}`, body);
       return result.data;
@@ -77,7 +77,7 @@ class UserApi {
    * @param body User form data
    * @returns Promise with updated user
    */
-  async updateMe(body: User): Promise<User> {
+  async putMe(body: User): Promise<User> {
     try {
       const result = await axios.put<User>(`${this.url}/me`, body);
       return result.data;
@@ -92,7 +92,7 @@ class UserApi {
    * @param id User ID
    * @returns Promise
    */
-  async deleteUser(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {

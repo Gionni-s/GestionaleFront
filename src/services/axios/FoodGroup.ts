@@ -1,7 +1,7 @@
-import axios from './index';
+import axios, { ApiCall } from './index';
 import { FoodGroup, FoodGroupFormData } from '@/app/Label/types';
 
-class FoodGroupApi {
+class FoodGroupApi implements ApiCall<FoodGroup, FoodGroupFormData> {
   private url = 'food-groups';
 
   /**
@@ -9,7 +9,7 @@ class FoodGroupApi {
    * @param params Query parameters as string
    * @returns Promise with Food Groups array
    */
-  async getFoodGroups(params?: string): Promise<FoodGroup[]> {
+  async get(params?: string): Promise<FoodGroup[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<FoodGroup[]>(`${this.url}${queryString}`);
@@ -26,7 +26,7 @@ class FoodGroupApi {
    * @param params Query parameters as string
    * @returns Promise with food data
    */
-  async getFoodGroupById(id: string, params?: string): Promise<FoodGroup> {
+  async getById(id: string, params?: string): Promise<FoodGroup> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<FoodGroup>(
@@ -44,7 +44,7 @@ class FoodGroupApi {
    * @param body Food Group form data
    * @returns Promise with created food group
    */
-  async createFoodGroup(body: FoodGroupFormData): Promise<FoodGroup> {
+  async post(body: FoodGroupFormData): Promise<FoodGroup> {
     try {
       const result = await axios.post<FoodGroup>(`${this.url}`, body);
       return result.data;
@@ -60,10 +60,7 @@ class FoodGroupApi {
    * @param body Food Group form data
    * @returns Promise with updated food
    */
-  async updateFoodGroup(
-    id: string,
-    body: FoodGroupFormData
-  ): Promise<FoodGroup> {
+  async put(id: string, body: FoodGroupFormData): Promise<FoodGroup> {
     try {
       const result = await axios.put<FoodGroup>(`${this.url}/${id}`, body);
       return result.data;
@@ -78,7 +75,7 @@ class FoodGroupApi {
    * @param id Food Group ID
    * @returns Promise
    */
-  async deleteFoodGroup(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {

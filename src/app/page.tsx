@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import ShoppingListApi from '@/services/axios/ShoppingList';
 import Link from 'next/link';
-import warehouseApi from '@/services/axios/Warehouse';
+import WarehouseApi from '@/services/axios/Warehouse';
 
 function Home() {
   const { t, i18n } = useTranslation();
@@ -32,12 +32,12 @@ function Home() {
 
   useEffect(() => {
     const getShoppingListAmount = async () => {
-      const result = await ShoppingListApi.getShoppingLists('status=toBuy');
+      const result = await ShoppingListApi.get('status=toBuy');
       setLowStockItems(result.length);
     };
 
     const getItemToExpire = async () => {
-      const result = await warehouseApi.getWarehouses();
+      const result = await WarehouseApi.get();
       setItemToExpire(result.length);
     };
 

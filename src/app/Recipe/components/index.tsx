@@ -18,13 +18,13 @@ import { PlusCircle, Pencil, Trash, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
   AlternativeRecipe,
-  CookBook,
-  FormData,
-  Ingridient,
+  IngredientFormData,
+  Ingredient,
   Recipe,
 } from '../types';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
+import { Cookbook } from '@/app/Label/types';
 
 const Recipes: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -33,27 +33,27 @@ const Recipes: React.FC = () => {
     message: '',
   });
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [form, setForm] = useState<FormData>({
+  const [form, setForm] = useState<IngredientFormData>({
     name: '',
     cookbookId: '',
-    ingridients: [
+    ingredients: [
       { foodId: '', quantity: 1, name: '' },
       { foodId: '', quantity: 1, name: '' },
     ],
   });
   const [editingId, setEditingId] = useState<string | undefined>(undefined);
-  const [ingridientOptions, setIngridientOptions] = useState<Ingridient[]>([]);
-  const [cookbookOptions, setCookbookOptions] = useState<CookBook[]>([]);
+  const [ingridientOptions, setIngredientOptions] = useState<Ingredient[]>([]);
+  const [cookbookOptions, setCookbookOptions] = useState<Cookbook[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
-      const [recipesRes, ingridientsRes, cookbooksRes] = await Promise.all([
+      const [recipesRes, ingredientsRes, cookbooksRes] = await Promise.all([
         axios.get<Recipe[]>('/recipes'),
-        axios.get<Ingridient[]>('/foods'),
-        axios.get<CookBook[]>('/cookBooks'),
+        axios.get<Ingredient[]>('/foods'),
+        axios.get<Cookbook[]>('/cookBooks'),
       ]);
       setRecipes(recipesRes.data);
-      setIngridientOptions(ingridientsRes.data);
+      setIngredientOptions(ingredientsRes.data);
       setCookbookOptions(cookbooksRes.data);
     } catch (error) {
       // if(error.)
@@ -103,13 +103,13 @@ const Recipes: React.FC = () => {
   const addIngridientField = () => {
     setForm({
       ...form,
-      ingridients: [...form.ingridients, { foodId: '', name: '', quantity: 1 }],
+      ingredients: [...form.ingredients, { foodId: '', name: '', quantity: 1 }],
     });
   };
 
   const removeIngredientField = (index: number) => {
-    const updatedIngridients = form.ingridients.filter((_, i) => i !== index);
-    setForm({ ...form, ingridients: updatedIngridients });
+    const updatedIngridients = form.ingredients.filter((_, i) => i !== index);
+    setForm({ ...form, ingredients: updatedIngridients });
   };
 
   const handleFieldChange = (
@@ -120,10 +120,10 @@ const Recipes: React.FC = () => {
     if (field === 'name' || field === 'bookId' || field === 'note') {
       setForm({ ...form, [field]: value });
     } else if (index !== undefined) {
-      const updatedIngridients = form.ingridients.map((ingridient, i) =>
-        i === index ? { ...ingridient, [field]: value } : ingridient
+      const updatedIngridients = form.ingredients.map((ingredient, i) =>
+        i === index ? { ...ingredient, [field]: value } : ingredient
       );
-      setForm({ ...form, ingridients: updatedIngridients });
+      setForm({ ...form, ingredients: updatedIngridients });
     }
   };
 
@@ -131,7 +131,7 @@ const Recipes: React.FC = () => {
     setForm({
       name: '',
       cookbookId: '',
-      ingridients: [
+      ingredients: [
         { foodId: '', name: '', quantity: 1 },
         { foodId: '', name: '', quantity: 1 },
       ],
@@ -163,7 +163,7 @@ const Recipes: React.FC = () => {
         <TableCell>{recipe.name}</TableCell>
         <TableCell>{recipe.cookBook?.name || 'N/A'}</TableCell>
         <TableCell>
-          {recipe.ingridients.map((val, index) => (
+          {recipe.ingredients.map((val, index) => (
             <p key={index}>
               {val.food?.name || 'N/A'} : {val.quantity}
             </p>
@@ -196,10 +196,10 @@ const Recipes: React.FC = () => {
             setForm({
               name: recipe.name,
               cookbookId: recipe.cookbookId,
-              ingridients: recipe.ingridients.map((ingridient) => ({
-                foodId: ingridient.foodId,
-                quantity: ingridient.quantity,
-                name: ingridient.name,
+              ingredients: recipe.ingredients.map((ingredient) => ({
+                foodId: ingredient.foodId,
+                quantity: ingredient.quantity,
+                name: ingredient.name,
               })),
               note: recipe.note,
             });
@@ -262,10 +262,10 @@ const Recipes: React.FC = () => {
               <Button type="button" onClick={addIngridientField}>
                 {t('addIngredients')}
               </Button>
-              {form.ingridients.map((ingridient, index) => (
+              {form.ingredients.map((ingredient, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <select
-                    value={ingridient.foodId}
+                    value={ingredient.foodId}
                     onChange={(e) =>
                       handleFieldChange('foodId', e.target.value, index)
                     }
@@ -283,7 +283,7 @@ const Recipes: React.FC = () => {
                   </select>
                   <Input
                     type="number"
-                    value={ingridient.quantity}
+                    value={ingredient.quantity}
                     onChange={(e) =>
                       handleFieldChange(
                         'quantity',
@@ -295,7 +295,7 @@ const Recipes: React.FC = () => {
                     className="w-20"
                     required
                   />
-                  {form.ingridients.length > 1 && (
+                  {form.ingredients.length > 1 && (
                     <Button
                       type="button"
                       variant="outline"

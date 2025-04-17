@@ -1,7 +1,7 @@
 import { Warehouse, WarehouseFormData } from '@/app/Label/types';
-import axios from './index';
+import axios, { ApiCall } from './index';
 
-class WarehouseApi {
+class WarehouseApi implements ApiCall<Warehouse, WarehouseFormData> {
   private url = 'warehouses';
 
   /**
@@ -9,7 +9,7 @@ class WarehouseApi {
    * @param params Query parameters as string
    * @returns Promise with Warehouses array
    */
-  async getWarehouses(params?: string): Promise<Warehouse[]> {
+  async get(params?: string): Promise<Warehouse[]> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Warehouse[]>(`${this.url}${queryString}`);
@@ -26,7 +26,7 @@ class WarehouseApi {
    * @param params Query parameters as string
    * @returns Promise with warehouse data
    */
-  async getWarehouseById(id: string, params?: string): Promise<Warehouse> {
+  async getById(id: string, params?: string): Promise<Warehouse> {
     try {
       const queryString = params ? `?${params}` : '';
       const result = await axios.get<Warehouse>(
@@ -44,7 +44,7 @@ class WarehouseApi {
    * @param body Warehouse form data
    * @returns Promise with created warehouse
    */
-  async createWarehouse(body: WarehouseFormData): Promise<Warehouse> {
+  async post(body: WarehouseFormData): Promise<Warehouse> {
     try {
       const result = await axios.post<Warehouse>(`${this.url}`, body);
       return result.data;
@@ -60,10 +60,7 @@ class WarehouseApi {
    * @param body Warehouse form data
    * @returns Promise with updated warehouse
    */
-  async updateWarehouse(
-    id: string,
-    body: WarehouseFormData
-  ): Promise<Warehouse> {
+  async put(id: string, body: WarehouseFormData): Promise<Warehouse> {
     try {
       const result = await axios.put<Warehouse>(`${this.url}/${id}`, body);
       return result.data;
@@ -78,7 +75,7 @@ class WarehouseApi {
    * @param id Warehouse ID
    * @returns Promise
    */
-  async deleteWarehouse(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     try {
       await axios.delete(`${this.url}/${id}`);
     } catch (error) {
