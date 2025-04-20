@@ -7,6 +7,7 @@ import axios, {
 } from 'axios';
 import { store } from '../store';
 import { logout, updateToken } from '../store/auth';
+import { User } from '@/app/Profile/types';
 
 export interface ApiCall<T, TFormData> {
   get(params?: string): Promise<T[]>;
@@ -21,12 +22,6 @@ type AuthResponse = {
   token: string;
   refreshToken: string;
   user: User;
-};
-
-type User = {
-  // Define your user properties here
-  id: string;
-  [key: string]: any;
 };
 
 // HTTP request timeout in milliseconds

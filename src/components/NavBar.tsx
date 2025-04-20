@@ -16,6 +16,7 @@ import { languageSave } from '@/services/store/language';
 import { changeLanguage } from '@/services/i18n';
 import { ShoppingBasket, LogOut } from 'lucide-react';
 import ShoppingListApi from '@/services/axios/ShoppingList';
+import { logout } from '@/services/store/auth';
 
 interface UserProfile {
   _id: string;
@@ -67,6 +68,7 @@ export function NavBar() {
 
   // Menu items with role-based access control
   const menuItems = [
+    { href: '/', label: 'Home', roleRequired: 'user' },
     { href: '/Label', label: 'labels', roleRequired: 'user' },
     { href: '/Food', label: 'foods', roleRequired: 'user' },
     { href: '/Recipe', label: 'recipes', roleRequired: 'user' },
@@ -112,8 +114,7 @@ export function NavBar() {
 
   const fetchShoppingItemsCount = async () => {
     try {
-      // Assuming there's an endpoint that returns the shopping list items count
-      const response = await ShoppingListApi.getShoppingLists('status=toBuy');
+      const response = await ShoppingListApi.get('status=toBuy');
       setShoppingItemsCount(Array.isArray(response) ? response.length : 0);
     } catch (error) {
       console.error('Failed to fetch shopping items count:', error);
@@ -132,8 +133,7 @@ export function NavBar() {
   const handleLogout = async () => {
     try {
       await axios.post('/auth/logout');
-      // Redirect to login page or clear auth state
-      window.location.href = '/login';
+      dispatch(logout());
     } catch (error) {
       console.error('Failed to logout:', error);
     }

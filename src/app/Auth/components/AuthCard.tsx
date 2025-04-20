@@ -34,7 +34,7 @@ export function AuthCard() {
         headers: { Authorization: `Basic ${encodedToken}` },
       });
       store.dispatch(loginSuccess(response.data));
-      router.replace('/Profile');
+      router.replace('/');
       router.refresh();
     } catch (error) {
       console.error('Login error:', error);
@@ -57,7 +57,7 @@ export function AuthCard() {
         headers: { Authorization: `Basic ${encodedToken}` },
       });
       store.dispatch(loginSuccess(loginResponse.data));
-      router.replace('/Profile');
+      router.replace('/');
       router.refresh();
     } catch (error) {
       console.error('Registration error:', error);

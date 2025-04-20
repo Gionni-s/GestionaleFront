@@ -1,15 +1,7 @@
-import { UserProfile } from '@/app/Profile/types';
+import { User } from '@/app/Profile/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Types
-interface User {
-  id: string | undefined;
-  email?: string;
-  name?: string;
-  surname?: string;
-  role?: string;
-  profileImage?: string | null;
-}
 
 interface AuthState extends User {
   isAuthenticated: boolean;
@@ -20,30 +12,29 @@ interface AuthState extends User {
 
 interface LoginPayload {
   token: string;
-  user: {
-    id: string;
-    email?: string;
-    name?: string;
-    surname?: string;
-    role: string;
-    profileImage?: string | null;
-  };
+  user: User;
   refreshToken?: string;
 }
 
 interface TokenUpdatePayload {
   token: string;
-  user: UserProfile;
+  user: User;
   refreshToken?: string;
 }
 
 const initialState: AuthState = {
-  id: undefined,
-  email: undefined,
-  name: undefined,
-  surname: undefined,
-  role: undefined,
+  _id: '',
+  name: '',
+  surname: '',
+  email: '',
+  isConfimer: false,
+  password: '',
+  phoneNumber: 0,
+  dateCreation: new Date(),
+  lastLogin: new Date(),
   profileImage: undefined,
+  color: '',
+  role: '',
   isAuthenticated: false,
   token: null,
   refreshToken: null,
@@ -81,7 +72,7 @@ export const authSlice = createSlice({
       const { token, user, refreshToken } = action.payload;
 
       state.isAuthenticated = true;
-      state.id = user.id;
+      state._id = user._id;
       state.email = user.email;
       state.name = user.name;
       state.surname = user.surname;
@@ -117,7 +108,7 @@ export const authSlice = createSlice({
 
       state.token = token;
       state.refreshToken = refreshToken || state.refreshToken;
-      state.id = user._id;
+      state._id = user._id;
       state.email = user.email;
       state.name = user.name;
       state.surname = user.surname;
@@ -178,13 +169,20 @@ export default authSlice.reducer;
 export const selectIsAuthenticated = (state: { auth: AuthState }) =>
   state.auth.isAuthenticated;
 export const selectUser = (state: { auth: AuthState }): User => ({
-  id: state.auth.id,
-  email: state.auth.email,
+  _id: state.auth._id,
   name: state.auth.name,
   surname: state.auth.surname,
-  role: state.auth.role,
+  email: state.auth.email,
+  isConfimer: state.auth.isConfimer,
+  password: state.auth.password,
+  phoneNumber: state.auth.phoneNumber,
+  dateCreation: state.auth.dateCreation,
+  lastLogin: state.auth.lastLogin,
   profileImage: state.auth.profileImage,
+  color: state.auth.color,
+  role: state.auth.role,
 });
+
 export const selectUserRole = (state: { auth: AuthState }) => state.auth.role;
 export const selectToken = (state: { auth: AuthState }) => state.auth.token;
 export const selectAuthState = (state: { auth: AuthState }) => state.auth;
