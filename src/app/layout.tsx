@@ -2,22 +2,28 @@
 
 import { Inter } from 'next/font/google';
 import './globals.css';
-import React, { useContext } from 'react';
+import React from 'react';
 import { store, persistor } from '../services/store';
 import { Provider, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import '../services/i18n';
 import { AuthCard } from './auth/components/AuthCard';
-import { Sidebar, SidebarContext } from '@/components/sidebar/sidebar';
+import { Sidebar } from '@/components/sidebar/sidebar';
+import {
+  SidebarProvider,
+  useSidebar,
+} from '@/components/sidebar/sidebar-context';
 
 const inter = Inter({ subsets: ['latin'] });
 
 function MainContent({ children }: { children: React.ReactNode }) {
-  const { isOpen } = useContext(SidebarContext);
+  const { isOpen } = useSidebar();
 
   return (
     <main
-      className={`transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-16'}`}
+      className={`flex-1 transition-all duration-300 ${
+        isOpen ? 'pl-64' : 'pl-16'
+      }`}
     >
       {children}
     </main>
@@ -32,12 +38,12 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
+    <SidebarProvider>
+      <div className="flex min-h-screen">
+        <Sidebar />
         <MainContent>{children}</MainContent>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
 

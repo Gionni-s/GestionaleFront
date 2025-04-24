@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export const sidebarLinks = [
-  { href: '/', label: 'Home', icon: Home },
+  // { href: '/', label: 'Home', icon: Home },
   { href: '/label', label: 'Labels', icon: Users },
   { href: '/food', label: 'Foods', icon: Utensils },
   { href: '/recipe', label: 'Recipes', icon: BookOpen },
