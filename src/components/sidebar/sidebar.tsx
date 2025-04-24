@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { sidebarLinks } from './sidebar-links';
+import { getSidebarLinks } from './sidebar-links';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronLeft, ChevronRight, Globe } from 'lucide-react';
@@ -52,6 +52,7 @@ export const Sidebar = () => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(
     getLanguageByCode(language?.code || 'en')
   );
+  const sidebarLinks = getSidebarLinks(t);
 
   const user = useSelector(selectUser);
 

@@ -10,17 +10,16 @@ import {
   BarChart2,
 } from 'lucide-react';
 
-export const sidebarLinks = [
-  // { href: '/', label: 'Home', icon: Home },
-  { href: '/label', label: 'Labels', icon: Users },
-  { href: '/food', label: 'Foods', icon: Utensils },
-  { href: '/recipe', label: 'Recipes', icon: BookOpen },
+export const getSidebarLinks = (t: (key: string) => string) => [
+  { href: '/label', label: t('labels'), icon: Users },
+  { href: '/food', label: t('foods'), icon: Utensils },
+  { href: '/recipe', label: t('recipes'), icon: BookOpen },
   {
     href: '/warehouse-entities',
-    label: 'Warehouse',
+    label: t('warehouses'),
     icon: Warehouse,
   },
-  { href: '/budget', label: 'Budgets', icon: PiggyBank },
-  { href: '/budget-groups', label: 'Budget Groups', icon: Layers },
-  { href: '/dashboard', label: 'Dashboards', icon: BarChart2 },
+  { href: '/budget', label: t('budgets'), icon: PiggyBank },
+  { href: '/budget-groups', label: t('budgetGroups'), icon: Layers },
+  { href: '/dashboard', label: t('dashboards'), icon: BarChart2 },
 ];
