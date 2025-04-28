@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
 import axios from '@/services/axios/index';
 import { Food, FoodFormData } from '@/app/Food/types';
-import { FoodGroup } from '@/app/Label/types';
+import { FoodGroup } from '@/app/label/types';
 
 const Foods: React.FC = () => {
   const { t } = useTranslation();
@@ -163,7 +163,7 @@ const Foods: React.FC = () => {
           head={[
             t('names'),
             t('foodGroups'),
-            { label: t('Actions'), className: 'w-[100px]' },
+            { label: t('actions'), className: 'w-[100px]' },
           ]}
           body={foods}
           bodyKeys={['name', 'foodGroup.name']}

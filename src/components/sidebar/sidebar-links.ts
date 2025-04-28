@@ -8,6 +8,7 @@ import {
   PiggyBank,
   Layers,
   BarChart2,
+  ShoppingCart,
 } from 'lucide-react';
 
 export const getSidebarLinks = (t: (key: string) => string) => [
@@ -18,6 +19,11 @@ export const getSidebarLinks = (t: (key: string) => string) => [
     href: '/warehouse-entities',
     label: t('warehouses'),
     icon: Warehouse,
+  },
+  {
+    href: '/shopping-list',
+    label: t('shoppingLists'),
+    icon: ShoppingCart,
   },
   { href: '/budget', label: t('budgets'), icon: PiggyBank },
   { href: '/budget-groups', label: t('budgetGroups'), icon: Layers },

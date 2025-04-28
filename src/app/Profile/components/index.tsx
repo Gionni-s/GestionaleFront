@@ -95,6 +95,7 @@ const Profile: React.FC = () => {
   // Data fetching functions
   const fetchUserProfile = useCallback(async () => {
     try {
+      setLoading(true);
       // Use userApi instead of direct axios call
       const data = await UserApi.getById('me');
       setUserProfile(data);
@@ -177,7 +178,15 @@ const Profile: React.FC = () => {
           const result = reader.result as string;
           setPreviewImage(result);
           setForm((prevForm) =>
-            prevForm ? { ...prevForm, profileImage: result } : null
+            prevForm
+              ? {
+                  ...prevForm,
+                  profileImage: {
+                    file: result,
+                    type: file.type,
+                  },
+                }
+              : null
           );
         };
         reader.readAsDataURL(file);
@@ -270,7 +279,7 @@ const Profile: React.FC = () => {
   const handleEdit = useCallback((item: MinStockLevel) => {
     setEditingId(item._id);
     setMinStockForm({
-      foodId: item.food._id,
+      foodId: item.food._id, // Fixed: Use food._id directly instead of food object
       quantity: item.quantity,
     });
   }, []);
@@ -345,7 +354,7 @@ const Profile: React.FC = () => {
             onSave={handleMinStockSubmit}
             onCancel={resetMinStockForm}
             title={editingId ? t('editMinStock') : t('addMinStock')}
-            triggerText={t('addMinStock')}
+            triggerText={editingId ? t('editMinStock') : t('addMinStock')}
             icon={<PlusCircle className="mr-2 h-4 w-4" />}
             isEdit={editingId}
             editText={t('edit')}
@@ -501,7 +510,7 @@ const Profile: React.FC = () => {
                         style={{ borderColor: form.color }}
                       >
                         <AvatarImage
-                          src={previewImage || form.profileImage}
+                          src={previewImage || form.profileImage?.file}
                           alt="Profile"
                           className="object-cover aspect-square"
                         />
@@ -544,7 +553,7 @@ const Profile: React.FC = () => {
                           </Label>
                           <Input
                             id="name"
-                            value={form.name}
+                            value={form.name || ''}
                             onChange={(e) =>
                               handleFieldChange('name', e.target.value)
                             }
@@ -563,7 +572,7 @@ const Profile: React.FC = () => {
                           </Label>
                           <Input
                             id="surname"
-                            value={form.surname}
+                            value={form.surname || ''}
                             onChange={(e) =>
                               handleFieldChange('surname', e.target.value)
                             }
@@ -586,10 +595,7 @@ const Profile: React.FC = () => {
                           type="tel"
                           value={form.phoneNumber || ''}
                           onChange={(e) =>
-                            handleFieldChange(
-                              'phoneNumber',
-                              Number(e.target.value) || 0
-                            )
+                            handleFieldChange('phoneNumber', e.target.value)
                           }
                           required
                           disabled={!isEditing}
@@ -673,7 +679,7 @@ const Profile: React.FC = () => {
                     <Input
                       id="email"
                       type="email"
-                      value={form.email}
+                      value={form.email || ''}
                       disabled
                       className="bg-muted"
                     />
@@ -688,7 +694,7 @@ const Profile: React.FC = () => {
                     </Label>
                     <Input
                       id="role"
-                      value={form.role}
+                      value={form.role || ''}
                       disabled
                       className="bg-muted"
                     />
@@ -699,7 +705,11 @@ const Profile: React.FC = () => {
                       <UserCircle className="h-4 w-4" /> {t('registrationDate')}
                     </Label>
                     <Input
-                      value={new Date(form.dateCreation).toLocaleDateString()}
+                      value={
+                        form.dateCreation
+                          ? new Date(form.dateCreation).toLocaleDateString()
+                          : ''
+                      }
                       disabled
                       className="bg-muted"
                     />
@@ -710,7 +720,11 @@ const Profile: React.FC = () => {
                       <UserCircle className="h-4 w-4" /> {t('lastLogin')}
                     </Label>
                     <Input
-                      value={new Date(form.lastLogin).toLocaleDateString()}
+                      value={
+                        form.lastLogin
+                          ? new Date(form.lastLogin).toLocaleDateString()
+                          : ''
+                      }
                       disabled
                       className="bg-muted"
                     />

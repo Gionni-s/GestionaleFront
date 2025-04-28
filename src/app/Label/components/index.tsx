@@ -381,7 +381,7 @@ const Labels = () => {
               <Table
                 head={[
                   t('names'),
-                  { label: t('Actions'), className: 'w-[100px]' },
+                  { label: t('actions'), className: 'w-[100px]' },
                 ]}
                 body={categories[config.key]}
                 bodyKeys={['name']}

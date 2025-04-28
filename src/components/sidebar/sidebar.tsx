@@ -169,7 +169,7 @@ export const Sidebar = () => {
           >
             <Link href="/profile">
               <Avatar>
-                <AvatarImage src={user?.profileImage} alt={user.name} />
+                <AvatarImage src={user?.profileImage?.file} alt={user.name} />
                 <AvatarFallback>{user.name[0]}</AvatarFallback>
               </Avatar>
               {isOpen && (

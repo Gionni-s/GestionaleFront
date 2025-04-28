@@ -1,4 +1,4 @@
-import { Food } from "@/app/Food/types";
+import { Food } from '@/app/Food/types';
 
 export interface User {
   _id: string;
@@ -10,7 +10,7 @@ export interface User {
   phoneNumber: number;
   dateCreation: Date;
   lastLogin: Date;
-  profileImage?: string;
+  profileImage: { file: string; type: string } | undefined;
   color: string;
   role: string;
 }
