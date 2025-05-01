@@ -1,9 +1,9 @@
-  import Screen from './components';
+import Screen from './components';
 
-  export default function Page() {
-    return (
-      <main className="flex flex-col items-center justify-between p-5">
-        <Screen />
-      </main>
-    );
-  }
+export default function Page() {
+  return (
+    <main className="h-[calc(100vh-64px)] w-full overflow-hidden">
+      <Screen />
+    </main>
+  );
+}

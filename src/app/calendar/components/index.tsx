@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   format,
   startOfWeek,
@@ -33,9 +33,9 @@ import {
   renderAllDayCheckbox,
   renderCurrentTimeIndicator,
   renderDayAllDayEvents,
-  sortEvents,
 } from './utils';
-import { FormattedEventType, Event } from '../types';
+import { Event, FormEvent } from '../types';
+import eventApi from '@/services/axios/Events';
 
 // Colori disponibili per gli eventi
 const eventColors = [
@@ -54,40 +54,51 @@ export default function Calendar() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [newEvent, setNewEvent] = useState<Event | null>(null);
+  const [newEvent, setNewEvent] = useState<FormEvent | null>(null);
   const [draggedEvent, setDraggedEvent] = useState<Event | null>(null);
+  const [reload, setReload] = useState<boolean>(true);
 
-  // Utilizzo l'hook per ottenere l'ora corrente
+  useEffect(() => {
+    if (reload) {
+      fetchEvents();
+    }
+    setReload(false);
+  }, [reload]);
+
+  const fetchEvents = async (): Promise<void> => {
+    try {
+      const response = await eventApi.get();
+      setEvents(response);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const currentTime = useCurrentTime();
 
-  // Genera dati delle giornate per la vista mensile
   const getDaysForMonthView = () => {
     const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 });
     const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 });
     return eachDayOfInterval({ start, end });
   };
 
-  // Genera le ore per le viste giornaliera e settimanale
   const getHoursForDayView = () => {
     return Array.from({ length: 24 }, (_, i) => i);
   };
 
-  // Gestisce il click su un giorno per aggiungere un nuovo evento
   const handleDayClick = (day: Date) => {
     setSelectedEvent(null);
     setNewEvent(prepareNewEvent(day, eventColors));
     setIsDialogOpen(true);
   };
 
-  // Gestisce il click su un evento esistente per modificarlo
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
 
-    // Formatta le date per il form
-    const formattedEvent = {
+    const formattedEvent: FormEvent = {
       title: event.title,
-      start: format(event.start, "yyyy-MM-dd'T'HH:mm"),
-      end: format(event.end, "yyyy-MM-dd'T'HH:mm"),
+      start: event.start,
+      end: event.end,
       color: event.color,
       isAllDay: event.isAllDay || false,
     };
@@ -96,16 +107,24 @@ export default function Calendar() {
     setIsDialogOpen(true);
   };
 
-  // Salva un nuovo evento o aggiorna un evento esistente
-  const handleSaveEvent = () => {
-    setEvents(updateEventAllDayStatus(events, selectedEvent, newEvent));
+  const handleSaveEvent = async () => {
+    if (newEvent) {
+      if (selectedEvent) {
+        await eventApi.put(selectedEvent._id, newEvent);
+      } else {
+        await eventApi.post(newEvent);
+      }
+    }
+    setReload(true);
     setIsDialogOpen(false);
   };
 
-  // Elimina un evento esistente
-  const handleDeleteEvent = () => {
+  const handleDeleteEvent = async () => {
     if (selectedEvent) {
-      setEvents(events.filter((event: Event) => event.id !== selectedEvent.id));
+      setEvents(
+        events.filter((event: Event) => event._id !== selectedEvent._id)
+      );
+      await eventApi.delete(selectedEvent._id);
     }
     setIsDialogOpen(false);
   };
@@ -113,7 +132,7 @@ export default function Calendar() {
   // Gestione del drag and drop per eventi
   const handleDragStart = (event: Event, e: any) => {
     setDraggedEvent(event);
-    e.dataTransfer.setData('text/plain', event.id);
+    e.dataTransfer.setData('text/plain', event._id);
 
     // Imposta un'immagine trasparente per il drag
     const img = new Image();
@@ -135,7 +154,7 @@ export default function Calendar() {
     if (draggedEvent.isAllDay) {
       // Per eventi giornalieri, aggiorna solo la data mantenendo l'attributo isAllDay
       const updatedEvents = events.map((event) => {
-        if (event.id === draggedEvent.id) {
+        if (event._id === draggedEvent._id) {
           const newStart = new Date(day);
           newStart.setHours(0, 0, 0, 0);
 
@@ -151,7 +170,7 @@ export default function Calendar() {
     } else {
       // Per eventi normali, sposta mantenendo l'orario
       const updatedEvents = events.map((event) => {
-        if (event.id === draggedEvent.id) {
+        if (event._id === draggedEvent._id) {
           const diff =
             day.getTime() - new Date(event.start).setHours(0, 0, 0, 0);
 
@@ -184,7 +203,7 @@ export default function Calendar() {
     const days = getDaysForMonthView();
 
     return (
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 h-full">
         {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((day, index) => (
           <div key={index} className="py-2 text-center font-medium">
             {day}
@@ -200,7 +219,7 @@ export default function Calendar() {
             <div
               key={index}
               className={cn(
-                'h-32 border border-border/50 p-1 overflow-hidden',
+                'min-h-[100px] border border-border/50 p-1 overflow-hidden',
                 isCurrentMonth
                   ? 'bg-background'
                   : 'bg-muted/50 text-muted-foreground',
@@ -242,7 +261,7 @@ export default function Calendar() {
 
                     return (
                       <div
-                        key={event.id}
+                        key={event._id}
                         className={cn(
                           'px-1 py-0.5 rounded text-xs shadow-sm cursor-pointer truncate',
                           event.color || 'bg-blue-500',
@@ -287,7 +306,7 @@ export default function Calendar() {
     const hours = getHoursForDayView();
 
     return (
-      <div className="flex h-[calc(100vh-10rem)] overflow-auto">
+      <div className="flex h-full">
         {/* Colonna delle ore */}
         <div className="w-16 flex-shrink-0 border-r border-border/50">
           <div className="h-12"></div> {/* Spazio per intestazioni giorni */}
@@ -355,7 +374,7 @@ export default function Calendar() {
                 >
                   {allDayEvents.map((event) => (
                     <div
-                      key={event.id}
+                      key={event._id}
                       className={cn(
                         'px-1 py-0.5 my-0.5 rounded text-xs shadow-sm cursor-pointer truncate',
                         event.color || 'bg-blue-500',
@@ -379,7 +398,10 @@ export default function Calendar() {
           </div>
 
           {/* Griglia delle ore */}
-          <div className="flex h-96 overflow-auto">
+          <div
+            className="flex overflow-y-auto"
+            style={{ height: 'calc(100% - 80px)' }}
+          >
             {days.map((day, dayIndex) => {
               const hourlyEvents = events.filter(
                 (event) =>
@@ -427,7 +449,7 @@ export default function Calendar() {
 
                     return (
                       <div
-                        key={event.id}
+                        key={event._id}
                         className={cn(
                           'absolute left-1 right-1 rounded shadow-sm px-1 py-0.5 overflow-hidden text-xs',
                           event.color || 'bg-blue-500',
@@ -490,7 +512,7 @@ export default function Calendar() {
     );
 
     return (
-      <div className="flex h-[calc(100vh-10rem)] overflow-auto">
+      <div className="flex h-full">
         {/* Colonna delle ore */}
         <div className="w-16 flex-shrink-0 border-r border-border/50">
           <div className="h-12"></div> {/* Spazio per intestazione giorno */}
@@ -529,7 +551,7 @@ export default function Calendar() {
             {allDayEvents.length > 0 ? (
               allDayEvents.map((event) => (
                 <div
-                  key={event.id}
+                  key={event._id}
                   className={cn(
                     'px-2 py-0.5 mr-2 rounded text-xs shadow-sm cursor-pointer',
                     event.color || 'bg-blue-500',
@@ -556,7 +578,8 @@ export default function Calendar() {
 
           {/* Griglia delle ore */}
           <div
-            className="relative"
+            className="relative overflow-y-auto"
+            style={{ height: 'calc(100% - 72px)' }}
             onClick={() => handleDayClick(day)}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(day, e)}
@@ -585,7 +608,7 @@ export default function Calendar() {
 
               return (
                 <div
-                  key={event.id}
+                  key={event._id}
                   className={cn(
                     'absolute left-4 right-4 rounded shadow-sm px-2 py-1 overflow-hidden',
                     event.color || 'bg-blue-500',
@@ -624,7 +647,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full w-full flex flex-col">
       <div className="p-4 border-b border-border flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Button
@@ -709,7 +732,7 @@ export default function Calendar() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-hidden p-4">
         {view === 'month' && renderMonthView()}
         {view === 'week' && renderWeekView()}
         {view === 'day' && renderDayView()}

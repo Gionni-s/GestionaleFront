@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { isSameDay, format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Event } from '../types';
+import { Event, FormEvent } from '../types';
+import { WarehouseEntity } from '@/app/warehouse-entities/types';
 
 /**
  * Hook che fornisce la funzionalità per tracciare l'ora corrente
@@ -12,9 +13,11 @@ export const useCurrentTime = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
+    setCurrentTime(new Date());
+
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Aggiorna ogni minuto
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
@@ -32,7 +35,7 @@ export const useCurrentTime = () => {
 export const updateEventAllDayStatus = (
   events: Event[],
   selectedEvent: Event | null,
-  newEvent: Event | null
+  newEvent: FormEvent | null
 ) => {
   if (!newEvent) return events;
 
@@ -48,7 +51,7 @@ export const updateEventAllDayStatus = (
   if (selectedEvent) {
     // Aggiorna evento esistente
     return events.map((event) =>
-      event.id === selectedEvent.id
+      event._id === selectedEvent._id
         ? {
             ...event,
             title: newEvent.title,
@@ -60,11 +63,9 @@ export const updateEventAllDayStatus = (
         : event
     );
   } else {
-    // Crea nuovo evento
     return [
       ...events,
       {
-        id: crypto.randomUUID(),
         title: newEvent.title,
         start,
         end,
@@ -89,8 +90,8 @@ export const prepareNewEvent = (day: Date, eventColors: string[]) => {
 
   return {
     title: '',
-    start: format(start, "yyyy-MM-dd'T'HH:mm"),
-    end: format(end, "yyyy-MM-dd'T'HH:mm"),
+    start: start,
+    end: end,
     color: eventColors[Math.floor(Math.random() * eventColors.length)],
     isAllDay: false,
   };
@@ -103,7 +104,7 @@ export const prepareNewEvent = (day: Date, eventColors: string[]) => {
  * @returns {JSX.Element} Componente checkbox per eventi giornalieri
  */
 export const renderAllDayCheckbox = (
-  newEvent: Event | null,
+  newEvent: FormEvent | null,
   setNewEvent: any
 ) => {
   return (
@@ -133,8 +134,7 @@ export const renderCurrentTimeIndicator = (currentTime: Date) => {
   const hour = currentTime.getHours();
   const minute = currentTime.getMinutes();
 
-  // Calcola la posizione verticale
-  const topPosition = hour * 60 + minute;
+  const topPosition = (hour * 60 + minute) / 3.75;
 
   return (
     <div
@@ -142,10 +142,8 @@ export const renderCurrentTimeIndicator = (currentTime: Date) => {
       style={{ top: `${topPosition}px` }}
     >
       <div className="flex items-center">
-        <div className="w-16 text-xs text-primary font-medium pr-1 text-right">
-          {format(currentTime, 'HH:mm')}
-        </div>
-        <div className="flex-1 h-0.5 bg-primary" />
+        <div className="w-2 h-2 rounded-full bg-red-500 mr-1 ml-1"></div>
+        <div className="flex-1 h-0.5 bg-red-500" />
       </div>
     </div>
   );
@@ -175,7 +173,7 @@ export const renderDayAllDayEvents = (
     <div className="border-b border-border/50 pb-1 mb-1">
       {allDayEvents.slice(0, 2).map((event) => (
         <div
-          key={event.id}
+          key={event._id}
           className={cn(
             'px-1 py-0.5 rounded text-xs shadow-sm cursor-pointer truncate',
             event.color || 'bg-blue-500',
@@ -241,7 +239,7 @@ export const handleAllDayEventDrop = (
   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
   return events.map((event) => {
-    if (event.id === draggedEvent.id) {
+    if (event._id === draggedEvent._id) {
       const newStart = new Date(event.start);
       newStart.setDate(newStart.getDate() + diffDays);
 
