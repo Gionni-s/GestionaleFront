@@ -9,6 +9,7 @@ import {
   Layers,
   BarChart2,
   ShoppingCart,
+  Calendar,
 } from 'lucide-react';
 
 export const getSidebarLinks = (t: (key: string) => string) => [
@@ -27,5 +28,6 @@ export const getSidebarLinks = (t: (key: string) => string) => [
   },
   { href: '/budget', label: t('budgets'), icon: PiggyBank },
   { href: '/budget-groups', label: t('budgetGroups'), icon: Layers },
+  { href: 'calendar', label: t('calendar'), icon: Calendar },
   { href: '/dashboard', label: t('dashboards'), icon: BarChart2 },
 ];

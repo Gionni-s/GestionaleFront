@@ -89,6 +89,7 @@ const resources = {
       edit: 'Edit',
       setting: 'Settings',
       minStockList: 'Min number on Stock',
+      calendar:'Calendar'
     },
   },
   it: {
@@ -177,6 +178,7 @@ const resources = {
       edit: 'Modifica',
       settings: 'Importazioni',
       minStockList: 'Numero minimo in Magazzino',
+      calendar:'Calendario'
     },
   },
 };
