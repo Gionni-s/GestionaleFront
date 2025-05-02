@@ -9,8 +9,8 @@ export interface Event {
 
 export interface FormEvent {
   title: string;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
   color?: string;
   isAllDay?: boolean;
 }

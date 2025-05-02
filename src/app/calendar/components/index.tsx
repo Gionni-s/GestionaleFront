@@ -35,7 +35,8 @@ import {
   renderDayAllDayEvents,
   sortEvents,
 } from './utils';
-import { FormattedEventType, Event } from '../types';
+import { FormEvent, Event } from '../types';
+import EventApi from '@/services/axios/Events';
 
 // Colori disponibili per gli eventi
 const eventColors = [
@@ -54,7 +55,7 @@ export default function Calendar() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [newEvent, setNewEvent] = useState<Event | null>(null);
+  const [newEvent, setNewEvent] = useState<FormEvent | null>(null);
   const [draggedEvent, setDraggedEvent] = useState<Event | null>(null);
 
   // Riferimento per sincronizzare lo scroll
@@ -63,6 +64,19 @@ export default function Calendar() {
 
   // Utilizzo l'hook per ottenere l'ora corrente
   const currentTime = useCurrentTime();
+
+  async function fetchEvents() {
+    try {
+      const result = await EventApi.get();
+      setEvents(result);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   // Sincronizza lo scroll tra la colonna delle ore e la griglia
   useEffect(() => {
@@ -104,11 +118,17 @@ export default function Calendar() {
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
 
-    // Formatta le date per il form
+    // Converte le date al formato corretto per l'input datetime-local
+    const eventStart =
+      event.start instanceof Date ? event.start : parseISO(event.start);
+    const eventEnd =
+      event.end instanceof Date ? event.end : parseISO(event.end);
+
+    // Formatta le date nel formato esatto richiesto dall'input datetime-local: "yyyy-MM-ddTHH:mm"
     const formattedEvent = {
       title: event.title,
-      start: format(event.start, "yyyy-MM-dd'T'HH:mm"),
-      end: format(event.end, "yyyy-MM-dd'T'HH:mm"),
+      start: format(eventStart, "yyyy-MM-dd'T'HH:mm"),
+      end: format(eventEnd, "yyyy-MM-dd'T'HH:mm"),
       color: event.color,
       isAllDay: event.isAllDay || false,
     };
@@ -119,14 +139,48 @@ export default function Calendar() {
 
   // Salva un nuovo evento o aggiorna un evento esistente
   const handleSaveEvent = () => {
-    setEvents(updateEventAllDayStatus(events, selectedEvent, newEvent));
+    if (!newEvent) return;
+
+    // Crea un nuovo array di eventi
+    const updatedEvents = [...events];
+
+    const processedEvent = {
+      _id: selectedEvent?._id || Math.random().toString(36).substring(2, 9),
+      title: newEvent.title,
+      start: newEvent.isAllDay
+        ? new Date(new Date(newEvent.start.toString()).setHours(0, 0, 0, 0))
+        : parseISO(newEvent.start.toString()),
+      end: newEvent.isAllDay
+        ? new Date(
+            new Date(newEvent.start.toString()).setHours(23, 59, 59, 999)
+          )
+        : parseISO(newEvent.end.toString()),
+      color: newEvent.color,
+      isAllDay: newEvent.isAllDay || false,
+    };
+
+    if (selectedEvent) {
+      // Aggiorna evento esistente
+      const index = updatedEvents.findIndex((e) => e._id === selectedEvent._id);
+      if (index !== -1) {
+        updatedEvents[index] = processedEvent;
+      }
+    } else {
+      // Aggiungi nuovo evento
+      updatedEvents.push(processedEvent);
+    }
+
+    // Ordina gli eventi
+    setEvents(sortEvents ? sortEvents(updatedEvents) : updatedEvents);
     setIsDialogOpen(false);
   };
 
   // Elimina un evento esistente
   const handleDeleteEvent = () => {
     if (selectedEvent) {
-      setEvents(events.filter((event: Event) => event.id !== selectedEvent.id));
+      setEvents(
+        events.filter((event: Event) => event._id !== selectedEvent._id)
+      );
     }
     setIsDialogOpen(false);
   };
@@ -134,7 +188,7 @@ export default function Calendar() {
   // Gestione del drag and drop per eventi
   const handleDragStart = (event: Event, e: any) => {
     setDraggedEvent(event);
-    e.dataTransfer.setData('text/plain', event.id);
+    e.dataTransfer.setData('text/plain', event._id);
 
     // Imposta un'immagine trasparente per il drag
     const img = new Image();
@@ -156,7 +210,7 @@ export default function Calendar() {
     if (draggedEvent.isAllDay) {
       // Per eventi giornalieri, aggiorna solo la data mantenendo l'attributo isAllDay
       const updatedEvents = events.map((event) => {
-        if (event.id === draggedEvent.id) {
+        if (event._id === draggedEvent._id) {
           const newStart = new Date(day);
           newStart.setHours(0, 0, 0, 0);
 
@@ -172,7 +226,7 @@ export default function Calendar() {
     } else {
       // Per eventi normali, sposta mantenendo l'orario
       const updatedEvents = events.map((event) => {
-        if (event.id === draggedEvent.id) {
+        if (event._id === draggedEvent._id) {
           const diff =
             day.getTime() - new Date(event.start).setHours(0, 0, 0, 0);
 
@@ -263,7 +317,7 @@ export default function Calendar() {
 
                     return (
                       <div
-                        key={event.id}
+                        key={event._id}
                         className={cn(
                           'px-1 py-0.5 rounded text-xs shadow-sm cursor-pointer truncate',
                           event.color || 'bg-blue-500',
@@ -281,7 +335,7 @@ export default function Calendar() {
                         draggable
                         onDragStart={(e) => handleDragStart(event, e)}
                       >
-                        {format(eventStart, 'HH:mm')} {event.title}
+                        {format(eventStart, 'HH:mm:ss')} {event.title}
                       </div>
                     );
                   })}
@@ -383,7 +437,7 @@ export default function Calendar() {
                 >
                   {allDayEvents.map((event) => (
                     <div
-                      key={event.id}
+                      key={event._id}
                       className={cn(
                         'px-1 py-0.5 my-0.5 rounded text-xs shadow-sm cursor-pointer truncate',
                         event.color || 'bg-blue-500',
@@ -455,7 +509,7 @@ export default function Calendar() {
 
                     return (
                       <div
-                        key={event.id}
+                        key={event._id}
                         className={cn(
                           'absolute left-1 right-1 rounded shadow-sm px-1 py-0.5 overflow-hidden text-xs',
                           event.color || 'bg-blue-500',
@@ -562,7 +616,7 @@ export default function Calendar() {
             {allDayEvents.length > 0 ? (
               allDayEvents.map((event) => (
                 <div
-                  key={event.id}
+                  key={event._id}
                   className={cn(
                     'px-2 py-0.5 mr-2 rounded text-xs shadow-sm cursor-pointer',
                     event.color || 'bg-blue-500',
@@ -619,7 +673,7 @@ export default function Calendar() {
 
               return (
                 <div
-                  key={event.id}
+                  key={event._id}
                   className={cn(
                     'absolute left-4 right-4 rounded shadow-sm px-2 py-1 overflow-hidden',
                     event.color || 'bg-blue-500',
@@ -780,11 +834,13 @@ export default function Calendar() {
                   <Input
                     id="start"
                     type="datetime-local"
-                    value={newEvent?.start.toString() || ''}
+                    value={
+                      typeof newEvent?.start === 'string' ? newEvent.start : ''
+                    }
                     onChange={(e) =>
                       setNewEvent({
-                        ...newEvent,
-                        start: parseISO(e.target.value),
+                        ...newEvent!,
+                        start: e.target.value,
                       })
                     }
                   />
@@ -795,11 +851,13 @@ export default function Calendar() {
                   <Input
                     id="end"
                     type="datetime-local"
-                    value={newEvent?.end.toString() || ''}
+                    value={
+                      typeof newEvent?.end === 'string' ? newEvent.end : ''
+                    }
                     onChange={(e) =>
                       setNewEvent({
-                        ...newEvent,
-                        end: parseISO(e.target.value),
+                        ...newEvent!,
+                        end: e.target.value,
                       })
                     }
                   />

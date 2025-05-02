@@ -83,16 +83,21 @@ export const updateEventAllDayStatus = (
  * @returns {Object} Oggetto evento inizializzato
  */
 export const prepareNewEvent = (day: Date, eventColors: string[]) => {
+  // Imposta l'ora di inizio all'ora corrente arrotondata
+  const now = new Date();
   const start = new Date(day);
-  start.setHours(9, 0, 0, 0);
-  const end = new Date(day);
-  end.setHours(10, 0, 0, 0);
+  start.setHours(now.getHours(), 0, 0, 0);
+
+  // Imposta la fine a un'ora dopo l'inizio
+  const end = new Date(start);
+  end.setHours(end.getHours() + 1);
 
   return {
     title: '',
-    start: start,
-    end: end,
-    color: eventColors[Math.floor(Math.random() * eventColors.length)],
+    // Formatta le date nel formato esatto richiesto dall'input datetime-local
+    start: format(start, "yyyy-MM-dd'T'HH:mm"),
+    end: format(end, "yyyy-MM-dd'T'HH:mm"),
+    color: eventColors[0],
     isAllDay: false,
   };
 };
