@@ -1,4 +1,4 @@
-import { ShoppingList, ShoppingListFormData } from '@/app/ShoppingList/types';
+import { ShoppingList, ShoppingListFormData } from '@/app/shopping-list/types';
 import axios, { ApiCall } from './index';
 
 class ShoppingListApi implements ApiCall<ShoppingList, ShoppingListFormData> {

@@ -7,7 +7,8 @@ import {
   TableCell,
   TableHead,
 } from './ui/table';
-import React from 'react';
+import React, { useState } from 'react';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 type HeadColumnConfig = string | { label: string; className?: string };
 
@@ -95,34 +96,39 @@ export default function Table({
   disableActions = false,
   columnConfig = {},
 }: TableProps) {
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   return (
-    <UITable>
-      <TableHeader>
-        <TableRow>
-          {head.map((item, index) => {
-            const label = typeof item === 'string' ? item : item.label;
-            const className =
-              typeof item === 'object' && item.className ? item.className : '';
+    <>
+      <UITable>
+        <TableHeader>
+          <TableRow>
+            {head.map((item, index) => {
+              const label = typeof item === 'string' ? item : item.label;
+              const className =
+                typeof item === 'object' && item.className
+                  ? item.className
+                  : '';
 
-            return (
-              <TableHead key={index} className={className}>
-                {label}
-              </TableHead>
-            );
-          })}
-        </TableRow>
-      </TableHeader>
-      <tbody>
-        <GenerateBody
-          body={body}
-          bodyKeys={bodyKeys}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          disableActions={disableActions}
-          columnConfig={columnConfig}
-        />
-      </tbody>
-    </UITable>
+              return (
+                <TableHead key={index} className={className}>
+                  {label}
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        </TableHeader>
+        <tbody>
+          <GenerateBody
+            body={body}
+            bodyKeys={bodyKeys}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            disableActions={disableActions}
+            columnConfig={columnConfig}
+          />
+        </tbody>
+      </UITable>
+    </>
   );
 }
 
@@ -138,6 +144,8 @@ function GenerateBody({
   disableActions,
   columnConfig,
 }: BodyProps) {
+  const [editingId, setEditingId] = useState<string>();
+  const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
   if (!Array.isArray(body)) {
     return (
       <TableRow>
@@ -158,75 +166,90 @@ function GenerateBody({
     );
   }
 
-  return body.map((entity) => (
-    <TableRow key={entity._id}>
-      {bodyKeys.map((key) => {
-        if (key.includes('|')) {
-          const keys = key.split('|');
-          const values = keys.map((subKey) => {
-            const rawValue = getNestedValue(entity, subKey);
-            return columnConfig?.[subKey]?.format
-              ? columnConfig[subKey].format(rawValue, entity)
+  return (
+    <>
+      {body.map((entity) => (
+        <TableRow key={entity._id}>
+          {bodyKeys.map((key) => {
+            if (key.includes('|')) {
+              const keys = key.split('|');
+              const values = keys.map((subKey) => {
+                const rawValue = getNestedValue(entity, subKey);
+                return columnConfig?.[subKey]?.format
+                  ? columnConfig[subKey].format(rawValue, entity)
+                  : rawValue;
+              });
+
+              const concatenatedValue = values.join(' ');
+              const dynamicClass =
+                keys
+                  .map((subKey) =>
+                    columnConfig?.[subKey]?.className?.(
+                      getNestedValue(entity, subKey),
+                      entity
+                    )
+                  )
+                  .find((cls) => cls) || '';
+
+              return (
+                <TableCell key={key} className={dynamicClass}>
+                  {concatenatedValue}
+                </TableCell>
+              );
+            }
+
+            const rawValue = getNestedValue(entity, key);
+            const formattedValue = columnConfig?.[key]?.format
+              ? columnConfig[key].format(rawValue, entity)
               : rawValue;
-          });
+            const dynamicClass = columnConfig?.[key]?.className
+              ? columnConfig[key].className(rawValue, entity)
+              : '';
 
-          const concatenatedValue = values.join(' ');
-          const dynamicClass =
-            keys
-              .map((subKey) =>
-                columnConfig?.[subKey]?.className?.(
-                  getNestedValue(entity, subKey),
-                  entity
-                )
-              )
-              .find((cls) => cls) || '';
+            return (
+              <TableCell key={key} className={dynamicClass}>
+                {React.isValidElement(formattedValue)
+                  ? formattedValue
+                  : formattedValue}
+              </TableCell>
+            );
+          })}
 
-          return (
-            <TableCell key={key} className={dynamicClass}>
-              {concatenatedValue}
+          {!disableActions && (
+            <TableCell>
+              <div className="flex space-x-2">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => onEdit(entity)}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="destructive"
+                  onClick={() => {
+                    setDeleteModalOpen(true);
+                    setEditingId(entity._id);
+                  }}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </div>
             </TableCell>
-          );
-        }
-
-        const rawValue = getNestedValue(entity, key);
-        const formattedValue = columnConfig?.[key]?.format
-          ? columnConfig[key].format(rawValue, entity)
-          : rawValue;
-        const dynamicClass = columnConfig?.[key]?.className
-          ? columnConfig[key].className(rawValue, entity)
-          : '';
-
-        return (
-          <TableCell key={key} className={dynamicClass}>
-            {React.isValidElement(formattedValue)
-              ? formattedValue
-              : formattedValue}
-          </TableCell>
-        );
-      })}
-
-      {!disableActions && (
-        <TableCell>
-          <div className="flex space-x-2">
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => onEdit(entity)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="destructive"
-              onClick={() => onDelete(entity._id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        </TableCell>
-      )}
-    </TableRow>
-  ));
+          )}
+        </TableRow>
+      ))}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onConfirm={async () => {
+          await onDelete(editingId as string);
+          setDeleteModalOpen(false);
+        }}
+        onCancel={() => setDeleteModalOpen(false)}
+      />
+    </>
+  );
 }
 
 /**

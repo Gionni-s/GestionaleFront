@@ -1,5 +1,5 @@
 import { BudgetGroup } from '@/app/budget-groups/types';
-import { User } from '@/app/Profile/types';
+import { User } from '@/app/profile/types';
 
 export interface Budget {
   _id: string;

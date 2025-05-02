@@ -7,7 +7,7 @@ import axios, {
 } from 'axios';
 import { store } from '../store';
 import { logout, updateToken } from '../store/auth';
-import { User } from '@/app/Profile/types';
+import { User } from '@/app/profile/types';
 
 export interface ApiCall<T, TFormData> {
   get(params?: string): Promise<T[]>;

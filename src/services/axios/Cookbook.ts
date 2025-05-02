@@ -1,4 +1,4 @@
-import { Cookbook, CookbookFormData } from '@/app/Label/types';
+import { Cookbook, CookbookFormData } from '@/app/label/types';
 import axios, { ApiCall } from './index';
 
 class CookbookApi implements ApiCall<Cookbook, CookbookFormData> {

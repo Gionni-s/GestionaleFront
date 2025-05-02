@@ -5,7 +5,7 @@ import axios from '@/services/axios/index';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Table,
+  // Table,
   TableBody,
   TableCell,
   TableHead,
@@ -16,22 +16,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Pencil, Trash, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import {
-  AlternativeRecipe,
-  IngredientFormData,
-  Ingredient,
-  Recipe,
-} from '../types';
+import { Ingredient, IngredientFormData, Recipe } from '../types';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
-import { Cookbook } from '@/app/Label/types';
+import { Cookbook } from '@/app/label/types';
+import Table from '@/components/Table';
 
 const Recipes: React.FC = () => {
   const { t, i18n } = useTranslation();
   const router = useRouter();
-  const [recipes, setRecipes] = useState<Recipe[] | AlternativeRecipe>({
-    message: '',
-  });
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [form, setForm] = useState<IngredientFormData>({
     name: '',
@@ -72,7 +66,6 @@ const Recipes: React.FC = () => {
       setRecipes(response.data);
     } catch (error) {
       console.error('Failed to fetch recipes:', error);
-      setRecipes({ message: 'Failed to load recipes' });
     }
   };
 
@@ -176,6 +169,21 @@ const Recipes: React.FC = () => {
     ));
   };
 
+  const handleEdit = (recipe: Recipe) => {
+    setForm({
+      name: recipe.name,
+      cookbookId: recipe.cookbookId,
+      ingredients: recipe.ingredients.map((ingredient) => ({
+        foodId: ingredient.foodId,
+        quantity: ingredient.quantity,
+        name: ingredient.name,
+      })),
+      note: recipe.note,
+    });
+    setEditingId(recipe._id);
+    setModalVisible(true);
+  };
+
   const generateDefaultFields = (recipe: Recipe) => {
     return (
       <>
@@ -192,20 +200,7 @@ const Recipes: React.FC = () => {
         <Button
           size="icon"
           variant="outline"
-          onClick={() => {
-            setForm({
-              name: recipe.name,
-              cookbookId: recipe.cookbookId,
-              ingredients: recipe.ingredients.map((ingredient) => ({
-                foodId: ingredient.foodId,
-                quantity: ingredient.quantity,
-                name: ingredient.name,
-              })),
-              note: recipe.note,
-            });
-            setEditingId(recipe._id);
-            setModalVisible(true);
-          }}
+          onClick={() => handleEdit(recipe)}
         >
           <Pencil className="h-4 w-4" />
         </Button>
@@ -319,7 +314,7 @@ const Recipes: React.FC = () => {
       </div>
 
       <div className="border rounded-lg overflow-hidden">
-        <Table>
+        {/* <Table>
           <TableHeader>
             <TableRow>
               <TableHead>{t('names')}</TableHead>
@@ -329,7 +324,29 @@ const Recipes: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>{renderTableRows()}</TableBody>
-        </Table>
+        </Table> */}
+        <Table
+          head={[
+            t('names'),
+            t('cookBooks'),
+            t('ingredients'),
+            { label: t('actions'), className: 'w-[100px]' },
+          ]}
+          body={recipes}
+          bodyKeys={['name', 'cookBook.name', 'ingredients']}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          columnConfig={{
+            ingredients: {
+              format: (val: any[]) =>
+                val.map((val, index) => (
+                  <p key={index}>
+                    {val.food?.name || 'N/A'} : {val.quantity}
+                  </p>
+                )),
+            },
+          }}
+        />
       </div>
     </div>
   );

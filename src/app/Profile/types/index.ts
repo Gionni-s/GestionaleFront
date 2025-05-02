@@ -1,4 +1,4 @@
-import { Food } from '@/app/Food/types';
+import { Food } from '@/app/food/types';
 
 export interface User {
   _id: string;

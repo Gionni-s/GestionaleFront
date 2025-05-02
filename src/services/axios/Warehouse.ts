@@ -1,4 +1,4 @@
-import { Warehouse, WarehouseFormData } from '@/app/Label/types';
+import { Warehouse, WarehouseFormData } from '@/app/label/types';
 import axios, { ApiCall } from './index';
 
 class WarehouseApi implements ApiCall<Warehouse, WarehouseFormData> {

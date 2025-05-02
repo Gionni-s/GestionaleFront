@@ -1,7 +1,7 @@
 import {
   WarehouseEntity,
   WarehouseEntityFormData,
-} from '@/app/warehouseEntities/types';
+} from '@/app/warehouse-entities/types';
 import axios, { ApiCall } from './index';
 
 class WarehouseEntityEntityApi
