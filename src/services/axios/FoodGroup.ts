@@ -1,5 +1,5 @@
 import axios, { ApiCall } from './index';
-import { FoodGroup, FoodGroupFormData } from '@/app/Label/types';
+import { FoodGroup, FoodGroupFormData } from '@/app/label/types';
 
 class FoodGroupApi implements ApiCall<FoodGroup, FoodGroupFormData> {
   private url = 'food-groups';

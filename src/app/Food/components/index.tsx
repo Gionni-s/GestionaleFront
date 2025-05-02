@@ -9,7 +9,7 @@ import Table from '@/components/Table';
 import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
 import axios from '@/services/axios/index';
-import { Food, FoodFormData } from '@/app/Food/types';
+import { Food, FoodFormData } from '@/app/food/types';
 import { FoodGroup } from '@/app/label/types';
 
 const Foods: React.FC = () => {

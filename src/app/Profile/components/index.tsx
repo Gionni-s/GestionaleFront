@@ -56,8 +56,8 @@ import Modal from '@/components/Modal';
 import Select from '@/components/Select';
 import { useTranslation } from 'react-i18next';
 import { MinStockLevel, RootState } from '../types';
-import { User as UserProfile } from '@/app/Profile/types';
-import { Food } from '@/app/Food/types';
+import { User as UserProfile } from '@/app/profile/types';
+import { Food } from '@/app/food/types';
 import UserApi from '@/services/axios/User';
 import axios from '@/services/axios'; // Keep for non-user API calls
 

@@ -1,4 +1,5 @@
-import { Cookbook } from '@/app/Label/types';
+import { Food } from '@/app/food/types';
+import { Cookbook } from '@/app/label/types';
 
 export interface Recipe {
   _id: string;
@@ -7,12 +8,8 @@ export interface Recipe {
   ingredients: RecipeIngredient[];
   cookbookId: string;
   cookBook: Cookbook;
-  food: Ingredient;
+  food: Food[];
   note?: string;
-}
-
-export interface AlternativeRecipe {
-  message: string;
 }
 
 export interface Ingredient {

@@ -1,4 +1,4 @@
-import { Location, LocationFormData } from '@/app/Label/types';
+import { Location, LocationFormData } from '@/app/label/types';
 import axios, { ApiCall } from './index';
 
 class LocationApi implements ApiCall<Location, LocationFormData> {

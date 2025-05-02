@@ -1,6 +1,6 @@
-import { User } from '@/app/Profile/types';
+import { User } from '@/app/profile/types';
 import axios, { ApiCall } from './index';
-import { UserFormData } from '@/app/Auth/types';
+import { UserFormData } from '@/app/auth/types';
 
 class UserApi {
   private url = 'users';

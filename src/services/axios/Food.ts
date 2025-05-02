@@ -1,5 +1,5 @@
 import axios, { ApiCall } from './index';
-import { Food, FoodFormData } from '@/app/Food/types';
+import { Food, FoodFormData } from '@/app/food/types';
 
 class FoodApi implements ApiCall<Food, FoodFormData> {
   private url = 'foods';

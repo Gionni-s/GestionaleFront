@@ -22,7 +22,7 @@ import {
   LocationFormData,
   WarehouseFormData,
   CookbookFormData,
-} from '@/app/Label/types';
+} from '@/app/label/types';
 
 type CategoryKey = 'foodGroups' | 'locations' | 'warehouses' | 'cookbook';
 type Categories = Record<
