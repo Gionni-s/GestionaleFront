@@ -131,10 +131,22 @@ export const renderAllDayCheckbox = (
  * @returns {JSX.Element|null} L'indicatore dell'ora corrente o null se fuori dalla vista visibile
  */
 export const renderCurrentTimeIndicator = (currentTime: Date) => {
+  // Calcola i minuti totali dall'inizio della giornata
   const hour = currentTime.getHours();
   const minute = currentTime.getMinutes();
+  const totalMinutes = hour * 60 + minute;
 
-  const topPosition = (hour * 60 + minute) / 3.75;
+  // Assumendo che ogni ora occupa 60px di altezza nel layout (modificare se necessario)
+  const pixelsPerHour = 64;
+  const pixelsPerMinute = pixelsPerHour / 60;
+
+  // Calcola la posizione top in base ai minuti totali
+  const topPosition = totalMinutes * pixelsPerMinute;
+
+  // Formatta l'ora corrente per mostrarla (opzionale)
+  const formattedTime = `${hour.toString().padStart(2, '0')}:${minute
+    .toString()
+    .padStart(2, '0')}`;
 
   return (
     <div
@@ -142,7 +154,10 @@ export const renderCurrentTimeIndicator = (currentTime: Date) => {
       style={{ top: `${topPosition}px` }}
     >
       <div className="flex items-center">
-        <div className="w-2 h-2 rounded-full bg-red-500 mr-1 ml-1"></div>
+        <div
+          className="w-2 h-2 rounded-full bg-red-500 mr-1 ml-1"
+          title={formattedTime}
+        ></div>
         <div className="flex-1 h-0.5 bg-red-500" />
       </div>
     </div>
