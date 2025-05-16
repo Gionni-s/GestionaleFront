@@ -1,3 +1,4 @@
+import routes from '@/router';
 import {
   Home,
   Settings,
@@ -13,21 +14,21 @@ import {
 } from 'lucide-react';
 
 export const getSidebarLinks = (t: (key: string) => string) => [
-  { href: '/label', label: t('labels'), icon: Users },
-  { href: '/food', label: t('foods'), icon: Utensils },
-  { href: '/recipe', label: t('recipes'), icon: BookOpen },
+  { href: routes.label, label: t('labels'), icon: Users },
+  { href: routes.food, label: t('foods'), icon: Utensils },
+  { href: routes.recipe, label: t('recipes'), icon: BookOpen },
   {
-    href: '/warehouse-entities',
+    href: routes.warehouseEntity,
     label: t('warehouses'),
     icon: Warehouse,
   },
   {
-    href: '/shopping-list',
+    href: routes.shoppingList,
     label: t('shoppingLists'),
     icon: ShoppingCart,
   },
-  { href: '/budget', label: t('budgets'), icon: PiggyBank },
-  { href: '/budget-groups', label: t('budgetGroups'), icon: Layers },
-  { href: 'calendar', label: t('calendar'), icon: Calendar },
-  { href: '/dashboard', label: t('dashboards'), icon: BarChart2 },
+  { href: routes.budget, label: t('budgets'), icon: PiggyBank },
+  { href: routes.budgetGroup, label: t('budgetGroups'), icon: Layers },
+  { href: routes.calendar, label: t('calendar'), icon: Calendar },
+  { href: routes.dashboard, label: t('dashboards'), icon: BarChart2 },
 ];

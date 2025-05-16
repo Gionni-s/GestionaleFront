@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import Modal from '@/components/Modal';
 import { Cookbook } from '@/app/label/types';
 import Table from '@/components/Table';
+import routes from '@/router';
 
 const Recipes: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -44,7 +45,7 @@ const Recipes: React.FC = () => {
       const [recipesRes, ingredientsRes, cookbooksRes] = await Promise.all([
         axios.get<Recipe[]>('/recipes'),
         axios.get<Ingredient[]>('/foods'),
-        axios.get<Cookbook[]>('/cookBooks'),
+        axios.get<Cookbook[]>('/cook-books'),
       ]);
       setRecipes(recipesRes.data);
       setIngredientOptions(ingredientsRes.data);
@@ -192,7 +193,7 @@ const Recipes: React.FC = () => {
           variant="outline"
           onClick={() => {
             console.log(recipe._id);
-            router.replace('/RecipeDetail?id=' + recipe._id);
+            router.replace(routes.RecipeDetail + '?id=' + recipe._id);
           }}
         >
           <ExternalLink className="h-4 w-4" />

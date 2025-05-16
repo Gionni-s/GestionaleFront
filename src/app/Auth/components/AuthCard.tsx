@@ -16,6 +16,7 @@ import { loginSuccess } from '@/services/store/auth';
 import { store } from '@/services/store';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import routes from '@/router';
 
 export function AuthCard() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export function AuthCard() {
         headers: { Authorization: `Basic ${encodedToken}` },
       });
       store.dispatch(loginSuccess(response.data));
-      router.replace('/');
+      router.replace(routes.home);
       router.refresh();
     } catch (error) {
       console.error('Login error:', error);
@@ -57,7 +58,7 @@ export function AuthCard() {
         headers: { Authorization: `Basic ${encodedToken}` },
       });
       store.dispatch(loginSuccess(loginResponse.data));
-      router.replace('/');
+      router.replace(routes.home);
       router.refresh();
     } catch (error) {
       console.error('Registration error:', error);

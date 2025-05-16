@@ -60,6 +60,7 @@ import { User as UserProfile } from '@/app/profile/types';
 import { Food } from '@/app/food/types';
 import UserApi from '@/services/axios/User';
 import axios from '@/services/axios'; // Keep for non-user API calls
+import routes from '@/router';
 
 const Profile: React.FC = () => {
   // Profile states
@@ -309,7 +310,7 @@ const Profile: React.FC = () => {
   const handleLogout = useCallback(async () => {
     try {
       store.dispatch(logout());
-      router.replace('/Auth');
+      router.replace(routes.auth);
       router.refresh();
     } catch (error) {
       console.error('Logout failed:', error);

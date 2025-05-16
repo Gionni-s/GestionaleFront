@@ -2,7 +2,7 @@ import { Cookbook, CookbookFormData } from '@/app/label/types';
 import axios, { ApiCall } from './index';
 
 class CookbookApi implements ApiCall<Cookbook, CookbookFormData> {
-  private url = 'cookBooks';
+  private url = 'cook-books';
 
   /**
    * Get all cookbooks with optional query parameters

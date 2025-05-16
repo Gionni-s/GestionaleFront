@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
+import routes from '@/router';
 
 interface Recipe {
   _id: string;
@@ -65,7 +66,7 @@ const RecipeDetail: React.FC = () => {
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-2xl">
       <Button
         variant="outline"
-        onClick={() => router.replace('/Recipe')}
+        onClick={() => router.replace(routes.recipe)}
         className="mb-4"
       >
         <ArrowLeft className="h-5 w-5 mr-2" /> Back
